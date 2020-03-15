@@ -15,7 +15,7 @@ public class Languages extends StackPane {
 	public Languages(int y, String value, boolean highlighted) {	
 				
 		text = new Text(value);
-		text.setTranslateX(325);
+		text.setTranslateX(320);
 		text.setTranslateY(y);
 		text.setFont(Font.font("Courier new"));
 		
@@ -34,6 +34,7 @@ public class Languages extends StackPane {
 			background.setFill(Color.web("#0f0f0f"));
 			text.setFill(Color.WHITE);
 		}
+		
 		setAlignment(text, Pos.CENTER_LEFT);
 		getChildren().addAll(background, this.text);	
 	}
