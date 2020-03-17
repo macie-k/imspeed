@@ -28,6 +28,7 @@ public class Window extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		
 		window = primaryStage;
+		//window.getIcons().add(new Image("/path/to/stackoverflow.jpg"));
 		
 		Pane menu = new Pane(); menu.setPrefSize(800, 500);
 		Scene scene = new Scene(menu, Color.web("#0f0f0f"));
@@ -74,7 +75,7 @@ public class Window extends Application {
 			int strike = 0;
 			
 			@Override
-			public void handle(long now) {				
+			public void handle(long now) {			
 				if(now - lastUpdate >= 1_000_000_000) {
 					if(strike < 10) {
 						List<Word> del = new ArrayList<Word>();
@@ -93,18 +94,17 @@ public class Window extends Application {
 					}
 				}
 				if(now - lastUpdate2 >= 10_000_000_000l && points > 1) {
+					checkIfEnough(4, xVal_final, yVal_final);
 					
 					for(int i=0; i<4; i++) {		
-						checkIfEnough(4, xVal_final, yVal_final);
+						int rndmx = random.nextInt(xVal.size());
+						int rndmy = random.nextInt(yVal.size());
 						
-						int x = xVal.get(random.nextInt(xVal.size()));
-						int y = yVal.get(random.nextInt(yVal.size()));
+						int x = xVal.get(rndmx); xVal.remove(rndmx);
+						int y = yVal.get(rndmy); yVal.remove(rndmy);
 						String value = strings.get(random.nextInt(strings.size()));
 						
 						Word word = new Word(x, y, value);
-						
-						xVal.remove(Integer.valueOf(x));
-						yVal.remove(Integer.valueOf(y));
 						
 						words.add(word);
 						root.getChildren().add(word);
@@ -136,14 +136,14 @@ public class Window extends Application {
 							
 								case 0:
 									for(int i=0; i<5; i++) {									
-										int x = xVal.get(random.nextInt(xVal.size()));
-										int y = yVal.get(random.nextInt(yVal.size()));
+										int rndmx = random.nextInt(xVal.size());
+										int rndmy = random.nextInt(yVal.size());
+										
+										int x = xVal.get(rndmx); xVal.remove(rndmx);
+										int y = yVal.get(rndmy); yVal.remove(rndmy);
 										String value = strings.get(random.nextInt(strings.size()));
 										
 										Word word = new Word(x, y, value);
-										
-										xVal.remove(Integer.valueOf(x));
-										yVal.remove(Integer.valueOf(y));
 										
 										add.add(word);
 										root.getChildren().add(word);
@@ -155,15 +155,15 @@ public class Window extends Application {
 									for(int i=0; i<3; i++) {
 										checkIfEnough(3, xVal_final, yVal_final);
 										
-										int x = xVal.get(random.nextInt(xVal.size()));
-										int y = yVal.get(random.nextInt(yVal.size()));
+										int rndmx = random.nextInt(xVal.size());
+										int rndmy = random.nextInt(yVal.size());
+										
+										int x = xVal.get(rndmx); xVal.remove(rndmx);
+										int y = yVal.get(rndmy); yVal.remove(rndmy);
 										String value = strings.get(random.nextInt(strings.size()));
 										
 										Word word = new Word(x, y, value);
-										
-										xVal.remove(Integer.valueOf(x));
-										yVal.remove(Integer.valueOf(y));
-										
+
 										add.add(word);
 										root.getChildren().add(word);
 									}
@@ -175,14 +175,17 @@ public class Window extends Application {
 										
 										for(int i=0; i<3; i++) {
 											
-											int x = xVal.get(random.nextInt(xVal.size()));
-											int y = yVal.get(random.nextInt(yVal.size()));
+											int rndmx = random.nextInt(xVal.size());
+											int rndmy = random.nextInt(yVal.size());
+											
+											int x = xVal.get(rndmx); xVal.remove(rndmx);
+											int y = yVal.get(rndmy); yVal.remove(rndmy);
+											
 											String value = strings.get(random.nextInt(strings.size()));
 											
 											Word word = new Word(x, y, value);
 											
-											xVal.remove(Integer.valueOf(x));
-											yVal.remove(Integer.valueOf(y));
+											
 											
 											add.add(word);
 											root.getChildren().add(word);
