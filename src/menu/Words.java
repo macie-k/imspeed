@@ -18,6 +18,7 @@ public class Words {
 	public static String[] loadLanguages(int x) {
 		
 		String path = new File("").getAbsolutePath() + "\\words\\";		// get path of "words" directory
+		//System.out.println(path);
 		File folder = new File(path);
 		listOfFiles = folder.listFiles();	// get all available language files
 		
