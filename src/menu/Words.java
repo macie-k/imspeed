@@ -2,11 +2,14 @@ package menu;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 
 public class Words {
 	
@@ -26,7 +29,7 @@ public class Words {
 			try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName()));){
 				
 				if(Selection.selected.contains(Words.listOfFiles[i]))
-					lngs[i] = " [ x ] "; else lngs[i] = " [   ] ";		// if selected add "x" in box else box alone
+					lngs[i] = " [ x ] "; else lngs[i] = " [   ] ";		// if selected add "x" in box else empty box
 				
 				lngs[i] += b.readLine();	// add language name from file's first line
 					
@@ -35,8 +38,23 @@ public class Words {
 		return lngs;		
 	}
 	
-	public static void loadWords(List<File> selected) {
+	public static List<String> loadWords(List<File> selected) {
+		List<String> allWords = new ArrayList<String>();
 		
+		for(File f : selected) {
+			try (Scanner read = new Scanner(f);) {
+						
+				read.nextLine();
+				while(read.hasNext()) {
+					allWords.add(read.nextLine());
+				}
+				
+			} catch (FileNotFoundException e) {
+				System.out.println("File error");
+			}
+		}
+		//System.out.println(allWords);
+		return allWords;
 	}
 	
 	

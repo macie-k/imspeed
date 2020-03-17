@@ -8,6 +8,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import base.Window;
+
 public class Selection {
 	
 	private static int x=0;
@@ -18,7 +20,7 @@ public class Selection {
 		
 		/* load all available languages */
 		for(int i=0; i<5; i++) {
-			int calcY = 240 + 20*i;
+			int calcY = 190 + 20*i;
 			lngs[i] = new Languages(calcY, Words.loadLanguages(x)[i], x==i);
 		}
 		
@@ -30,33 +32,39 @@ public class Selection {
 			switch (e.getCode()) {
 			
 				case UP: if(x>0) x--;
-					root.getChildren().removeAll(lngs);
+					setScene(root, stage, scene);
 					break;
 					
 				case DOWN: if(x<4) x++;
-					root.getChildren().removeAll(lngs);
+					setScene(root, stage, scene);
 					break;
 					
 				case SPACE:
 					if(selected.contains(Words.listOfFiles[x]))	selected.remove(Words.listOfFiles[x]);
 					else selected.add(Words.listOfFiles[x]);
+					setScene(root, stage, scene);
 					break;
 					
 				case ENTER:
-					root.getChildren().removeAll(lngs);
-					Words.loadWords(selected);
+					Window.startGame(selected);
 					break;
 					
 				default: break;			
 			}
 			
-			for(int i=0; i<5; i++) {
-				int calcY = 240 + 20*i;
-				lngs[i] = new Languages(calcY, Words.loadLanguages(x)[i], i==x);
-			}
-			
-			root.getChildren().addAll(lngs);
-			stage.setScene(scene);
 		});
+	}
+	
+	public static void setScene(Pane root, Stage stage, Scene scene) {
+		
+		root.getChildren().removeAll(lngs);
+		
+		for(int i=0; i<5; i++) {
+			int calcY = 190 + 20*i;
+			lngs[i] = new Languages(calcY, Words.loadLanguages(x)[i], i==x);
+		}
+		
+		root.getChildren().addAll(lngs);
+		stage.setScene(scene);
 	}
 }
