@@ -24,6 +24,7 @@ Preferably version 10, as it's the last version with JavaFX built in.
 <br>
 
 * After downloading it, run `setup.ps1` and provide path for your JDK root folder.
+* Make sure `words` folder is in the same directory as game.
 
 <br>
 
