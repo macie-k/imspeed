@@ -19,9 +19,10 @@ public class Window extends Application {
 		
 	public static Stage window;
 	
-	static int points=-7;
+	static double points=-7;
 	private static int typed=0;
 	private static int max_word_len=0;
+	private static double multiplier = 0.98;
 	
 	private static List<Integer> xVal;
 	private static List<Integer> yVal;
@@ -57,15 +58,14 @@ public class Window extends Application {
 		List<Word> words = new ArrayList<Word>();	// list of avctive words
 		List<Word> fresh = new ArrayList<Word>();
 		
-		for(String s : strings) {
+		for(String s : strings)
 			if(s.length()>max_word_len) max_word_len = s.length();
-		}
-		max_word_len *= 8;
+		max_word_len *= 9;
 		
 		final List<Integer> xVal_final = new ArrayList<Integer>();
 		final List<Integer> yVal_final = new ArrayList<Integer>();
 		
-		for(int i=-10; i<20; i+=5) { xVal_final.add(i); }
+		for(int i=-10; i<10; i+=5) { xVal_final.add(i); }
 		for(int i=20; i<400; i+=20) { yVal_final.add(i); }
 		
 		xVal = new ArrayList<Integer>(xVal_final);
@@ -79,7 +79,7 @@ public class Window extends Application {
 		
 		System.out.println(xVal.size() + " :: " + xVal);
 		System.out.println(yVal.size() + " :: " + yVal);
-		
+				
 		timer = new AnimationTimer() {
 			
 			private long lastUpdate = 0;
@@ -92,18 +92,13 @@ public class Window extends Application {
 					if(strike < 10) {
 						List<Word> del = new ArrayList<Word>();
 						
-						
-						
 						for(Word w : words) {
 							w.moveForward(); 
 							
-							if(w.getTranslateX() > 100) {
-								w.setFresh(false);
-								fresh.remove(w);
-							}
+							if(w.getTranslateX() > max_word_len) fresh.remove(w);
 							
 							if(w.getTranslateX()>800) {
-								strike++;
+								strike++; multiplier = 1;
 								del.add(w);	root.getChildren().remove(w);
 								System.out.println("Strike: " +  strike);
 							}
@@ -117,10 +112,9 @@ public class Window extends Application {
 						System.out.println("rip");
 					}
 				}
-				if(now - lastUpdate2 >= 10_000_000_000l && typed > 1) {
-
-					for(int i=0; i<4; i++) {		
-						if(fresh.size()+1 < 19) {
+				if(now - lastUpdate2 >= 15_000_000_000l && typed > 1) {
+					if(words.size() < 20) {
+						for(int i=0; i<8; i++) {		
 							Word word = createWord(strings, xVal_final, yVal_final, fresh);
 							fresh.add(word); words.add(word);
 							root.getChildren().add(word);
@@ -142,57 +136,45 @@ public class Window extends Application {
 						timer.stop();
 						gameOver();
 					}
-					
-//					if(Scenes.input.getText().equals("add")) {
-//						points += 100;
-//						Scenes.points.setText(String.valueOf(points));
-//						window.setScene(scene);
-//					}
-															
+														
 					List<Word> del = new ArrayList<Word>();
 					List<Word> add = new ArrayList<Word>();
 					
 					for(Word w : words) {
 						if(w.getValue().equals(Scenes.input.getText())) {
 							
-							typed++; points += w.getLength();
+							typed++; points+=w.getLength()*multiplier; multiplier+=0.02;
 							
 							fresh.remove(w); del.add(w); root.getChildren().remove(w);
 							
-							Scenes.points.setText(String.valueOf(points));
+							Scenes.points.setText(String.valueOf(Math.round(points)));
 							window.setScene(scene);
 							
 							switch (typed) {
 							
 								case 1:
 									for(int i=0; i<5; i++) {									
-										if(fresh.size()+1 < 19) {
-											Word word = createWord(strings, xVal_final, yVal_final, fresh);
-											fresh.add(word); add.add(word);
-											root.getChildren().add(word);
-										}
+										Word word = createWord(strings, xVal_final, yVal_final, fresh);
+										fresh.add(word); add.add(word);
+										root.getChildren().add(word);
 									}
 									
 								break;
 								
 								case 2:
 									for(int i=0; i<3; i++) {
-										if(fresh.size()+1 < 19) {
-											Word word = createWord(strings, xVal_final, yVal_final, fresh);
-											fresh.add(word); add.add(word);
-											root.getChildren().add(word);
-										}
+										Word word = createWord(strings, xVal_final, yVal_final, fresh);
+										fresh.add(word); add.add(word);
+										root.getChildren().add(word);
 									}
 								break;
 								
 								default:
 									if(typed%6==0) {
-										for(int i=0; i<4; i++) {											
-											if(fresh.size()+1 < 19) {
-												Word word = createWord(strings, xVal_final, yVal_final, fresh);
-												fresh.add(word); add.add(word);
-												root.getChildren().add(word);
-											}
+										for(int i=0; i<3; i++) {
+											Word word = createWord(strings, xVal_final, yVal_final, fresh);
+											fresh.add(word); add.add(word);
+											root.getChildren().add(word);
 										}
 									}
 								break;
@@ -224,7 +206,7 @@ public class Window extends Application {
 		
 		for(Word w : fresh)
 			if(w.getTranslateY() == y)
-				while(w.getTranslateX() <= (value.length()*8)+x+15)
+				while(w.getTranslateX() <= (value.length()*9)+x+20)
 					x -= 5;
 		
 		return new Word(x, y, value);
