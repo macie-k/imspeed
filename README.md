@@ -4,7 +4,7 @@ Remake of bisqwit's "wspeed" game
 <br>
 
 ## Overview
-* Custom languages can be added by a user
+* Custom languages can be added by editing `.words.` files
 
 ![1](https://user-images.githubusercontent.com/25122875/77094283-8f076600-6a0c-11ea-87a2-29055941b8c6.jpg)
 
