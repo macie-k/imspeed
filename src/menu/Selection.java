@@ -2,6 +2,7 @@ package menu;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -16,7 +17,9 @@ public class Selection {
 	private static Languages[] lngs = new Languages[5];
 	static List<File> selected = new ArrayList<File>();
 
-	public static void select(Scene scene, Pane root, Stage stage) {
+	public static void select(Stage stage, Pane root) {
+		
+		Scene scene = new Scene(root, Color.web("#0f0f0f"));
 		
 		/* load all available languages */
 		for(int i=0; i<5; i++) {
@@ -46,7 +49,9 @@ public class Selection {
 					break;
 					
 				case ENTER:
-					Window.startGame(selected);
+					if(!selected.contains(Words.listOfFiles[x])) selected.add(Words.listOfFiles[x]);
+					setScene(root, stage, scene);
+					if(!Words.loadWords(selected).isEmpty()) Window.startGame(selected);
 					break;
 					
 				default: break;			

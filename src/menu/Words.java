@@ -2,14 +2,16 @@ package menu;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 public class Words {
 	
@@ -43,15 +45,17 @@ public class Words {
 		List<String> allWords = new ArrayList<String>();
 		
 		for(File f : selected) {
-			try (Scanner read = new Scanner(f);) {
-						
-				read.nextLine();
-				while(read.hasNext()) {
-					allWords.add(read.nextLine());
+			try (BufferedReader read = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF8"));) {
+				read.readLine();
+				
+				String s;
+				while((s = read.readLine()) != null) {
+					allWords.add(s);
 				}
 				
 			} catch (FileNotFoundException e) {
 				System.out.println("File error");
+			} catch (UnsupportedEncodingException e) {} catch (IOException e) {
 			}
 		}
 		//System.out.println(allWords);
