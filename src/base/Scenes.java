@@ -14,6 +14,27 @@ public class Scenes {
 	static Text points = new Text();
 	public static TextField input = new TextField();
 	
+	public static Scene gameOver(Pane root) {
+		
+		Scene scene = new Scene(root, Color.web("#0f0f0f"));
+		StackPane stack = new StackPane();
+		
+		Rectangle background = new Rectangle();
+		background.setWidth(800); background.setHeight(500);
+		background.setTranslateX(0); background.setTranslateY(0);
+		background.setFill(Color.web("#0f0f0f"));
+		
+		int pointslen = String.valueOf(Window.points).length();
+		Text t = new Text("Your score: "); t.setFill(Color.WHITE); t.setTranslateX(320-pointslen*5); t.setFont(Font.font("Courier new")); t.setStyle("-fx-font-size: 20;"); 
+		Text pkts = new Text(points.getText()); pkts.setFill(Color.web("#ff4a80")); pkts.setTranslateX(400+pointslen); pkts.setFont(Font.font("Courier new")); pkts.setStyle("-fx-font-size: 25;");
+		
+		stack.getChildren().addAll(t, pkts);
+		stack.setTranslateY(230);
+		root.getChildren().addAll(background, stack);
+		
+		return scene;
+	}
+	
 	public static Scene game(Pane root) {
 		
 		Scene scene = new Scene(root, Color.web("#0f0f0f"));
@@ -55,7 +76,4 @@ public class Scenes {
 		return scene;
 	}
 
-/*	public static Scene gameOver(Pane root) {
-		
-	}*/
 }

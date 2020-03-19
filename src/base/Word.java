@@ -6,8 +6,8 @@ import javafx.scene.text.Text;
 
 public class Word extends Text {
 	
-	boolean typed = false;
 	final String value;
+	boolean fresh = true;
 	
 	Word(int x, int y, String value) {
 		
@@ -22,8 +22,20 @@ public class Word extends Text {
 
 	}
 	
+	public int getLength() {
+		return this.value.length();
+	}
+	
+	public void setValue(String s) {
+		this.setValue(s);
+	}
+	
 	public String getValue() {
 		return this.value;
+	}
+	
+	public void setFresh(boolean b) {
+		this.fresh = b;
 	}
 	
 	void moveForward() {
