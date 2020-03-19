@@ -23,13 +23,13 @@ Preferably version 10, as it's the last version with JavaFX built in.
 
 <br>
 
-* After downloading it, run `setup.ps1` and provide path for your JDK root folder.
-* Make sure `words` folder is in the same directory as game.
+* Run `setup.bat` to set up system environment variable
+* Make sure `words` folder is in the same directory as the game.
 
 <br>
 
 * **Launch:**
   * Just double click on `.exe` file or:
-  * `java -jar imspeed.jar` - setting system environment variables (setup.ps1) is not required when using .jar
+  * `java -jar imspeed.jar` - running `setup` is not required when using this option
   
 `.exe` file is in fact wrapped jar, allowing for the icon and to run the program with a simple double-click
