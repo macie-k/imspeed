@@ -12,7 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import menu.Selection;
-import menu.Words;
+import menu.MenuWords;
 
 
 public class Window extends Application {
@@ -67,7 +67,7 @@ public class Window extends Application {
 		Pane root = new Pane(); root.setPrefSize(800, 500);
 		Scene scene = Scenes.game(root);
 		
-		List<String> strings = Words.loadWords(selected);	// list of all word-strings combined
+		List<String> strings = MenuWords.loadWords(selected);	// list of all word-strings combined
 		List<Word> words = new ArrayList<Word>();	// list of avctive words
 		List<Word> fresh = new ArrayList<Word>();	// list of new words [for placement optimization]
 		
