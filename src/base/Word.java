@@ -16,8 +16,7 @@ public class Word extends Text {
 	
 		setTranslateX(x);
 		setTranslateY(y);
-		setStyle("-fx-font-size: 15;");
-		setFont(Font.font("Courier new"));
+		setFont(Font.font("Courier new", 15));
 		setFill(Color.WHITE);
 
 	}
@@ -32,10 +31,6 @@ public class Word extends Text {
 	
 	public String getValue() {
 		return this.value;
-	}
-	
-	public void setFresh(boolean b) {
-		this.fresh = b;
 	}
 	
 	void moveForward() {
