@@ -28,9 +28,11 @@ public class Scenes {
 		background.setTranslateX(0); background.setTranslateY(0);
 		background.setFill(Window.BACKGROUND);
 		
+		// 290 + 36*pkts_len
+		
 		int pointslen = String.valueOf(Math.round(Window.points)).length();
-		Text t = new Text("Your score: "); t.setFill(Color.WHITE); t.setTranslateX(240-pointslen*12); t.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 30;");
-		Text pkts = new Text(points.getText()); pkts.setFill(Color.web("#ff4a80")); /*pkts.setFill(Color.RED);*/pkts.setTranslateX(400+pointslen); pkts.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 32;");
+		Text t = new Text("Your score: "); t.setFill(Color.WHITE); t.setTranslateX(400-(300+pointslen*36)/2); t.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 30;");
+		Text pkts = new Text(points.getText()); pkts.setFill(Color.web("#ff4a80")); /*pkts.setFill(Color.RED);*/pkts.setTranslateX(t.getTranslateX() + (305+pointslen*36)/2); pkts.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 32;");
 		
 		stack.getChildren().addAll(t, pkts);
 		stack.setTranslateY(200);
