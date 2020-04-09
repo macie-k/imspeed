@@ -21,19 +21,24 @@ public class Selection {
 	
 	public static void selectDifficulty(Pane root) {
 		
-		Scene scene = new Scene(root, Color.web("#0f0f0f"));
+		x=0;
+		Scene scene = new Scene(root);
+		root.setStyle("-fx-background-color: rgb(15,15,15)");
 		
-		Text header = new Text("• Select difficulty •");
-		header.setTranslateX(242); header.setTranslateY(110);
-		header.setFont(Font.font("Monospaced", 25)); header.setFill(Color.WHITE);
+		Text header = new Text("DIFFICULTY");
+		header.setTranslateX(143); header.setTranslateY(130); header.setFill(Color.WHITE);
+			
+		Font.loadFont("https://kazmierczyk.me/styles/fonts/Kyrou%207%20Wide%20Bold.ttf", 14);
+		header.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 50;");
 		
 		MenuOption[] diff = new MenuOption[5];		
 		for(int i=0; i<5; i++) {
-			int calcY = 200 + 25*i;
+			int calcY = 220 + 25*i;
 			diff[i] = new MenuOption(calcY, MenuWords.loadDifficulties(x)[i], "diff", x==i);
 		}
 		
 		root.getChildren().add(header); root.getChildren().addAll(diff);
+		
 		window.setScene(scene);
 		
 		scene.setOnKeyPressed(e -> {
@@ -61,17 +66,20 @@ public class Selection {
 
 	public static void selectLanguage(Pane root) {
 		
-		x=0;
-		Scene scene = new Scene(root, Color.web("#0f0f0f"));
+		x=0; selected.clear();
+		Scene scene = new Scene(root);
+		root.setStyle("-fx-background-color: rgb(15,15,15)");
 		
-		Text header = new Text("• Select languages •");
-		header.setTranslateX(250); header.setTranslateY(110);
-		header.setFont(Font.font("Monospaced", 25)); header.setFill(Color.WHITE);
+		Text header = new Text("LANGUAGES");
+		header.setTranslateX(157); header.setTranslateY(130);header.setFill(Color.WHITE);
+		
+		Font.loadFont("https://kazmierczyk.me/styles/fonts/Kyrou%207%20Wide%20Bold.ttf", 14);		
+		header.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 50;");
 		
 		/* load all available languages */
 		MenuOption[] lngs = new MenuOption[5];
 		for(int i=0; i<5; i++) {
-			int calcY = 200 + 25*i;
+			int calcY = 220 + 25*i;
 			lngs[i] = new MenuOption(calcY, MenuWords.loadLanguages(x)[i], "lng", x==i);
 		}
 		
@@ -118,16 +126,15 @@ public class Selection {
 		
 		if(type.equals("lng")) {
 			for(int i=0; i<5; i++) {
-				int calcY = 200 + 25*i;
+				int calcY = 220 + 25*i;
 				option[i] = new MenuOption(calcY, MenuWords.loadLanguages(x)[i], "lng", i==x);
 			}
 		} if(type.equals("diff")) {
 			for(int i=0; i<5; i++) {
-				int calcY = 200 + 25*i;
+				int calcY = 220 + 25*i;
 				option[i] = new MenuOption(calcY, MenuWords.loadDifficulties(x)[i], "diff", i==x);
 			}
 		}
-
 		
 		root.getChildren().addAll(option);
 		window.setScene(scene);

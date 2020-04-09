@@ -1,5 +1,6 @@
 package menu;
 
+import base.Window;
 import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -28,8 +29,7 @@ public class MenuOption extends StackPane {
 		text = new Text(value);
 		text.setTranslateX(textX);
 		text.setTranslateY(y);
-		text.setFont(Font.font("Courier new"));
-		text.setStyle("-fx-font-size: 14;");
+		text.setFont(Font.font("Courier new", 14));
 		
 		background = new Rectangle();
 		background.setWidth(bgWidth);
@@ -42,7 +42,7 @@ public class MenuOption extends StackPane {
 			background.setFill(Color.WHITE);
 			text.setFill(Color.BLACK);
 		} else {
-			background.setFill(Color.web("#0f0f0f"));
+			background.setFill(Window.BACKGROUND);
 			text.setFill(Color.WHITE);
 		}
 		

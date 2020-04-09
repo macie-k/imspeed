@@ -25,6 +25,14 @@ public class MenuWords {
 	public static String[] loadLanguages(int x) {
 		
 		String path = new File("").getAbsolutePath() + "\\words\\";		// get path of "words" directory
+
+		if(!new File(path).exists()) {
+			String d[] = path.split("\\\\");
+			path="";
+			for(int i=0; i<d.length-2; i++) path += d[i] + "\\";
+			path += "words\\";
+		}
+		
 		//System.out.println(path);
 		File folder = new File(path);
 		listOfFiles = folder.listFiles();	// get all available language files
