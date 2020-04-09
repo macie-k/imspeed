@@ -9,7 +9,12 @@ import java.util.Random;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import menu.Selection;
 import menu.MenuWords;
@@ -20,10 +25,12 @@ public class Window extends Application {
 	public static int DIFFICULTY;
 	public static Stage window;
 	
-	static double points=-7;
-	private static int typed=0;
+	public static Color BACKGROUND = Color.web("#0f0f0f");
+	
+	static double points;
+	private static int typed;
 	private static int max_word_len = 0;
-	private static double multiplier = 0.98;
+	private static double multiplier;
 	
 	private static long howOften;
 	private static long howFast;
@@ -57,15 +64,43 @@ public class Window extends Application {
 	
 	public static void gameOver() {	
 		Pane root = new Pane(); root.setPrefSize(800, 500);
+		Text retry = new Text("> Press enter to try again <"); retry.setFill(Color.WHITE); retry.setTranslateX(308);retry.setTranslateY(370); retry.setFont(Font.font("Courier new", 11));
 		Scene scene = Scenes.gameOver(root);
+		
+		root.getChildren().add(retry);
 		window.setScene(scene);
 		
+		timer = new AnimationTimer() {
+			
+			private long lastUpdate = 0;
+						
+			@Override
+			public void handle(long now) {		
+				
+				if(now - lastUpdate >= 500_000_000) {
+					retry.setVisible(!retry.isVisible());
+					window.setScene(scene);
+					lastUpdate = now;
+				}
+			}
+		}; timer.start();
+		
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                timer.stop();
+                setDiff();
+            } e.consume();
+        });
 	}
 	
 	public static void startGame(List<File> selected) {
 		
 		Pane root = new Pane(); root.setPrefSize(800, 500);
 		Scene scene = Scenes.game(root);
+		
+		multiplier = 0.98;
+		points = -7;
+		typed = 0;
 		
 		List<String> strings = MenuWords.loadWords(selected);	// list of all word-strings combined
 		List<Word> words = new ArrayList<Word>();	// list of avctive words
@@ -188,7 +223,7 @@ public class Window extends Application {
 						timer.stop();
 						gameOver();
 					}
-														
+																			
 					List<Word> del = new ArrayList<Word>();		// list for words to be deleted from "words" list
 					List<Word> add = new ArrayList<Word>();		// list for words to be added to "words" list
 					

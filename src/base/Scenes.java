@@ -1,5 +1,7 @@
 package base;
 
+import javafx.animation.AnimationTimer;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
@@ -11,33 +13,35 @@ import javafx.scene.text.Text;
 
 public class Scenes {
 	
+	static AnimationTimer timer;
 	static Text points = new Text();
 	public static TextField input = new TextField();
-	
+		
 	public static Scene gameOver(Pane root) {
 		
-		Scene scene = new Scene(root, Color.web("#0f0f0f"));
+		Font.loadFont("https://kazmierczyk.me/styles/fonts/Kyrou%207%20Wide%20Bold.ttf", 14);
+		Scene scene = new Scene(root, Window.BACKGROUND);
 		StackPane stack = new StackPane();
 		
 		Rectangle background = new Rectangle();
 		background.setWidth(800); background.setHeight(500);
 		background.setTranslateX(0); background.setTranslateY(0);
-		background.setFill(Color.web("#0f0f0f"));
+		background.setFill(Window.BACKGROUND);
 		
-		int pointslen = String.valueOf(Window.points).length();
-		Text t = new Text("Your score: "); t.setFill(Color.WHITE); t.setTranslateX(320-pointslen*5); t.setFont(Font.font("Courier new")); t.setStyle("-fx-font-size: 20;"); 
-		Text pkts = new Text(points.getText()); pkts.setFill(Color.web("#ff4a80")); pkts.setTranslateX(400+pointslen); pkts.setFont(Font.font("Courier new")); pkts.setStyle("-fx-font-size: 25;");
+		int pointslen = String.valueOf(Math.round(Window.points)).length();
+		Text t = new Text("Your score: "); t.setFill(Color.WHITE); t.setTranslateX(240-pointslen*12); t.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 30;");
+		Text pkts = new Text(points.getText()); pkts.setFill(Color.web("#ff4a80")); /*pkts.setFill(Color.RED);*/pkts.setTranslateX(400+pointslen); pkts.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 32;");
 		
 		stack.getChildren().addAll(t, pkts);
-		stack.setTranslateY(230);
+		stack.setTranslateY(200);
 		root.getChildren().addAll(background, stack);
-		
+				
 		return scene;
 	}
 	
 	public static Scene game(Pane root) {
 		
-		Scene scene = new Scene(root, Color.web("#0f0f0f"));
+		Scene scene = new Scene(root, Window.BACKGROUND);
 		StackPane inputArea = new StackPane();
 				
 		Rectangle bottom = new Rectangle();
@@ -48,13 +52,13 @@ public class Scenes {
 		Rectangle background = new Rectangle();
 		background.setWidth(800); background.setHeight(500);
 		background.setTranslateX(0); background.setTranslateY(0);
-		background.setFill(Color.web("#0f0f0f"));
+		background.setFill(Window.BACKGROUND);
 		
-		points.setFill(Color.web("#ff4a80")); points.setTranslateX(450); points.setFont(Font.font("Courier new")); points.setStyle("-fx-font-size: 17;");
+		int pointslen = String.valueOf(Math.round(Window.points)).length()+5;
+		points.setFill(Color.web("#ff4a80")); points.setTranslateX(442+10*pointslen); points.setFont(Font.font("Courier new", 17));
 		
-		Text pkts = new Text("Points: "); pkts.setFill(Color.WHITE); pkts.setTranslateX(400); pkts.setFont(Font.font("Courier new")); pkts.setStyle("-fx-font-size: 17;");
+		Text pkts = new Text("Points: "); pkts.setFill(Color.WHITE); pkts.setTranslateX(400); pkts.setFont(Font.font("Courier new", 17));
 		Text l = new Text(">"); l.setFill(Color.WHITE); l.setTranslateX(-70); l.setFont(Font.font("Courier new"));
-		//Label r = new Label("<"); r.setTextFill(Color.WHITE); r.setTranslateX(70);
 
 		input.setPrefWidth(120); input.setPrefHeight(20); input.setMaxWidth(120); input.setMaxHeight(20);
 		input.setStyle("-fx-faint-focus-color: transparent;"
@@ -69,6 +73,7 @@ public class Scenes {
 		
 		inputArea.setTranslateX(20); inputArea.setTranslateY(440);
 		inputArea.setMaxWidth(140); inputArea.setPrefWidth(140);
+		StackPane.setAlignment(points, Pos.CENTER_LEFT);
 		inputArea.getChildren().addAll(input, l, pkts, points);
 				
 		root.getChildren().addAll(background, bottom, inputArea);
