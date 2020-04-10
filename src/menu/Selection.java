@@ -34,7 +34,7 @@ public class Selection {
 		MenuOption[] diff = new MenuOption[5];		
 		for(int i=0; i<5; i++) {
 			int calcY = 220 + 25*i;
-			diff[i] = new MenuOption(calcY, MenuWords.loadDifficulties(x)[i], "diff", x==i);
+			diff[i] = new MenuOption(calcY, MenuWords.loadDifficulties()[i], "diff", x==i);
 		}
 		
 		root.getChildren().add(header); root.getChildren().addAll(diff);
@@ -80,7 +80,7 @@ public class Selection {
 		MenuOption[] lngs = new MenuOption[5];
 		for(int i=0; i<5; i++) {
 			int calcY = 220 + 25*i;
-			lngs[i] = new MenuOption(calcY, MenuWords.loadLanguages(x)[i], "lng", x==i);
+			lngs[i] = new MenuOption(calcY, MenuWords.loadLanguages()[i], "lng", x==i);
 		}
 		
 		root.getChildren().add(header); root.getChildren().addAll(lngs);
@@ -127,12 +127,12 @@ public class Selection {
 		if(type.equals("lng")) {
 			for(int i=0; i<5; i++) {
 				int calcY = 220 + 25*i;
-				option[i] = new MenuOption(calcY, MenuWords.loadLanguages(x)[i], "lng", i==x);
+				option[i] = new MenuOption(calcY, MenuWords.loadLanguages()[i], "lng", i==x);
 			}
 		} if(type.equals("diff")) {
 			for(int i=0; i<5; i++) {
 				int calcY = 220 + 25*i;
-				option[i] = new MenuOption(calcY, MenuWords.loadDifficulties(x)[i], "diff", i==x);
+				option[i] = new MenuOption(calcY, MenuWords.loadDifficulties()[i], "diff", i==x);
 			}
 		}
 		
