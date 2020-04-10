@@ -1,6 +1,5 @@
 package base;
 
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,13 +18,12 @@ import javafx.stage.Stage;
 import menu.Selection;
 import menu.MenuWords;
 
-
 public class Window extends Application {
 		
 	public static int DIFFICULTY;
 	public static Stage window;
 	
-	public static Color BACKGROUND = Color.web("#0f0f0f");
+	public static Color BACKGROUND = Color.web("#0e0e0e");
 	
 	static double points;
 	private static int typed;
@@ -40,7 +38,9 @@ public class Window extends Application {
 	private static List<Integer> xVal;
 	private static List<Integer> yVal;
 	
-	static AnimationTimer timer;
+	static AnimationTimer WORDS_ANIMATION;
+	static AnimationTimer BACKGROUND_ANIMATION;
+	static AnimationTimer GAMEOVER_ANIMATION;
 		
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -70,7 +70,7 @@ public class Window extends Application {
 		root.getChildren().add(retry);
 		window.setScene(scene);
 		
-		timer = new AnimationTimer() {
+		GAMEOVER_ANIMATION = new AnimationTimer() {
 			
 			private long lastUpdate = 0;
 						
@@ -83,11 +83,11 @@ public class Window extends Application {
 					lastUpdate = now;
 				}
 			}
-		}; timer.start();
+		}; GAMEOVER_ANIMATION.start();
 		
         scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
             if (e.getCode() == KeyCode.ENTER) {
-                timer.stop();
+            	GAMEOVER_ANIMATION.stop();
                 setDiff();
             } e.consume();
         });
@@ -98,9 +98,23 @@ public class Window extends Application {
 		Pane root = new Pane(); root.setPrefSize(800, 500);
 		Scene scene = Scenes.game(root);
 		
-		multiplier = 0.98;
-		points = -7;
-		typed = 0;
+		List<Particle> particles = new ArrayList<Particle>();
+		int[] particleY = new int[398]; for(int i=0; i<398; i++) particleY[i] = i+2;
+		Random random = new Random();
+		
+		for(int i=0; i<200; i++) {
+			Particle p = new Particle(random.nextInt(790)+10, particleY[random.nextInt(398)], random.nextDouble());
+				particles.add(p); root.getChildren().add(p);
+			
+			Particle trail_1 = new Particle(p.getTranslateX()-1, p.getTranslateY(), p.getAlpha()*0.66);
+				particles.add(trail_1); root.getChildren().add(trail_1);
+				
+			Particle trail_2 = new Particle(p.getTranslateX()-2, p.getTranslateY(), p.getAlpha()*0.33);
+				particles.add(trail_2); root.getChildren().add(trail_2);
+		}
+		
+		multiplier = 0.98; points = -7; typed = 0; Scenes.points.setText("");
+		window.setScene(scene);
 		
 		List<String> strings = MenuWords.loadWords(selected);	// list of all word-strings combined
 		List<Word> words = new ArrayList<Word>();	// list of avctive words
@@ -168,16 +182,55 @@ public class Window extends Application {
 				howMuch = 6;
 			break;
 		}
-				
-		timer = new AnimationTimer() {
+		
+		BACKGROUND_ANIMATION = new AnimationTimer() {
+
+			private long particle_create = 0;
+			private long particle_move = 0;
 			
+			@Override
+			public void handle(long now) { 
+				
+				if(now - particle_move >= 5_000_000) {
+					List<Particle> toRemove = new ArrayList<Particle>();
+					
+					for(Particle p : particles) {
+						if(p.getTranslateX()>800) {
+							toRemove.add(p);
+						} else {
+							p.moveForward();
+							window.setScene(scene);				
+						}
+					} particles.removeAll(toRemove); root.getChildren().removeAll(toRemove); toRemove.clear();
+					particle_move = now;
+				}
+				
+				if(now - particle_create >= 7_000_000) {
+					Particle p = new Particle(-2, particleY[random.nextInt(398)], random.nextDouble());
+						particles.add(p); root.getChildren().add(p);
+						
+					Particle trail_1 = new Particle(-3, p.getTranslateY(), p.getAlpha()*0.66);
+						particles.add(trail_1); root.getChildren().add(trail_1);
+						
+					Particle trail_2 = new Particle(-4, p.getTranslateY(), p.getAlpha()*0.33);
+						particles.add(trail_2); root.getChildren().add(trail_2);
+					particle_create = now;	
+				}
+				
+			}
+			
+		}; BACKGROUND_ANIMATION.start();
+						
+		WORDS_ANIMATION = new AnimationTimer() {
+						
 			private long lastUpdate = 0;
 			private long lastUpdate2 = 0;
+			
 			int strike = 0;
 						
 			@Override
-			public void handle(long now) {		
-				
+			public void handle(long now) {
+				 
 				if(now - lastUpdate >= howFast) {	// do every 0.7s
 					if(strike < 10) {
 						List<Word> del = new ArrayList<Word>();		// list of words to deletion after loop
@@ -186,16 +239,20 @@ public class Window extends Application {
 							w.moveForward(); 	// move all words forward
 							
 							if(w.getTranslateX() > max_word_len) fresh.remove(w);	// if word is further than longest word remove it from list of new words
-							if(w.getTranslateX()>800) {		// if word leaves beyond the window
+							if(w.getTranslateX()>805) {		// if word leaves beyond the window
 								strike++; multiplier = 1;	// add strikes, reset multiplier
 								del.add(w);	root.getChildren().remove(w);	// add word to deletion, and remove it from pane
 								System.out.println("Strike: " +  strike);
 							}	
 						} words.removeAll(del); lastUpdate = now;
 						
+						if(words.isEmpty()) {
+							WORDS_ANIMATION.stop(); BACKGROUND_ANIMATION.start(); gameOver();
+						}
+						
 					} else {	// if game is over
 						root.getChildren().removeAll(words);	// remove all objects
-						timer.stop(); gameOver();	// stop the timer and change the scene
+						WORDS_ANIMATION.stop(); BACKGROUND_ANIMATION.start(); gameOver();	// stop the timer and change the scene
 						System.out.println("rip");
 					}
 				}
@@ -211,7 +268,7 @@ public class Window extends Application {
 				}
 			}
 			
-		}; timer.start();
+		}; WORDS_ANIMATION.start();
 
 		Scenes.input.setOnKeyPressed(e -> {
 			
@@ -220,10 +277,16 @@ public class Window extends Application {
 				case ENTER:	// every ENTER pressed:
 					
 					if(Scenes.input.getText().equals("killmenow")) {	// special word to end the game
-						timer.stop();
+						WORDS_ANIMATION.stop(); BACKGROUND_ANIMATION.stop();
 						gameOver();
 					}
-																			
+					
+//					if(Scenes.input.getText().equals("add")) {
+//						points += 10000;
+//						Scenes.points.setText(String.valueOf(Math.round(points)));
+//						window.setScene(scene);
+//					}
+																								
 					List<Word> del = new ArrayList<Word>();		// list for words to be deleted from "words" list
 					List<Word> add = new ArrayList<Word>();		// list for words to be added to "words" list
 					

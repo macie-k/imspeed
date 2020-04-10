@@ -27,12 +27,10 @@ public class Scenes {
 		background.setWidth(800); background.setHeight(500);
 		background.setTranslateX(0); background.setTranslateY(0);
 		background.setFill(Window.BACKGROUND);
-		
-		// 290 + 36*pkts_len
-		
+				
 		int pointslen = String.valueOf(Math.round(Window.points)).length();
 		Text t = new Text("Your score: "); t.setFill(Color.WHITE); t.setTranslateX(400-(300+pointslen*36)/2); t.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 30;");
-		Text pkts = new Text(points.getText()); pkts.setFill(Color.web("#ff4a80")); /*pkts.setFill(Color.RED);*/pkts.setTranslateX(t.getTranslateX() + (305+pointslen*36)/2); pkts.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 32;");
+		Text pkts = new Text(points.getText()); pkts.setFill(Color.web("#FF554D")); /*pkts.setFill(Color.RED);*/pkts.setTranslateX(t.getTranslateX() + (305+pointslen*36)/2); pkts.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 32;");
 		
 		stack.getChildren().addAll(t, pkts);
 		stack.setTranslateY(200);
@@ -47,9 +45,9 @@ public class Scenes {
 		StackPane inputArea = new StackPane();
 				
 		Rectangle bottom = new Rectangle();
-		bottom.setWidth(800); bottom.setHeight(10);
+		bottom.setWidth(800); bottom.setHeight(5);
 		bottom.setTranslateX(0); bottom.setTranslateY(400);
-		bottom.setFill(Color.web("#151515"));
+		bottom.setFill(Color.web("#131313"));
 		
 		Rectangle background = new Rectangle();
 		background.setWidth(800); background.setHeight(500);
@@ -57,7 +55,7 @@ public class Scenes {
 		background.setFill(Window.BACKGROUND);
 		
 		int pointslen = String.valueOf(Math.round(Window.points)).length()+5;
-		points.setFill(Color.web("#ff4a80")); points.setTranslateX(442+10*pointslen); points.setFont(Font.font("Courier new", 17));
+		points.setFill(Color.web("#FF554D")); points.setTranslateX(445+10*pointslen); points.setFont(Font.font("Courier new", 17));
 		
 		Text pkts = new Text("Points: "); pkts.setFill(Color.WHITE); pkts.setTranslateX(400); pkts.setFont(Font.font("Courier new", 17));
 		Text l = new Text(">"); l.setFill(Color.WHITE); l.setTranslateX(-70); l.setFont(Font.font("Courier new"));
@@ -66,7 +64,7 @@ public class Scenes {
 		input.setStyle("-fx-faint-focus-color: transparent;"
 				+ "-fx-focus-color: transparent;"
 				+ "-fx-text-box-border: transparent;"
-				+ "-fx-background-color: #151515;"
+				+ "-fx-background-color: #131313;"
 				+ "-fx-text-fill: #FFF;"
 				+ "-fx-highlight-fill: #FFF;"
 				+ "-fx-highlight-text-fill: #000;"
