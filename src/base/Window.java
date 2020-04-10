@@ -63,6 +63,9 @@ public class Window extends Application {
 	}
 	
 	public static void gameOver() {	
+		WORDS_ANIMATION.stop();
+		BACKGROUND_ANIMATION.stop(); 
+		
 		Pane root = new Pane(); root.setPrefSize(800, 500);
 		Text retry = new Text("> Press enter to try again <"); retry.setFill(Color.WHITE); retry.setTranslateX(308);retry.setTranslateY(370); retry.setFont(Font.font("Courier new", 11));
 		Scene scene = Scenes.gameOver(root);
@@ -246,14 +249,12 @@ public class Window extends Application {
 							}	
 						} words.removeAll(del); lastUpdate = now;
 						
-						if(words.isEmpty()) {
-							WORDS_ANIMATION.stop(); BACKGROUND_ANIMATION.start(); gameOver();
-						}
+						if(words.isEmpty()) gameOver();
 						
 					} else {	// if game is over
 						root.getChildren().removeAll(words);	// remove all objects
-						WORDS_ANIMATION.stop(); BACKGROUND_ANIMATION.start(); gameOver();	// stop the timer and change the scene
 						System.out.println("rip");
+						gameOver();	// stop the timer and change the scene
 					}
 				}
 				
@@ -277,7 +278,6 @@ public class Window extends Application {
 				case ENTER:	// every ENTER pressed:
 					
 					if(Scenes.input.getText().equals("killmenow")) {	// special word to end the game
-						WORDS_ANIMATION.stop(); BACKGROUND_ANIMATION.stop();
 						gameOver();
 					}
 					
