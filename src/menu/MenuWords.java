@@ -17,12 +17,12 @@ public class MenuWords {
 	
 	static File[] listOfFiles;
 	
-	public static String[] loadDifficulties(int x) {
+	public static String[] loadDifficulties() {
 		String[] diffs = {"Masturbating with one hand", "I have iOS autocorrection", "Kinda normal", "I wear fast glasses", "Asian"};
 		return diffs;		
 	}
 	
-	public static String[] loadLanguages(int x) {
+	public static String[] loadLanguages() {
 		
 		String path = new File("").getAbsolutePath() + "\\words\\";		// get path of "words" directory
 
