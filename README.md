@@ -23,9 +23,9 @@ Remake of bisqwit's "wspeed" game
 
  ## How to use
  
-### The .exe file requires `Java JDK` to run
+### The .exe file requires [`Java JDK`](https://bit.ly/imspeedJDK) to run
 
-Preferably version 10, as it's the last version with JavaFX built in. • Link: https://bit.ly/imspeedJDK
+Preferably version 10, as it's the last version with **JavaFX** built in.
 
 <br>
 
@@ -44,5 +44,12 @@ Preferably version 10, as it's the last version with JavaFX built in. • Link: 
 * **Launch:**
   * Just double click on `.exe` file or:
   * `java -jar imspeed.jar` - running `setup` is not required when using this option
+  * For self testing use either IDE launch option or `run.bat` file: <br>
+    ```batch
+     @echo off
+     javac -cp ".\base\*;.\menu\*;..\words\*;" .\base\Window.java
+     java -cp ".\base\*;.\menu\*;..\words\*;" base.Window 2> error_log.txt
+    ```
+  <br>
   
-`.exe` file is in fact wrapped jar, allowing for the icon and to run the program with a simple double-click
+**Sidenote:** `.exe` file is in fact wrapped jar, allowing for the icon and to run the program with double-click
