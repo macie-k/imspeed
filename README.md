@@ -23,7 +23,7 @@ Preferably version 10, as it's the last version with JavaFX built in.
 
 <br>
 
-* Run `setup.bat` to set up system environment variable
+* Run `setup.bat` to set up system environment variable (only required when using `.exe` file)
 * Make sure `words` folder is in the same directory as the game.
 
 <br>
