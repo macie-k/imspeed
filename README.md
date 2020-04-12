@@ -25,7 +25,8 @@ Remake of bisqwit's "wspeed" game
  
 ### The .exe file requires `Java JDK` to run
 
-Preferably version 10, as it's the last version with JavaFX built in.
+Preferably version 10, as it's the last version with JavaFX built in. <br>
+Link: https://bit.ly/imspeedJDK
 
 <br>
 
