@@ -26,5 +26,5 @@ echo 	Write-Host "Error, check if you have permissions" -ForegroundColor red >> 
 echo } >> setup.ps1
 echo Start-Sleep -s 3 >> setup.ps1
 
-timeout 3
+timeout 2>nul
 powershell.exe -executionpolicy bypass -file "setup.ps1"
