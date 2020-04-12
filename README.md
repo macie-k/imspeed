@@ -44,7 +44,7 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
 * **Launch:**
   * Just double click on `.exe` file or:
   * `java -jar imspeed.jar` - running `setup` is not required when using this option
-  * For self testing use either IDE launch option or `run.bat` file: <br>
+  * For self testing use either the IDE launch option or the `run.bat` file: <br>
     ```batch
      javac -cp ".\base\*;.\menu\*;..\words\*;" .\base\Window.java
      java -cp ".\base\*;.\menu\*;..\words\*;" base.Window 2> error_log.txt
