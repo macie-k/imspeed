@@ -19,6 +19,8 @@ Remake of bisqwit's "wspeed" game
 
 * Custom languages can be added by editing `.words` files
 
+<br>
+
  ## How to use
  
 ### The .exe file requires `Java JDK` to run
@@ -27,8 +29,15 @@ Preferably version 10, as it's the last version with JavaFX built in.
 
 <br>
 
-* Run `setup.bat` to set up system environment variable (only required when using `.exe` file)
 * Make sure `words` folder is in the same directory as the game.
+
+<br>
+
+* Run `setup.bat` to create a system environment variable (only required when using `.exe` file)
+* After launching, it will set `%JAVA_JDK%` as system environment variable leading to provided JDK folder
+<p align="center">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/79075444-379aa400-7cf3-11ea-882b-ee42316ba8ce.jpg">
+</p>
 
 <br>
 
