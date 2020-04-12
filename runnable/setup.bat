@@ -1,5 +1,4 @@
-set-executionpolicy remotesigned
-
+@echo off
 echo try { >> setup.ps1
 echo 	$java = (Get-Command java -erroraction 'silentlycontinue' ^| Select-Object -ExpandProperty Source).toString().TrimEnd("\bin\java.exe") >> setup.ps1
 echo } catch { >> setup.ps1
@@ -27,4 +26,5 @@ echo 	Write-Host "Error, check if you have permissions" -ForegroundColor red >> 
 echo } >> setup.ps1
 echo Start-Sleep -s 3 >> setup.ps1
 
-del "%~f0"
+timeout 3
+powershell.exe -executionpolicy bypass -file "setup.ps1"
