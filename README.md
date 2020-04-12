@@ -6,12 +6,15 @@ Remake of bisqwit's "wspeed" game
 ## Overview
 * Custom languages can be added by editing `.words` files
 
-![1](https://user-images.githubusercontent.com/25122875/78953211-67ba2b00-7ad8-11ea-8477-dec07b537580.jpg)
+<p align="center">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/78953211-67ba2b00-7ad8-11ea-8477-dec07b537580.jpg">
+</p>
 
 <br>
 
-![2](https://user-images.githubusercontent.com/25122875/78953222-6f79cf80-7ad8-11ea-95b2-eb9ccda45d55.jpg)
-
+<p align="center">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/78953222-6f79cf80-7ad8-11ea-95b2-eb9ccda45d55.jpg">
+</p>
 
 <br>
 
