@@ -23,7 +23,7 @@ Remake of bisqwit's "wspeed" game
 
  ## How to use
  
-### The .exe file requires [`Java JDK`](https://bit.ly/imspeedJDK) to run
+### The .exe file requires [`Java JDK`](https://bit.ly/imspeedJDK2) to run
 
 Preferably version 10, as it's the last version with **JavaFX** built in.
 
@@ -31,13 +31,18 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
 
 * Make sure `words` folder is in the same directory as the game.
 
-<br>
+### For Windows:
 
 * Run `setup.bat` to create a system environment variable (only required when using `.exe` file)
 * After launching, it will set `%JAVA_JDK%` as system environment variable leading to provided JDK folder <br>
 <p align="center">
   <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/79079528-febcf800-7d0f-11ea-8b74-f6a81d506af0.jpg">
 </p>
+
+### For linux:
+
+* [`JDK`](https://bit.ly/imspeedJDK2) with JavaFX is the only requirement for Unix based systems
+* Launch as shown below
 
 <br>
 
@@ -52,3 +57,5 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
   <br>
   
 **Sidenote:** `.exe` file is in fact wrapped jar, allowing for the icon and to run the program with double-click
+
+<br>
