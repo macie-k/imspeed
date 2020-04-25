@@ -28,6 +28,8 @@ Remake of bisqwit's "wspeed" game
 Preferably version 10, as it's the last version with **JavaFX** built in.
 * Make sure `words` folder is in the same directory as the game.
 
+<br>
+
 ### For Windows:
 
 * Run `setup.bat` to create a system environment variable (only required when using `.exe` file)
