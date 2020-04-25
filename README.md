@@ -38,7 +38,7 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
   <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/79079528-febcf800-7d0f-11ea-8b74-f6a81d506af0.jpg">
 </p>
 
-### For linux:
+### For Linux:
 
 * [`JDK`](https://bit.ly/imspeedJDK2) with JavaFX is the only requirement for Unix based systems
 * Launch as shown below
