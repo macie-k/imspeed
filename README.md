@@ -26,9 +26,6 @@ Remake of bisqwit's "wspeed" game
 ### The .exe file requires [`Java JDK`](https://bit.ly/imspeedJDK2) to run
 
 Preferably version 10, as it's the last version with **JavaFX** built in.
-
-<br>
-
 * Make sure `words` folder is in the same directory as the game.
 
 ### For Windows:
