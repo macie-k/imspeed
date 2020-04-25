@@ -6,7 +6,7 @@ Remake of bisqwit's "wspeed" game
 ## Overview
 
 <p align="center">
-  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/78953211-67ba2b00-7ad8-11ea-8477-dec07b537580.jpg">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/80281643-f059dd80-870c-11ea-9e04-38ca190bef60.jpg">
 </p>
 
 <br>
