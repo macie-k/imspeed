@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import base.Scenes;
 import base.Window;
 
 public class Selection {
@@ -19,16 +20,16 @@ public class Selection {
 	static List<File> selected = new ArrayList<File>();
 	private static Stage window = Window.window;
 	
+	/* set difficulties */
 	public static void selectDifficulty(Pane root) {
 		
 		x=0;
 		Scene scene = new Scene(root);
-		root.setStyle("-fx-background-color: rgb(15,15,15)");
+		root.setStyle("-fx-background-color: rgb(14, 14, 14)");
 		
 		Text header = new Text("DIFFICULTY");
 		header.setTranslateX(143); header.setTranslateY(130); header.setFill(Color.WHITE);
-			
-		Font.loadFont("https://kazmierczyk.me/styles/fonts/Kyrou%207%20Wide%20Bold.ttf", 14);
+		
 		header.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 50;");
 		
 		MenuOption[] diff = new MenuOption[5];		
@@ -64,16 +65,17 @@ public class Selection {
 		});
 	}
 
+	/* set languages */
 	public static void selectLanguage(Pane root) {
 		
 		x=0; selected.clear();
 		Scene scene = new Scene(root);
-		root.setStyle("-fx-background-color: rgb(15,15,15)");
+		root.setStyle("-fx-background-color: rgb(14, 14, 14)");
 		
 		Text header = new Text("LANGUAGES");
 		header.setTranslateX(157); header.setTranslateY(130);header.setFill(Color.WHITE);
 		
-		Font.loadFont("https://kazmierczyk.me/styles/fonts/Kyrou%207%20Wide%20Bold.ttf", 14);		
+		Font.loadFont(Scenes.fontsPath + "Kyrou 7 Wide Bold.ttf", 14);		
 		header.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 50;");
 		
 		/* load all available languages */
@@ -120,7 +122,8 @@ public class Selection {
 		});
 	}
 	
-	public static void setScene(Pane root, Scene scene, String type, MenuOption[] option) {
+	/* method for refreshing the view */
+	static void setScene(Pane root, Scene scene, String type, MenuOption[] option) {
 		
 		root.getChildren().removeAll(option);
 		
