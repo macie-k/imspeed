@@ -83,8 +83,8 @@ public class Window extends Application {
 		WORDS_ANIMATION.stop();
 		BACKGROUND_ANIMATION.stop();
 		
-		Save.ifExists();
-		Save.saveScore(Scenes.points.getText());
+//		Save.ifExists();
+//		Save.saveScore(Scenes.points.getText());
 		
 		Pane root = new Pane(); root.setPrefSize(800, 500);
 		Text retry = new Text("> Press enter to try again <"); retry.setFill(Color.WHITE); retry.setTranslateX(308);retry.setTranslateY(370); retry.setFont(Font.font("Courier new", 11));
