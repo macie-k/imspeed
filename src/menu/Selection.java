@@ -3,7 +3,6 @@ package menu;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -11,7 +10,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import base.Scenes;
 import base.Window;
 
 public class Selection {
@@ -29,7 +27,6 @@ public class Selection {
 		
 		Text header = new Text("DIFFICULTY");
 		header.setTranslateX(143); header.setTranslateY(130); header.setFill(Color.WHITE);
-		
 		header.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 50;");
 		
 		MenuOption[] diff = new MenuOption[5];		
@@ -39,7 +36,6 @@ public class Selection {
 		}
 		
 		root.getChildren().add(header); root.getChildren().addAll(diff);
-		
 		window.setScene(scene);
 		
 		scene.setOnKeyPressed(e -> {
@@ -74,8 +70,6 @@ public class Selection {
 		
 		Text header = new Text("LANGUAGES");
 		header.setTranslateX(157); header.setTranslateY(130);header.setFill(Color.WHITE);
-		
-		Font.loadFont(Scenes.fontsPath + "Kyrou 7 Wide Bold.ttf", 14);		
 		header.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 50;");
 		
 		/* load all available languages */
