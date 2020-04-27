@@ -1,5 +1,14 @@
 package base;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,10 +25,52 @@ public class Scenes {
 	static AnimationTimer timer;
 	static Text points = new Text();
 	public static TextField input = new TextField();
+	public static String fontsPath;
+	
+	public static void fontSetup() {
+		String OS = Window.OS;
+		String[] fontNames = {"Kyrou 7 Wide Bold.ttf", "Courier new.ttf"};
+		
+		if(OS.equals("windows")) {
+			fontsPath = System.getenv("appdata") + "\\imspeed\\";
+		} else {
+			fontsPath = System.getenv("HOME") + "/.imspeed/";
+		}
+		
+		if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {
+			System.out.println("Error creating imspeed directory");
+		} else {
+			Window.HOME_DIR = fontsPath; fontsPath += "fonts" + Window.slash;
+			
+			if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {
+				System.out.println("Error creating font directory");
+			} else {
+				for(int i=0; i<fontNames.length; i++) {
+					if(!new File(fontsPath + fontNames[i]).exists()) {
+						try {
+							URL font = new URL("https://kazmierczyk.me/--imspeed/" + URLEncoder.encode(fontNames[i], "UTF-8").replace("+", "%20"));
+							InputStream url = font.openStream();
+							Files.copy(url, Paths.get(fontsPath+fontNames[i]));
+							url.close();
+						} catch (Exception e) {
+							System.out.println("Error downloading font " + e);
+						}		
+					}
+				}
+			}
+		}
+		
+		for(int i=0; i<fontNames.length; i++) {
+			try {
+				InputStream font = new FileInputStream(fontsPath + fontNames[i]);
+				Font.loadFont(font, 14);
+			} catch (FileNotFoundException e) {
+				System.out.println("Error loading font file " + e);
+			}
+		}
+	}
 		
 	public static Scene gameOver(Pane root) {
-		
-		Font.loadFont("https://kazmierczyk.me/styles/fonts/Kyrou%207%20Wide%20Bold.ttf", 14);
 		Scene scene = new Scene(root, Window.BACKGROUND);
 		StackPane stack = new StackPane();
 		
