@@ -80,7 +80,7 @@ public class Save {
 		/* If scoreboard file doesn't exist */
 		if(!scoreboard.exists()) {
 			
-			System.out.print("\n[X] Scoreboa-=rd doesn't exist, ");
+			System.out.print("\n[X] Scoreboard doesn't exist, ");
 			if(scoreboard_bak.exists()) {
 				System.out.println("trying to restore");
 				restoreBackup(scoreboard_bak, scoreboard); return;
@@ -99,14 +99,18 @@ public class Save {
 					String encodedFlag = Base64.getEncoder().encodeToString(String.valueOf(calculatedFlag).getBytes());	// encode it in Base64
 					
 					lastModified -= 3;
-					// write information about used exponent and flag itself & overwrite modification time after printing flag
-					saver.println("Control flag: #" + x + encodedFlag + "\n");  scoreboard.setLastModified(lastModified);
-					saver_bak.println("Control flag: #" + x + encodedFlag + "\n"); scoreboard_bak.setLastModified(lastModified);
 					
-					//System.out.println("Actual date: \t" + sdf.format(lastModified) + "\t" + lastModified);
-					
-					System.out.println("ifExists()# calculated:\t" + calculatedFlag);
-					System.out.println("ifExists()# encoded:\t" + encodedFlag);
+					/* write information about used exponent (x) and flag itself & overwrite modification time after printing flag */
+					saver.println("Control flag: #" + x + encodedFlag + "\n");
+						saver.close();
+							scoreboard.setLastModified(lastModified);
+							
+					saver_bak.println("Control flag: #" + x + encodedFlag + "\n");
+						saver_bak.close();
+							scoreboard_bak.setLastModified(lastModified);
+										
+//					System.out.println("ifExists()# calculated:\t" + calculatedFlag);
+//					System.out.println("ifExists()# encoded:\t" + encodedFlag);
 					
 				} catch (IOException e) {System.err.println("[X] Error when creating scoreboard file, check your permissions");}
 			}
@@ -132,13 +136,10 @@ public class Save {
 				
 				double calculatedFlag = file.lastModified();	// get current file's modification time
 				double decodedFlag = Double.valueOf(savedFlag)/Math.pow(Math.E, x);	// read first flagged line and get saved date number
-				
-				//System.out.println("Actual date: \t" + sdf.format(lastModified));				
-				//System.out.println("Actual date: \t" + sdf.format(savedFlag/Math.pow(b, e)));
-				
-				System.out.println("isModified("+file.getName()+")# encoded:\t" + encodedFlag);
-				System.out.println("isModified("+file.getName()+")# decoded:\t" + decodedFlag);
-				System.out.println("isModified("+file.getName()+")# calculated:\t" + calculatedFlag);
+
+//				System.out.println("isModified("+file.getName()+")# encoded: \t" + encodedFlag);
+//				System.out.println("isModified("+file.getName()+")# decoded: \t" + decodedFlag);
+//				System.out.println("isModified("+file.getName()+")# calculated: \t" + calculatedFlag);
 				
 				if(Math.abs(calculatedFlag - decodedFlag) < 30) {	// check if the flags match with small error margin
 					System.out.println("\n[OK] Flag is correct");
