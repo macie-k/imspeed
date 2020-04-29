@@ -55,6 +55,6 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
     ```
   <br>
   
-**Sidenote:** `.exe` file is in fact wrapped jar, allowing for the icon and to run the program with double-click
+**Sidenote:** `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program double-clicking
 
 <br>
