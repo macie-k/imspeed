@@ -7,6 +7,9 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,11 +17,13 @@ import base.Window;
 
 public class Selection {
 	
+	public static List<File> selected = new ArrayList<File>();
+	public static List<String> selectedNames = new ArrayList<String>();
+	
 	private static int x=0;
-	static List<File> selected = new ArrayList<File>();
 	private static Stage window = Window.window;
 	
-	/* set difficulties */
+	/* set difficulty */
 	public static void selectDifficulty(Pane root) {
 		
 		x=0;
@@ -61,10 +66,10 @@ public class Selection {
 		});
 	}
 
-	/* set languages */
+	/* select languages */
 	public static void selectLanguage(Pane root) {
 		
-		x=0; selected.clear();
+		x=0; selected.clear(); selectedNames.clear();
 		Scene scene = new Scene(root);
 		root.setStyle("-fx-background-color: rgb(14, 14, 14)");
 		
@@ -99,15 +104,31 @@ public class Selection {
 					break;
 					
 				case SPACE:
-					if(selected.contains(MenuWords.listOfFiles[x]))	selected.remove(MenuWords.listOfFiles[x]);
-					else selected.add(MenuWords.listOfFiles[x]);
+					if(selected.contains(MenuWords.listOfFiles[x]))	{
+						selected.remove(MenuWords.listOfFiles[x]);
+						selectedNames.remove(MenuWords.lngsNames.get(x));
+					} else {
+						if(!isEmpty(x)) {
+							selectedNames.add(MenuWords.lngsNames.get(x));
+							selected.add(MenuWords.listOfFiles[x]);
+						}
+					}
 					setScene(root, scene, "lng", lngs);
 					break;
 					
 				case ENTER:
-					if(!selected.contains(MenuWords.listOfFiles[x])) selected.add(MenuWords.listOfFiles[x]);
+					if(!selected.contains(MenuWords.listOfFiles[x])) {
+						if(!isEmpty(x)) {
+							selectedNames.add(MenuWords.lngsNames.get(x));
+							selected.add(MenuWords.listOfFiles[x]);
+						}
+					}
+					
 					setScene(root, scene, "lng", lngs);
-					if(!MenuWords.loadWords(selected).isEmpty()) Window.startGame(selected);
+					
+					if(!MenuWords.loadWords(selected).isEmpty()) {
+						Window.startGame(selected);
+					}
 					break;
 					
 				default: break;			
@@ -126,7 +147,9 @@ public class Selection {
 				int calcY = 220 + 25*i;
 				option[i] = new MenuOption(calcY, MenuWords.loadLanguages()[i], "lng", i==x);
 			}
-		} if(type.equals("diff")) {
+		}
+		
+		if(type.equals("diff")) {
 			for(int i=0; i<5; i++) {
 				int calcY = 220 + 25*i;
 				option[i] = new MenuOption(calcY, MenuWords.loadDifficulties()[i], "diff", i==x);
@@ -135,5 +158,18 @@ public class Selection {
 		
 		root.getChildren().addAll(option);
 		window.setScene(scene);
+	}
+	
+	static boolean isEmpty(int x) {
+		try {
+			if(Files.lines(Paths.get(MenuWords.listOfFiles[x].toString())).count() > 1) {
+				return false;				
+			} else {
+				return true;
+			}
+		} catch (IOException er) {
+			System.out.println(er);
+			return true;
+		}
 	}
 }

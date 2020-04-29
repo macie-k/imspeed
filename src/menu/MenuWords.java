@@ -3,11 +3,9 @@ package menu;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +14,8 @@ import java.util.List;
 import base.Window;
 
 public class MenuWords {
+	
+	public static List<String> lngsNames = new ArrayList<String>();
 	
 	static File[] listOfFiles;
 	static String slash = Window.slash;
@@ -50,12 +50,20 @@ public class MenuWords {
 		for(int i=0; i<listOfFiles.length; i++) {
 			try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName()));){
 				
-				if(Selection.selected.contains(listOfFiles[i]))
-					lngs[i] = " [ x ] "; else lngs[i] = " [   ] ";		// if selected add "x" in box else empty box
+				String s = b.readLine();
 				
-				lngs[i] += b.readLine();	// add language name from file's first line
+				if(Selection.selected.contains(listOfFiles[i])) {
+					lngs[i] = " [ x ] "; 	// if selected add "x" in box else empty box
+				} else {
+					lngs[i] = " [   ] ";		
+				}
+				
+				lngsNames.add(s);
+				lngs[i] += s;	// add language name from file's first line
 					
-			} catch (IOException e) {}
+			} catch (IOException e) {
+				System.out.println("\n[X] Error " + e);
+			}
 		}
 		return lngs;		
 	}
@@ -72,12 +80,10 @@ public class MenuWords {
 					allWords.add(s);
 				}
 				
-			} catch (FileNotFoundException e) {
-				System.out.println("File error");
-			} catch (UnsupportedEncodingException e) {} catch (IOException e) {
+			} catch (IOException e) {
+				System.out.println("\n[X] File error " + e);
 			}
 		}
-		//System.out.println(allWords);
 		return allWords;
 	}
 	
