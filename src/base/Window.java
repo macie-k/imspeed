@@ -278,8 +278,8 @@ public class Window extends Application {
 					}
 				}
 				
-				if(now - lastUpdate2 >= howOften && typed > 4) {		// every 6 seconds try to add 5 new words if less than 20 are displayed
-					if(words.size() < 20) {
+				if(now - lastUpdate2 >= howOften && typed > 4) {	// every 6 seconds try to add 5 new words if less than 20 are displayed
+					if(words.size() < 17) {
 						for(int i=0; i<howMuch; i++) {		
 							Word word = createWord(strings, xVal_final, yVal_final, fresh);
 							fresh.add(word); words.add(word);
