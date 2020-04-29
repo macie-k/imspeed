@@ -13,24 +13,30 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import base.Window;
+
 public class MenuWords {
 	
 	static File[] listOfFiles;
+	static String slash = Window.slash;
 	
 	public static String[] loadDifficulties() {
+		//String[] diffs = {"Masturbating with one hand", "I have iOS autocorrection", "Kinda normal", "I wear fast glasses", "Asian"};
 		String[] diffs = {"Very easy", "Easy", "Normal", "Hard", "Asian"};
 		return diffs;		
 	}
 	
 	public static String[] loadLanguages() {
 		
-		String path = new File("").getAbsolutePath() + "\\words\\";		// get path of "words" directory
-
+		String path = new File("").getAbsolutePath() + slash + "words" + slash;
+		String splitslash = slash;
+		
+		if(Window.OS.equals("windows")) splitslash = "\\\\";
 		if(!new File(path).exists()) {
-			String d[] = path.split("\\\\");
+			String d[] = path.split(splitslash);
 			path="";
-			for(int i=0; i<d.length-2; i++) path += d[i] + "\\";
-			path += "words\\";
+			for(int i=0; i<d.length-2; i++) path += d[i] + slash;
+			path += "words" + slash;
 		}
 		
 		//System.out.println(path);
