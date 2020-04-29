@@ -14,14 +14,17 @@ import java.util.Date;
 import java.util.Random;
 import java.util.Scanner;
 
+import menu.Selection;
+
 public class Save {
 	
 	static String slash = Window.slash;
+	
 	static String path = new File("").getAbsolutePath();
 	static String path_bak = Window.HOME_DIR;
 	
 	static File scoreboard = new File(path + slash + "score.board");
-	static File scoreboard_bak = new File(path_bak + slash + "scores.bak");
+	static File scoreboard_bak = new File(path_bak + slash + "score.bak");
 	
 	static SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 	
@@ -44,14 +47,23 @@ public class Save {
 			saver = new PrintWriter(FileW);
 			saver_bak = new PrintWriter(FileW_bak);
 			
-			Date now = new Date();
+			long now = new Date().getTime();
 			long fileDate = scoreboard.lastModified();
+			
+			String language = "";
+			if(Selection.selectedNames.size() > 1) {
+				language = "MIXED";
+			} else {
+				language = Selection.selectedNames.get(0);
+			}
 
-			saver.println("\n## " + sdf.format(now) + " ## " + points);
+			//saver.println("## " + sdf.format(now) + " ## " + MenuWords.loadDifficulties()[Window.DIFFICULTY-1] + " ## " + points);
+			saver.println(now + "#" + Window.DIFFICULTY + "#" + language + "#" + points);
 				saver.close();
 					scoreboard.setLastModified(fileDate);
-					
-			saver_bak.println("\n## " + sdf.format(now) + " ## " + points);
+				
+			//saver_bak.println("## " + sdf.format(now) + " ## " + MenuWords.loadDifficulties()[Window.DIFFICULTY-1] + " ## " +points);
+			saver.println(now + "#" + Window.DIFFICULTY + "#" + language + "#" +points);	
 				saver_bak.close();
 					scoreboard_bak.setLastModified(fileDate);
 					
@@ -88,8 +100,8 @@ public class Save {
 					
 					lastModified -= 3;
 					// write information about used exponent and flag itself & overwrite modification time after printing flag
-					saver.println("Control flag: #" + x + encodedFlag);  scoreboard.setLastModified(lastModified);
-					saver_bak.println("Control flag: #" + x + encodedFlag); scoreboard_bak.setLastModified(lastModified);
+					saver.println("Control flag: #" + x + encodedFlag + "\n");  scoreboard.setLastModified(lastModified);
+					saver_bak.println("Control flag: #" + x + encodedFlag + "\n"); scoreboard_bak.setLastModified(lastModified);
 					
 					//System.out.println("Actual date: \t" + sdf.format(lastModified) + "\t" + lastModified);
 					
@@ -116,7 +128,6 @@ public class Save {
 				int x = Character.getNumericValue(s.charAt(0));
 
 				String encodedFlag = s.substring(1, s.length());
-				System.out.println("Encoded " + encodedFlag);
 				String savedFlag = new String(Base64.getDecoder().decode(encodedFlag)); 	// decode the flag
 				
 				double calculatedFlag = file.lastModified();	// get current file's modification time
@@ -129,7 +140,7 @@ public class Save {
 				System.out.println("isModified("+file.getName()+")# decoded:\t" + decodedFlag);
 				System.out.println("isModified("+file.getName()+")# calculated:\t" + calculatedFlag);
 				
-				if(Math.abs(calculatedFlag - decodedFlag) < 10) {	// check if the flags match with small error margin
+				if(Math.abs(calculatedFlag - decodedFlag) < 30) {	// check if the flags match with small error margin
 					System.out.println("\n[OK] Flag is correct");
 					read.close();
 					return false;
