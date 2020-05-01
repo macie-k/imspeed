@@ -28,7 +28,7 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
 
 * Make sure `words` folder is in the same directory as the game
 * **Custom languages** can be added by editing `.words` files
-* `fonts` folder is optional, in case the downloading won't work
+* `fonts` folder is optional, in case the downloading doesn't work
 * Any critical errors should be logged in the `error_log.txt` file
 * `setup.bat` file is required **only** when using an `.exe` file
 
