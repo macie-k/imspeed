@@ -23,33 +23,32 @@ public class Window extends Application {
 		
 	public static int DIFFICULTY;
 	public static Stage window;
-	
+	public static String OS, slash;
 	public static Color BACKGROUND = Color.web("#0e0e0e");
 	
+	static String BAK_DIR;	// directory to save backup and fonts
+	
 	static double points;
-	private static int typed;
+	static List<Integer> CPMs = new ArrayList<Integer>();	// list of all registered CPMs [for average calculating]
+	static int avgCPM;	// average CPM [for saving]
+	
+	private static List<Integer> xVal, yVal;
+	
+	private static AnimationTimer WORDS_ANIMATION, BACKGROUND_ANIMATION, GAMEOVER_ANIMATION, TIMER;
+	
+	private static int typedWords, typedChars;
 	private static int max_word_len = 0;
 	private static double multiplier;
+	private static long startTime;
 	
 	private static long howOften;
 	private static long howFast;
 	private static int howMuch;
 	private static double multiplierAdd;
 	
-	private static List<Integer> xVal;
-	private static List<Integer> yVal;
-	
-	static AnimationTimer WORDS_ANIMATION;
-	static AnimationTimer BACKGROUND_ANIMATION;
-	static AnimationTimer GAMEOVER_ANIMATION;
-	
-	public static String OS;
-	public static String slash;
-	public static String HOME_DIR;
-		
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
+				
 		/* Detect OS for file manipulation */
 		if(System.getProperty("os.name").toLowerCase().equals("linux")) {
 			OS = "linux";
@@ -80,14 +79,24 @@ public class Window extends Application {
 	}
 	
 	public static void gameOver() {	
+		
 		WORDS_ANIMATION.stop();
 		BACKGROUND_ANIMATION.stop();
+		TIMER.stop();
 		
+		if(CPMs.size() > 0) {
+			for(int c : CPMs) avgCPM += c;
+			avgCPM /= CPMs.size();
+		} else {
+			avgCPM = 0;
+		}
+
+		/* BETA */
 //		Save.ifExists();
-//		Save.saveScore(Scenes.points.getText());
+//		Save.saveScore(Scenes.pointsVal.getText());
 		
 		Pane root = new Pane(); root.setPrefSize(800, 500);
-		Text retry = new Text("> Press enter to try again <"); retry.setFill(Color.WHITE); retry.setTranslateX(308);retry.setTranslateY(370); retry.setFont(Font.font("Courier new", 11));
+		Text retry = new Text("> Press enter to try again <"); retry.setFill(Color.WHITE); retry.setTranslateX(308); retry.setTranslateY(370); retry.setFont(Font.font("Courier new", 11));
 		Scene scene = Scenes.gameOver(root);
 		
 		root.getChildren().add(retry);
@@ -102,7 +111,6 @@ public class Window extends Application {
 				
 				if(now - lastUpdate >= 500_000_000) {
 					retry.setVisible(!retry.isVisible());
-					window.setScene(scene);
 					lastUpdate = now;
 				}
 			}
@@ -121,10 +129,11 @@ public class Window extends Application {
 		Pane root = new Pane(); root.setPrefSize(800, 500);
 		Scene scene = Scenes.game(root);
 		
-		List<Particle> particles = new ArrayList<Particle>();
-		int[] particleY = new int[398]; for(int i=0; i<398; i++) particleY[i] = i+2;
+		List<Particle> particles = new ArrayList<Particle>();	// list of all particles
+		int[] particleY = new int[398]; for(int i=0; i<398; i++) particleY[i] = i+2;	// array of predefined Y values
 		Random random = new Random();
 		
+		/* generate particle with its trail */
 		for(int i=0; i<200; i++) {
 			Particle p = new Particle(random.nextInt(790)+10, particleY[random.nextInt(398)], random.nextDouble());
 				particles.add(p); root.getChildren().add(p);
@@ -136,25 +145,24 @@ public class Window extends Application {
 				particles.add(trail_2); root.getChildren().add(trail_2);
 		}
 		
-		multiplier = 0.98; points = -7; typed = 0; Scenes.points.setText("");
-		window.setScene(scene);
-		
+		multiplier = 0.98; points = -7; typedWords = 0; typedChars = 0; CPMs.clear(); Scenes.CPM.setText("0"); Scenes.pointsVal.setText("0");	// reset everything
+
 		List<String> strings = MenuWords.loadWords(selected);	// list of all word-strings combined
-		List<Word> words = new ArrayList<Word>();	// list of avctive words
+		List<Word> words = new ArrayList<Word>();	// list of active words
 		List<Word> fresh = new ArrayList<Word>();	// list of new words [for placement optimization]
 		
 		// get longest word's length
 		for(String s : strings)
 			if(s.length()>max_word_len) max_word_len = s.length();
-		max_word_len *= 9;
+		max_word_len *= 9; // multiply by pixels of 1 letter with space
 		
 		// list for predefined x & y coordinates
 		final List<Integer> xVal_final = new ArrayList<Integer>();
 		final List<Integer> yVal_final = new ArrayList<Integer>();
 		
 		// predefined values
-		for(int i=-10; i<10; i+=5) { xVal_final.add(i); }
-		for(int i=20; i<400; i+=20) { yVal_final.add(i); }
+		for(int i=-10; i<10; i+=5) xVal_final.add(i);
+		for(int i=20; i<400; i+=20) yVal_final.add(i);
 		
 		// temporary sublists
 		xVal = new ArrayList<Integer>(xVal_final);
@@ -164,11 +172,12 @@ public class Window extends Application {
 		words.add(first);
 						
 		root.getChildren().add(first);
-		window.setScene(scene);
+		window.setScene(scene);	// render scene
 		
 		//System.out.println(xVal.size() + " :: " + xVal);
 		//System.out.println(yVal.size() + " :: " + yVal);
 		
+		/* set difficulty variables */ 
 		switch(DIFFICULTY) {
 			case 1:
 				multiplierAdd = 0;
@@ -206,6 +215,45 @@ public class Window extends Application {
 			break;
 		}
 		
+		/* timer for calculating CPM */
+		TIMER = new AnimationTimer() {
+			
+			private long lastUpdate = 0;
+
+			@Override
+			public void handle(long now) {
+				
+				/* every 1s */
+				if(now - lastUpdate >= 1_000_000_000) {
+					
+					/* calculating CPM */
+					double seconds = (now - startTime) / 1_000_000_000l;
+					double minutes = seconds/60;
+					int calc = (int) Math.round(typedChars/minutes);
+					
+					/* skip the 1st word*/
+					if(calc > -1 && typedWords > 1) {
+						CPMs.add(calc);
+						Scenes.CPM.setText(String.valueOf(calc));
+						
+						if(calc == 69) {	// you gay?
+							Scenes.CPM.setStyle(Scenes.Color_GAY_GRADIENT);  
+						} else {
+							/* ranges for color change */
+							/* >350 */ 		if(calc > 350) Scenes.CPM.setStyle(Scenes.Color_GOLD_GRADIENT); else 
+							/* 250-350 */ 	if(calc > 250) Scenes.CPM.setFill(Color.web(Scenes.Color_GREEN)); else
+							/* 200-250 */ 	if(calc > 200) Scenes.CPM.setFill(Color.web(Scenes.Color_YELLOW)); else
+							/* 150-200 */	if(calc > 150) Scenes.CPM.setFill(Color.web(Scenes.Color_ORANGE));
+							/* <150 */ 		else Scenes.CPM.setFill(Color.web(Scenes.Color_RED));
+						}
+					}
+					lastUpdate = now;
+				}
+			}
+			
+		};
+		
+		/* animating particles */
 		BACKGROUND_ANIMATION = new AnimationTimer() {
 
 			private long particle_create = 0;
@@ -221,8 +269,7 @@ public class Window extends Application {
 						if(p.getTranslateX()>800) {
 							toRemove.add(p);
 						} else {
-							p.moveForward();
-							window.setScene(scene);				
+							p.moveForward();			
 						}
 					} particles.removeAll(toRemove); root.getChildren().removeAll(toRemove); toRemove.clear();
 					particle_move = now;
@@ -244,6 +291,7 @@ public class Window extends Application {
 			
 		}; BACKGROUND_ANIMATION.start();
 						
+		/* animating words */
 		WORDS_ANIMATION = new AnimationTimer() {
 						
 			private long lastUpdate = 0;
@@ -254,7 +302,7 @@ public class Window extends Application {
 			@Override
 			public void handle(long now) {
 				 
-				if(now - lastUpdate >= howFast) {	// do every 0.7s
+				if(now - lastUpdate >= howFast) {
 					if(strike < 10) {
 						List<Word> del = new ArrayList<Word>();		// list of words to deletion after loop
 						
@@ -262,14 +310,17 @@ public class Window extends Application {
 							w.moveForward(); 	// move all words forward
 							
 							if(w.getTranslateX() > max_word_len) fresh.remove(w);	// if word is further than longest word remove it from list of new words
-							if(w.getTranslateX()>805) {		// if word leaves beyond the window
-								strike++; multiplier = 1;	// add strikes, reset multiplier
-								del.add(w);	root.getChildren().remove(w);	// add word to deletion, and remove it from pane
+							
+							if(w.getTranslateX()>805) {	// if word leaves beyond the window
+								multiplier = 1;	// reset multiplier
+								Scenes.missedVal.setText(String.valueOf(++strike));	// update missed and increase strikes
+								del.add(w);	root.getChildren().remove(w);	// add word to deletion, and remove it from the pane
 								System.out.println("Strike: " +  strike);
-							}	
+							}
+							
 						} words.removeAll(del); lastUpdate = now;
 						
-						if(words.isEmpty()) gameOver();
+						if(words.isEmpty()) gameOver();	// if no word is left on screen end the game
 						
 					} else {	// if game is over
 						root.getChildren().removeAll(words);	// remove all objects
@@ -278,7 +329,7 @@ public class Window extends Application {
 					}
 				}
 				
-				if(now - lastUpdate2 >= howOften && typed > 4) {	// every 6 seconds try to add 5 new words if less than 20 are displayed
+				if(now - lastUpdate2 >= howOften && typedWords > 4) {		// every [n] seconds try to add [m] new words if less than 17 are displayed
 					if(words.size() < 17) {
 						for(int i=0; i<howMuch; i++) {		
 							Word word = createWord(strings, xVal_final, yVal_final, fresh);
@@ -300,12 +351,6 @@ public class Window extends Application {
 					if(Scenes.input.getText().equals("killmenow")) {	// special word to end the game
 						gameOver();
 					}
-					
-//					if(Scenes.input.getText().equals("add")) {
-//						points += 10000;
-//						Scenes.points.setText(String.valueOf(Math.round(points)));
-//						window.setScene(scene);
-//					}
 																								
 					List<Word> del = new ArrayList<Word>();		// list for words to be deleted from "words" list
 					List<Word> add = new ArrayList<Word>();		// list for words to be added to "words" list
@@ -313,20 +358,22 @@ public class Window extends Application {
 					for(Word w : words) {
 						
 						if(w.getValue().equals(Scenes.input.getText())) {	// if typed word is equal to eny currently displayed
-													
-							points+=w.getLength()*multiplier; // add points accordingly to multiplier,
-							typed++; multiplier+=multiplierAdd;	// increase typed counter and multiplier
-							
+											
+							points += w.getLength()*multiplier; // add points accordingly to multiplier,
+							multiplier += multiplierAdd;	// increase multiplier
+							typedWords++; typedChars += w.getValue().length();	// increase amount of typed words and characters
+								
 							fresh.remove(w); del.add(w);	// remove word from all lists
 							root.getChildren().remove(w);	// and pane
 							
-							Scenes.points.setText(String.valueOf(Math.round(points)));	// update the points
-							window.setScene(scene);		// update the scene
+							Scenes.pointsVal.setText(String.valueOf(Math.round(points)));	// update the points
 							
-							switch (typed) {
+							switch (typedWords) {
 							
 								case 1:
-									for(int i=0; i<howMuch; i++) {									
+									startTime = System.nanoTime(); TIMER.start();	// after typing first word start timer for CPM
+									
+									for(int i=0; i<howMuch; i++) {	// add [m] words						
 										Word word = createWord(strings, xVal_final, yVal_final, fresh);
 										fresh.add(word); add.add(word);
 										root.getChildren().add(word);
@@ -343,7 +390,8 @@ public class Window extends Application {
 								break;
 								
 								default:
-									if(typed%6==0) {
+									/* every 6th typed word add [m] new words */
+									if(typedWords%6==0) {
 										for(int i=0; i<howMuch; i++) {
 											Word word = createWord(strings, xVal_final, yVal_final, fresh);
 											fresh.add(word); add.add(word);
