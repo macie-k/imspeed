@@ -117,7 +117,7 @@ public class Selection {
 					break;
 					
 				case ENTER:
-					if(!selected.contains(MenuWords.listOfFiles[x])) {
+					if(!selected.contains(MenuWords.listOfFiles[x]) && selected.size() == 0) {
 						if(!isEmpty(x)) {
 							selectedNames.add(MenuWords.lngsNames.get(x));
 							selected.add(MenuWords.listOfFiles[x]);
