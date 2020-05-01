@@ -12,7 +12,7 @@ Remake of bisqwit's "wspeed" game
 <br>
 
 <p align="center">
-  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/78953222-6f79cf80-7ad8-11ea-95b2-eb9ccda45d55.jpg">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/80805576-b11e0780-8bb8-11ea-9c77-81396409e225.jpg">
 </p>
 
 <br>
