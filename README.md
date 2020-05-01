@@ -36,7 +36,7 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
 
 ### For Windows:
 
-* Run `setup.bat` to create a system environment variable (only required when using `.exe` file)
+* Run `setup.bat` to create a system environment variable (**only required** when using an `.exe` file)
 * After launching, it will set `%JAVA_JDK%` as system environment variable leading to provided JDK folder <br>
 <p align="center">
   <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/79079528-febcf800-7d0f-11ea-8b74-f6a81d506af0.jpg">
