@@ -17,16 +17,20 @@ Remake of bisqwit's "wspeed" game
 
 <br>
 
-* Custom languages can be added by editing `.words` files
 
-<br>
-
- ## How to use
+## How to use
  
 ### The .exe file requires [`Java JDK`](https://bit.ly/imspeedJDK2) to run
 
 Preferably version 10, as it's the last version with **JavaFX** built in.
-* Make sure `words` folder is in the same directory as the game.
+
+<br>
+
+* Make sure `words` folder is in the same directory as the game
+* **Custom languages** can be added by editing `.words` files
+* `fonts` folder is optional, in case the downloading won't work
+* Any critical errors should be logged in the `error_log.txt` file
+* `setup.bat` file is required **only** when using an `.exe` file
 
 <br>
 
@@ -55,6 +59,6 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
     ```
   <br>
   
-**Sidenote:** `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program double-clicking
+**Sidenote:** `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program with a double-click.
 
 <br>
