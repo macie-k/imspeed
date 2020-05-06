@@ -15,7 +15,9 @@ public class Word extends Text {
 	
 		setTranslateX(x);
 		setTranslateY(y);
-		setFont(Font.font("Courier new", 15));
+		
+		setFont(Font.font("Courier New Bold", 14.49));	// for some reason 'm' bugs when bigger size is set?
+				
 		setFill(Color.WHITE);
 	}
 	
