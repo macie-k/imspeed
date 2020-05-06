@@ -41,7 +41,7 @@ public class Scenes {
 	/* spaghetti for downloading downloading and loading fonts */
 	public static void fontSetup() {
 		String OS = Window.OS;
-		String[] fontNames = {"Kyrou 7 Wide Bold.ttf", "Courier new.ttf"};	// fonts to be loaded
+		String[] fontNames = {"Kyrou 7 Wide Bold.ttf", "Courier New.ttf", "Courier New Bold.ttf"};	// fonts to be loaded
 		
 		/* specify the download directory dependend on the OS */
 		if(OS.equals("windows")) {
@@ -79,7 +79,7 @@ public class Scenes {
 		for(int i=0; i<fontNames.length; i++) {
 			try {
 				InputStream font = new FileInputStream(fontsPath + fontNames[i]);
-				Font.loadFont(font, 14);
+				Font.loadFont(font, 15);
 			} catch (FileNotFoundException e) {
 				System.err.println("Could not load font file: " + e);
 			}
