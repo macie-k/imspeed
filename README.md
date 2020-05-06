@@ -20,7 +20,7 @@ Remake of bisqwit's "wspeed" game
 
 ## How to use
  
-### The .exe file requires [`Java JDK`](https://bit.ly/imspeedJDK2) to run
+**The .exe file requires [`Java JDK`](https://bit.ly/imspeedJDK2) to run**
 
 Preferably version 10, as it's the last version with **JavaFX** built in.
 
@@ -31,6 +31,14 @@ Preferably version 10, as it's the last version with **JavaFX** built in.
 * `fonts` folder is optional, in case the downloading doesn't work
 * Any critical errors should be logged in the `error_log.txt` file
 * `setup.bat` file is required **only** when using an `.exe` file
+
+<br>
+
+### [ ! ] Scoreboard
+File `score.board` stores your scores and it will be created in **EVERY** root folder the game is started from.  
+If you want to keep all your scores in one file, **always** start the game from the same location.
+
+*[ in-game scoreboard is still in work, but it will work with your saved scores ].*
 
 <br>
 
