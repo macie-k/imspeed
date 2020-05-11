@@ -59,7 +59,7 @@ If you want to keep all your scores in one file, **always** start the game from 
 
 <br>
 
-* **Launch:**
+### Launching:
   * Just double click on `.exe` file or:
   * `java -jar imspeed.jar` - running `setup` is not required when using this option
   * For self testing use either the IDE launch option or the `run.bat` file: <br>
