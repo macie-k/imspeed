@@ -46,7 +46,7 @@ If you want to keep all your scores in one file, **always** start the game from 
 
 <br>
 
-### Setup For Windows
+## Setup For Windows
 
 * Running `setup.bat` is **only required** when using an `.exe` file
   + After launching, it will set `%JAVA_JDK%` as system environment variable that should lead to your root JDK directory <br>
@@ -56,7 +56,7 @@ If you want to keep all your scores in one file, **always** start the game from 
 
 <br>
 
-### How to use:
+## How to use:
   * Just double click on `.exe` file or:
   * `java -jar imspeed.jar`
   * For self testing use either the IDE launch option or the `run.bat` file: <br>
