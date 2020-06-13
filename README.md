@@ -48,7 +48,7 @@ If you want to keep all your scores in one file, **always** start the game from 
 
 ### Setup For Windows
 
-* Run `setup.bat` (**only required** when using an `.exe` file)
+* Running `setup.bat` is **only required** when using an `.exe` file
   + After launching, it will set `%JAVA_JDK%` as system environment variable that should lead to your root JDK directory <br>
 <p align="center">
   <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/79079528-febcf800-7d0f-11ea-8b74-f6a81d506af0.jpg">
@@ -64,8 +64,7 @@ If you want to keep all your scores in one file, **always** start the game from 
      javac -cp ".\base\*;.\menu\*;..\words\*;" .\base\Window.java
      java -cp ".\base\*;.\menu\*;..\words\*;" base.Window 2> error_log.txt
     ```
-  <br>
+  <br>  
   
 **Sidenote:** `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program with a double-click.
-
 <br>
