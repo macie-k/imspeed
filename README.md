@@ -46,9 +46,9 @@ If you want to keep all your scores in one file, **always** start the game from 
 
 <br>
 
-## Setup For Windows
+## Setup for `.exe` file
 
-* Running `setup.bat` is **only required** when using an `.exe` file
+* Running `setup.bat` is **only required** if you want to use the `.exe` file
   + After launching, it will set `%JAVA_JDK%` as system environment variable that should lead to your root JDK directory <br>
 <p align="center">
   <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/79079528-febcf800-7d0f-11ea-8b74-f6a81d506af0.jpg">
