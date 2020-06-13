@@ -17,13 +17,11 @@ Remake of bisqwit's "wspeed" game
 
 ## Requirements
 
-**`JDK` with `JavaFX` to run**
+* [`JDK`](https://www.oracle.com/java/technologies/javase-jdk14-downloads.html)
+* [`JavaFX`](https://gluonhq.com/products/javafx/)
+* `JAVA_HOME` System Variable leading to JDK root directory.
 
-* [JDK & JFX (10)](https://bit.ly/imspeedJDK2)
-* [Latest (14)](https://www.oracle.com/java/technologies/javase-jdk14-downloads.html)  
-* [Latest JFX (14)](https://gluonhq.com/products/javafx/)
-
-**Move items from JFX folder to JDK.**  
+**If you have JDK 11+, you need to download the JFX library separately and then add it to JDK folder.**  
 
 <br>  
 
@@ -43,16 +41,6 @@ File `score.board` stores your scores and it will be created in **EVERY** root f
 If you want to keep all your scores in one file, **always** start the game from the same location.
 
 *[ in-game scoreboard is still in work, but it will work with your saved scores ].*
-
-<br>
-
-## Setup for `.exe` file
-
-* Running `setup.bat` is **only required** if you want to use the `.exe` file
-  + After launching, it will set `%JAVA_JDK%` as system environment variable that should lead to your root JDK directory <br>
-<p align="center">
-  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/79079528-febcf800-7d0f-11ea-8b74-f6a81d506af0.jpg">
-</p>
 
 <br>
 
