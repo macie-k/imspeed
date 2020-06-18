@@ -17,11 +17,10 @@ Remake of bisqwit's "wspeed" game
 
 ## Requirements
 
-* [`JDK`](https://www.oracle.com/java/technologies/javase-jdk14-downloads.html)
-* [`JavaFX`](https://gluonhq.com/products/javafx/)
-* `JAVA_HOME` System Variable leading to JDK root directory.
+* [`Java`](https://www.java.com/download/)
+* `JAVA_HOME` System Variable leading to JRE root directory.
 
-**If you have JDK 11+, you need to download the JFX library separately and then add it to JDK folder.**  
+**If you want to compile the program yourself you'll need JDK with JFX**  
 
 <br>  
 
