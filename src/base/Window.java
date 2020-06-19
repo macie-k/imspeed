@@ -30,7 +30,7 @@ public class Window extends Application {
 	public static String OS, slash;
 	public static Color BACKGROUND = Color.web("#0e0e0e");
 	
-	static String BAK_DIR;	// directory to save backup and fonts
+	static String SCORE_DIR;	// directory to save backup and fonts
 	
 	static double points;
 	static List<Integer> CPMs = new ArrayList<Integer>();	// list of all registered CPMs [for average calculating]
@@ -66,7 +66,7 @@ public class Window extends Application {
 		window = primaryStage;
 		
 		Scenes.fontSetup();		
-		setDiff();
+		System.out.println();setDiff();
 		
 		window.setTitle("I'm speed");
 		window.setResizable(false);
@@ -130,9 +130,7 @@ public class Window extends Application {
 							reverse = true;
 							cover.setVisible(true);
 						} else {
-							for(CurtainBlock CB : blocks) {
-								CB.moveToMiddle();
-							}
+							blocks.forEach(block -> block.moveToMiddle());
 						}
 					} else {
 						if(blocks.get(8).getWidth() < 1) {
@@ -140,9 +138,7 @@ public class Window extends Application {
 							gameOver();
 							return;
 						} else {
-							for(CurtainBlock CB : blocks) {
-								CB.moveOutside();
-							}
+							blocks.forEach(block -> block.moveOutside());
 						}
 					}
 					lastUpdate = now;
@@ -152,8 +148,10 @@ public class Window extends Application {
 		}; CURTAIN_ANIMATION.start();
 	}
 	
-	public static void gameOver() {		
+	public static void gameOver() {
 		
+		System.out.println("\n[GAME OVER]\n");
+			
 		if(CPMs.size() > 0) {
 			for(int c : CPMs) avgCPM += c;
 			avgCPM /= CPMs.size();
@@ -161,7 +159,6 @@ public class Window extends Application {
 			avgCPM = 0;
 		}
 
-		Save.ifExists();
 		Save.saveScore(Scenes.pointsVal.getText());
 		
 		Pane root = new Pane();
@@ -195,7 +192,7 @@ public class Window extends Application {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
             if (e.getCode() == KeyCode.ENTER) {
             	GAMEOVER_ANIMATION.stop();
-                setDiff();
+                System.out.println();setDiff(); 
             } e.consume();
         });
 	}
@@ -234,6 +231,8 @@ public class Window extends Application {
 		multiplier = 0.98;
 		points = -7;		
 		CPMs.clear();
+		
+		Scenes.missedVal.setText("0");
 		Scenes.CPM.setText("0");
 		Scenes.pointsVal.setText("0");	
 
@@ -410,7 +409,7 @@ public class Window extends Application {
 						if(w.getTranslateX()>803) {	// if word leaves beyond the window
 							
 							Scenes.missedVal.setText(String.valueOf(++strike));	// update missed and increase strikes
-							System.out.println("Strike: " +  strike);
+							System.out.println("[STRIKE]: " +  strike);
 							
 							if(strike < 10) {
 								multiplier = 1;	// reset multiplier
@@ -427,12 +426,25 @@ public class Window extends Application {
 							fresh.remove(w);	// if word is further than longest word remove it from list of new words
 						}						
 					}
+					
 					words.removeAll(del);
-					lastUpdate = now;
-
-					if(words.isEmpty()) {
-						curtain(scene, root);	// if no word is left on screen end the game
+					
+					if(words.isEmpty()) { // if no words are on the screen
+						if(!curtain) {
+							if(typedWords == 0) {	// if fist word wasn't typed end the game
+								curtain(scene, root);
+							} else {	// else generate new words
+								for(int i=0; i<howMuch; i++) {		
+									Word word = createWord(strings, xVal_final, yVal_final, fresh);
+										fresh.add(word);
+										words.add(word);
+										root.getChildren().add(word);
+								}
+							}
+						}
 					}
+					
+					lastUpdate = now;
 				}
 				
 				/* every [n] seconds add [m] new words if less than 17 are displayed */
@@ -440,9 +452,9 @@ public class Window extends Application {
 					if(words.size() < 17) {
 						for(int i=0; i<howMuch; i++) {		
 							Word word = createWord(strings, xVal_final, yVal_final, fresh);
-							
-							fresh.add(word); words.add(word);
-							root.getChildren().add(word);
+								fresh.add(word);
+								words.add(word);
+								root.getChildren().add(word);
 						}
 					} lastUpdate2 = now;
 				}
@@ -484,16 +496,18 @@ public class Window extends Application {
 									/* add [m] new words */
 									for(int i=0; i<howMuch; i++) {					
 										Word word = createWord(strings, xVal_final, yVal_final, fresh);
-										fresh.add(word); add.add(word);
-										root.getChildren().add(word);
+											fresh.add(word);
+											add.add(word);
+											root.getChildren().add(word);
 									}
 								break;
 								
 								case 3:
 									for(int i=0; i<3; i++) {
 										Word word = createWord(strings, xVal_final, yVal_final, fresh);
-										fresh.add(word); add.add(word);
-										root.getChildren().add(word);
+											fresh.add(word);
+											add.add(word);
+											root.getChildren().add(word);
 									}
 								break;
 								
@@ -502,8 +516,9 @@ public class Window extends Application {
 									if(typedWords%6==0) {
 										for(int i=0; i<howMuch; i++) {
 											Word word = createWord(strings, xVal_final, yVal_final, fresh);
-											fresh.add(word); add.add(word);
-											root.getChildren().add(word);
+												fresh.add(word);
+												add.add(word);
+												root.getChildren().add(word);
 										}
 									}
 								break;
@@ -512,7 +527,8 @@ public class Window extends Application {
 					}
 					words.addAll(add);	// add words
 					words.removeAll(del);	// delete words
-					Scenes.input.clear(); break;	// remove the typed word from active word list and clear text field
+					Scenes.input.clear(); // clear text field
+					break ;	
 					
 				default: break;
 			}
@@ -544,11 +560,14 @@ public class Window extends Application {
 			xVal.remove(rndmx);
 		
 		/* check for word collision in the same row and calculate the final x coordinate */
-		for(Word w : fresh)
-			if(w.getTranslateY() == y)
-				while(w.getTranslateX() <= (value.length()*9)+x+20)
+		for(Word w : fresh) {
+			if(w.getTranslateY() == y) {
+				while(w.getTranslateX() <= (value.length()*9)+x+20) {
 					x -= 5;
-		
+				}
+			}
+		}
+					
 		return new Word(x, y, value);
 	}
 	

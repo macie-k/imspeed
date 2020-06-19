@@ -54,12 +54,13 @@ public class Scenes {
 			System.err.println("[ERROR] Could not create 'imspeed' directory");
 		} else {
 			
-			Window.BAK_DIR = fontsPath; // Specify global variable for this directory
+			Window.SCORE_DIR = fontsPath; // Specify global variable for this directory
 			fontsPath += "fonts" + Window.slash;	// add 'fonts' to the path with OS-dependent slash
 			
 			if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {		// if 'fonts' folder doesn't exist and cannot be created throw an error
 				System.err.println("[ERROR] Could not create 'fonts' directory");
 			} else {
+				
 				for(int i=0; i<fontNames.length; i++) {		// iterate all fonts
 					if(!new File(fontsPath + fontNames[i]).exists()) {
 						try {
@@ -67,9 +68,12 @@ public class Scenes {
 							InputStream url = font.openStream();
 							Files.copy(url, Paths.get(fontsPath+fontNames[i]));	// download fonts from private hosting and save in dedicated folder
 							url.close();
+							System.out.println("[OK] Success downloading {" + fontNames[i] + "}");
 						} catch (Exception e) {
 							System.err.println("[ERROR] Could not download font: " + e);
 						}		
+					} else {
+						System.out.println("[OK] {" + fontNames[i] + "} already downloaded");
 					}
 				}
 			}

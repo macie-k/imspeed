@@ -4,10 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -19,32 +15,23 @@ import menu.Select;
 public class Save {
 	
 	static String slash =  Window.slash;
-	
-	static String path = new File("").getAbsolutePath();
-	static String path_bak = Window.BAK_DIR;
-	
+	static String path = Window.SCORE_DIR;
 	static File scoreboard = new File(path + slash + "score.board");
-	static File scoreboard_bak = new File(path_bak + slash + "score.bak");
 	
 	static SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 	
 	static void saveScore(String points) {
 		
+		ifExists();
+		
 		if(isModified(scoreboard)) {
-			restoreBackup(scoreboard_bak, scoreboard);
-		} else {
-			if(!scoreboard_bak.exists()) {
-				System.out.print("[ERROR] Missing backup, trying to restore");
-				restoreBackup(scoreboard, scoreboard_bak);
-			}
+			scoreboard.delete();
 		}
 		
-		PrintWriter saver = null; PrintWriter saver_bak = null;
+		PrintWriter saver = null;
 		try {
 			FileWriter FileW = new FileWriter(scoreboard, true);
-			FileWriter FileW_bak = new FileWriter(scoreboard_bak, true);
 			saver = new PrintWriter(FileW);
-			saver_bak = new PrintWriter(FileW_bak);
 			
 			long now = new Date().getTime();
 			long fileDate = scoreboard.lastModified();
@@ -60,16 +47,11 @@ public class Save {
 			saver.println(now + "#" + Window.DIFFICULTY + "#" + language + "#" + points + "#" + Window.avgCPM);
 				saver.close();
 					scoreboard.setLastModified(fileDate);
-				
-			//saver_bak.println("## " + sdf.format(now) + " ## " + MenuWords.loadDifficulties()[Window.DIFFICULTY-1] + " ## " +points);
-			saver.println(now + "#" + Window.DIFFICULTY + "#" + language + "#" + points + "#" + Window.avgCPM);	
-				saver_bak.close();
-					scoreboard_bak.setLastModified(fileDate);
-					
+									
 			System.out.println("[OK] Score saved");
 			
 		} catch (Exception e) {
-			saver.close(); saver_bak.close();
+			saver.close();
 			System.out.println("[ERROR] Could not save score: " + e);
 		}
 	}
@@ -79,50 +61,39 @@ public class Save {
 		/* If scoreboard file doesn't exist */
 		if(!scoreboard.exists()) {
 			
-			System.out.print("\n[!] Scoreboard doesn't exist, ");
-			if(scoreboard_bak.exists()) {
-				System.out.println("trying to restore . . .");
-				restoreBackup(scoreboard_bak, scoreboard); return;
-			} else {
-				System.out.println("creating . . .");
-				try (PrintWriter saver = new PrintWriter(scoreboard);
-					 PrintWriter saver_bak = new PrintWriter(scoreboard_bak);){
-									
-					Random r = new Random();	// create file and Randomizer			
-					
-					long lastModified = scoreboard.lastModified();	// get file's modification time
-					
-					int x = r.nextInt(9)+1;
-					
-					double calculatedFlag = lastModified*Math.pow(Math.E, x);
-					String encodedFlag = Base64.getEncoder().encodeToString(String.valueOf(calculatedFlag).getBytes());	// encode it in Base64
-					
-					lastModified -= 3;
-					
-					/* write information about used exponent (x) and flag itself & overwrite modification time after printing flag */
-					saver.println("Control flag: #" + x + encodedFlag + "\n");
-						saver.close();
-							scoreboard.setLastModified(lastModified);
-							
-					saver_bak.println("Control flag: #" + x + encodedFlag + "\n");
-						saver_bak.close();
-							scoreboard_bak.setLastModified(lastModified);
+			System.out.print("[!] Scoreboard doesn't exist, ");
+			System.out.println("creating . . .");
+			try (PrintWriter saver = new PrintWriter(scoreboard);){
+								
+				Random r = new Random();	// create file and Randomizer			
+				
+				long lastModified = scoreboard.lastModified();	// get file's modification time
+				
+				int x = r.nextInt(9)+1;
+				
+				double calculatedFlag = lastModified*Math.pow(Math.E, x);
+				String encodedFlag = Base64.getEncoder().encodeToString(String.valueOf(calculatedFlag).getBytes());	// encode it in Base64
+				
+				lastModified -= 3;
+				
+				/* write information about used exponent (x) and flag itself & overwrite modification time after printing flag */
+				saver.println("Control flag: #" + x + encodedFlag + "\n");
+					saver.close();
+						scoreboard.setLastModified(lastModified);
 										
 //					System.out.println("ifExists()# calculated:\t" + calculatedFlag);
 //					System.out.println("ifExists()# encoded:\t" + encodedFlag);
-					
-				} catch (IOException e) {
-					System.err.println("[ERROR] Could not create scoreboard file, check your permissions: " + e);
-				}
+				
+			} catch (IOException e) {
+				System.err.println("[ERROR] Could not create scoreboard file, check your permissions: " + e);
 			}
 		} else {
-			System.out.println("\n[OK] Scoreboard exists");
+			System.out.println("[OK] Scoreboard exists");
 		}
 	}
 	
 	static boolean isModified(File file) {
 		
-		String fileName = file.getName();
 		if(file.exists()) {
 			
 			Scanner read = null;
@@ -144,48 +115,48 @@ public class Save {
 //				System.out.println("isModified("+file.getName()+")# calculated: \t" + calculatedFlag);
 				
 				if(Math.abs(calculatedFlag - decodedFlag) < 30) {	// check if the flags match with small error margin
-					System.out.println("\n[OK] Flag is correct (" + fileName + ")");
+					System.out.println("[OK] Flag is correct");
 					read.close();
 					return false;
 				} else {
-					System.out.println("\n[ERROR] Flag is incorrect (" + fileName + "), trying to restore . . ."); 
+					System.out.println("[ERROR] Flag is incorrect, trying to restore . . ."); 
 					read.close();
 					return true;
 				}
 				
 			} catch (Exception e) {
-				System.out.println("\n[ERROR] Flag is incorrect (" + fileName + "), trying to restore . . .");
+				System.out.println("[ERROR] Flag is incorrect, trying to restore . . .");
 				read.close();
 				return true;
 			}
 		} else {
-			System.out.println("[ERROR] File " + fileName + " doesn't exist");
+			System.out.println("[ERROR] File doesn't exist");
 			return true;
 		}
 	}
 	
-	static void restoreBackup(File from, File to) {
-
-		if(!isModified(from)) {
-			
-			Path original = Paths.get(from.getPath());
-			Path backup = Paths.get(to.getPath());
-			
-			try {
-				Files.copy(original, backup, StandardCopyOption.REPLACE_EXISTING);
-				System.out.println("\n[OK] Restore complete");
-			} catch (IOException e) {
-				System.err.println("\n[ERROR] Could not get access to the scoreboard file: " + e);
-				return;
-			}
-			
-		} else {
-			System.out.println("[ERROR] Scoreboard and backup file modified, deleting both . . .");
-			scoreboard_bak.delete(); scoreboard.delete();
-			ifExists();
-		}
-				
-	}
+//	static void restoreBackup(File from, File to) {
+//
+//		if(!isModified(from)) {
+//			
+//			Path original = Paths.get(from.getPath());
+//			Path backup = Paths.get(to.getPath());
+//			
+//			try {
+//				Files.copy(original, backup, StandardCopyOption.REPLACE_EXISTING);
+//				System.out.println("[OK] Restore complete\n");
+//			} catch (IOException e) {
+//				System.err.println("[ERROR] Could not get access to the scoreboard file: " + e);
+//				return;
+//			}
+//			
+//		} else {
+//			System.out.println("[ERROR] Scoreboard and backup file modified, deleting both . . .");
+//			scoreboard_bak.delete(); scoreboard.delete();
+//			ifExists();
+//		}
+//				
+//	}
 
 }
 
