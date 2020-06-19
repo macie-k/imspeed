@@ -35,13 +35,6 @@ Remake of bisqwit's "wspeed" game
    
 <br>
 
-### [ ! ] Scores
-File `score.board` stores your scores and it will be created in **EVERY** root folder the game is started from.  
-If you want to keep all your scores in one file, **always** start the game from the same location.
-
-*[ in-game scoreboard is still in work, but it will work with your saved scores ].*
-
-<br>
 
 ## How to use:
   * Just double click on `.exe` file or:
