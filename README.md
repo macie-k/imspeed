@@ -26,8 +26,6 @@ Remake of bisqwit's "wspeed" game
 
 ## General info
 
-<br>
-
 * Make sure `words` folder is in the same directory as the game
 * **Custom languages** can be added by editing `.words` files
 * `fonts` folder is optional, in case the downloading doesn't work
