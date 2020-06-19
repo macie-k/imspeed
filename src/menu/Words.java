@@ -19,6 +19,7 @@ public class Words {
 	
 	static File[] listOfFiles;
 	static String slash = Window.slash;
+	static int how_many_lngs;
 	
 	public static String[] loadDifficulties() {
 		//String[] diffs = {"Masturbating with one hand", "I have iOS autocorrection", "Kinda normal", "I wear fast glasses", "Asian"};
@@ -31,6 +32,7 @@ public class Words {
 		String path = new File("").getAbsolutePath() + slash + "words" + slash;
 		String splitslash = slash;
 		
+		/* case when launching from github repo and `words` are one directory lower */
 		if(Window.OS.equals("windows")) {
 			splitslash = "\\\\";
 		}
@@ -43,15 +45,22 @@ public class Words {
 			path += "words" + slash;
 		}
 		
-		//System.out.println(path);
 		File folder = new File(path);
 		listOfFiles = folder.listFiles();	// get all available language files
 		
 		Arrays.sort(listOfFiles, Collections.reverseOrder());	// reverse them
 		
-		String[] lngs = new String[5];
+		if(listOfFiles.length > 8) {
+			how_many_lngs = 8;
+		} else if(listOfFiles.length < 1) {
+			how_many_lngs = 1;
+		} else {
+			how_many_lngs = listOfFiles.length;
+		}
+		
+		String[] lngs = new String[how_many_lngs];
 
-		for(int i=0; i<listOfFiles.length; i++) {
+		for(int i=0; i<how_many_lngs; i++) {
 			try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName()))){
 				
 				String s = b.readLine();

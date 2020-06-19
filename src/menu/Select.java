@@ -23,6 +23,11 @@ public class Select {
 	
 	private static int x=0;
 	private static Stage window = Window.window;
+	private static int how_many_lngs;
+	
+	private static String[] loadedLanguages = Words.loadLanguages();
+	private static String[] loadedDifficulties= Words.loadDifficulties();
+	
 	
 	/* set difficulty */
 	public static void selectDifficulty(Pane root) {
@@ -40,7 +45,7 @@ public class Select {
 		Option[] diff = new Option[5];		
 		for(int i=0; i<5; i++) {
 			int calcY = 220 + 25*i;
-			diff[i] = new Option(calcY, Words.loadDifficulties()[i], "diff", x==i);
+			diff[i] = new Option(calcY, loadedDifficulties[i], "diff", x==i);
 		}
 		
 		root.getChildren().add(header);
@@ -50,17 +55,27 @@ public class Select {
 		scene.setOnKeyPressed(e -> {
 			switch (e.getCode()) {
 			
-				case UP: if(x>0) x--;
-					
+				case UP:
+					if(x>0) {
+						x--;
+					} else {
+						x = 4;
+					}
 					setScene(root, scene, "diff", diff);
 					break;
 					
-				case DOWN: if(x<4) x++;
+				case DOWN:
+					if(x<4) {
+						x++;
+					} else {
+						x = 0;
+					}
 					setScene(root, scene, "diff", diff);
 					break;
 					
 				case ENTER:
 					Window.DIFFICULTY = x+1;
+					System.out.println("[OK] Difficulty: " + loadedDifficulties[x]);
 					Window.setLang();
 					break;
 					
@@ -73,23 +88,29 @@ public class Select {
 	/* select languages */
 	public static void selectLanguage(Pane root) {
 		
-		x=0; selected_lng_files.clear(); selected_lng_names.clear();
-		
+		// reset stuff
+		selected_lng_files.clear();
+		selected_lng_names.clear();
+		x=0;
+				
 		Scene scene = new Scene(root);
-		root.setStyle("-fx-background-color: rgb(14, 14, 14)");
+			root.setStyle("-fx-background-color: rgb(14, 14, 14)");
 		
 		Text header = new Text("LANGUAGES");
-		header.setTranslateX(157); header.setTranslateY(130);header.setFill(Color.WHITE);
-		header.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 50;");
+			header.setTranslateX(157); header.setTranslateY(130);header.setFill(Color.WHITE);
+			header.setStyle("-fx-font-family: 'Grixel Kyrou 7 Wide Bold'; -fx-font-size: 50;");
+
+		how_many_lngs = Words.how_many_lngs;	// redefine variable to avoid `0`
 		
 		/* load all available languages */
-		Option[] lngs = new Option[5];
-		for(int i=0; i<5; i++) {
+		Option[] lngs = new Option[how_many_lngs];
+		for(int i=0; i<how_many_lngs; i++) {
 			int calcY = 220 + 25*i;
-			lngs[i] = new Option(calcY, Words.loadLanguages()[i], "lng", x==i);
+			lngs[i] = new Option(calcY, loadedLanguages[i], "lng", x==i);
 		}
 		
-		root.getChildren().add(header); root.getChildren().addAll(lngs);
+		root.getChildren().add(header);
+		root.getChildren().addAll(lngs);
 		window.setScene(scene);
 		
 		/* menu movement key listener */
@@ -100,11 +121,21 @@ public class Select {
 					Window.setDiff();
 					break;
 			
-				case UP: if(x>0) x--;
+				case UP:
+					if(x>0) {
+						x--;
+					} else {
+						x = how_many_lngs-1;
+					}
 					setScene(root, scene, "lng", lngs);
 					break;
 					
-				case DOWN: if(x<4) x++;
+				case DOWN:
+					if(x<how_many_lngs-1) {
+						x++;
+					} else {
+						x = 0;
+					}
 					setScene(root, scene, "lng", lngs);
 					break;
 					
@@ -132,6 +163,8 @@ public class Select {
 					setScene(root, scene, "lng", lngs);
 					
 					if(!Words.loadWords(selected_lng_files).isEmpty()) {
+							System.out.print("[OK] Languages: ");
+							selected_lng_names.forEach(slf -> System.out.print("{" + slf + "} ")); System.out.println();
 						Window.startGame(selected_lng_files);
 					}
 					break;
@@ -147,7 +180,7 @@ public class Select {
 		root.getChildren().removeAll(option);
 		
 		if(type.equals("lng")) {
-			for(int i=0; i<5; i++) {
+			for(int i=0; i<how_many_lngs; i++) {
 				int calcY = 220 + 25*i;
 				option[i] = new Option(calcY, Words.loadLanguages()[i], "lng", i==x);
 			}
@@ -156,7 +189,7 @@ public class Select {
 		if(type.equals("diff")) {
 			for(int i=0; i<5; i++) {
 				int calcY = 220 + 25*i;
-				option[i] = new Option(calcY, Words.loadDifficulties()[i], "diff", i==x);
+				option[i] = new Option(calcY, loadedDifficulties[i], "diff", i==x);
 			}
 		}
 		
