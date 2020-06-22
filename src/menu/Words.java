@@ -22,7 +22,6 @@ public class Words {
 	static int how_many_lngs;
 	
 	public static String[] loadDifficulties() {
-		//String[] diffs = {"Masturbating with one hand", "I have iOS autocorrection", "Kinda normal", "I wear fast glasses", "Asian"};
 		String[] diffs = {"Very easy", "Easy", "Normal", "Hard", "Asian"};
 		return diffs;		
 	}
