@@ -28,14 +28,14 @@ public class Save {
 			scoreboard.delete();
 		}
 		
-		PrintWriter saver = null;
+		PrintWriter saver = null;	// pre-declare PrintWriter so it can be closed in {catch}
 		try {
-			FileWriter FileW = new FileWriter(scoreboard, true);
-			saver = new PrintWriter(FileW);
+			saver = new PrintWriter(new FileWriter(scoreboard, true));
 			
 			long now = new Date().getTime();
 			long fileDate = scoreboard.lastModified();
 			
+			/* get info about used languages */
 			String language = "";
 			if(Select.selected_lng_names.size() > 1) {
 				language = "MIXED";
@@ -43,7 +43,6 @@ public class Save {
 				language = Select.selected_lng_names.get(0);
 			}
 
-			//saver.println("## " + sdf.format(now) + " ## " + MenuWords.loadDifficulties()[Window.DIFFICULTY-1] + " ## " + points);
 			saver.println(now + "#" + Window.DIFFICULTY + "#" + language + "#" + points + "#" + Window.avgCPM);
 				saver.close();
 					scoreboard.setLastModified(fileDate);
@@ -52,7 +51,7 @@ public class Save {
 			
 		} catch (Exception e) {
 			saver.close();
-			System.out.println("[ERROR] Could not save score: " + e);
+			System.err.println("[ERROR] Could not save score: " + e);
 		}
 	}
 	
@@ -61,26 +60,26 @@ public class Save {
 		/* If scoreboard file doesn't exist */
 		if(!scoreboard.exists()) {
 			
-			System.out.print("[!] Scoreboard doesn't exist, ");
-			System.out.println("creating . . .");
+			System.out.print("[!] Scoreboard doesn't exist, creating . . .");
 			try (PrintWriter saver = new PrintWriter(scoreboard);){
 								
 				Random r = new Random();	// create file and Randomizer			
 				
 				long lastModified = scoreboard.lastModified();	// get file's modification time
 				
-				int x = r.nextInt(9)+1;
+				int x = r.nextInt(9)+1;	// get random exponent
 				
 				double calculatedFlag = lastModified*Math.pow(Math.E, x);
 				String encodedFlag = Base64.getEncoder().encodeToString(String.valueOf(calculatedFlag).getBytes());	// encode it in Base64
 				
-				lastModified -= 3;
+				lastModified -= 3;	// correct milliseconds by the time it takes to make changes by Java
 				
 				/* write information about used exponent (x) and flag itself & overwrite modification time after printing flag */
 				saver.println("Control flag: #" + x + encodedFlag + "\n");
 					saver.close();
 						scoreboard.setLastModified(lastModified);
 										
+					/* debugging data logging */ 
 //					System.out.println("ifExists()# calculated:\t" + calculatedFlag);
 //					System.out.println("ifExists()# encoded:\t" + encodedFlag);
 				
@@ -110,6 +109,7 @@ public class Save {
 				double calculatedFlag = file.lastModified();	// get current file's modification time
 				double decodedFlag = Double.valueOf(savedFlag)/Math.pow(Math.E, x);	// read first flagged line and get saved date number
 
+				/* debugging data logging */ 
 //				System.out.println("isModified("+file.getName()+")# encoded: \t" + encodedFlag);
 //				System.out.println("isModified("+file.getName()+")# decoded: \t" + decodedFlag);
 //				System.out.println("isModified("+file.getName()+")# calculated: \t" + calculatedFlag);
@@ -119,21 +119,24 @@ public class Save {
 					read.close();
 					return false;
 				} else {
-					System.out.println("[ERROR] Flag is incorrect, trying to restore . . ."); 
+					System.err.println("[ERROR] Flag is incorrect, deleting . . ."); 
 					read.close();
 					return true;
 				}
 				
 			} catch (Exception e) {
-				System.out.println("[ERROR] Flag is incorrect, trying to restore . . .");
+				System.err.println("[ERROR] Flag is incorrect, deleting . . .");
 				read.close();
 				return true;
 			}
 		} else {
-			System.out.println("[ERROR] File doesn't exist");
+			System.err.println("[ERROR] File doesn't exist: " + file.getName());
 			return true;
 		}
 	}
+	
+	
+/* saved for future reference? idk */
 	
 //	static void restoreBackup(File from, File to) {
 //
