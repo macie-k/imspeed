@@ -26,7 +26,7 @@ public class Words {
 		return diffs;		
 	}
 	
-	public static String[] loadLanguages() {
+	public static String[][] loadLanguages() {
 		
 		String path = new File("").getAbsolutePath() + slash + "words" + slash;
 		String splitslash = slash;
@@ -57,7 +57,7 @@ public class Words {
 			how_many_lngs = listOfFiles.length;
 		}
 		
-		String[] lngs = new String[how_many_lngs];
+		String[][] lngs = new String[2][how_many_lngs];
 
 		for(int i=0; i<how_many_lngs; i++) {
 			try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName()))){
@@ -65,16 +65,16 @@ public class Words {
 				String s = b.readLine();
 				
 				if(Select.selected_lng_files.contains(listOfFiles[i])) {
-					lngs[i] = " [ x ] "; 	// if selected add "x" in box else empty box
+					lngs[0][i] = "[ x ]"; 	// if selected add "x" in box else empty box
 				} else {
-					lngs[i] = " [   ] ";		
+					lngs[0][i] = "[   ]";		
 				}
 				
 				lngsNames.add(s);
-				lngs[i] += s;	// add language name from file's first line
+				lngs[1][i] = s;	// add language name from file's first line
 					
 			} catch (IOException e) {
-				System.out.println("\n[ERROR] " + e);
+				System.err.println("\n[ERROR] " + e);
 			}
 		}
 		return lngs;		
@@ -93,7 +93,7 @@ public class Words {
 				}
 				
 			} catch (IOException e) {
-				System.out.println("\n[Error] " + e);
+				System.err.println("\n[Error] " + e);
 			}
 		}
 		return allWords;
