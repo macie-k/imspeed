@@ -6,11 +6,11 @@ Typing game kind of as remake of bisqwit's "wspeed" game
 ## Overview
 
 <p align="center">
-  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/80863852-34099580-8c7f-11ea-9833-25b7a4fcdfa6.jpg">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/85625633-0da71b80-b66c-11ea-928f-b1fe94220b2a.jpg">
 </p>  
 <br>
 <p align="center">
-  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/80805576-b11e0780-8bb8-11ea-9c77-81396409e225.jpg">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/85625655-1697ed00-b66c-11ea-880a-833b069b29a5.jpg">
 </p>
 
 <br>
