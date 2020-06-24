@@ -85,7 +85,7 @@ public class Scenes {
 				InputStream font = new FileInputStream(fontsPath + fontNames[i]);
 				Font.loadFont(font, 15);
 			} catch (FileNotFoundException e) {
-				System.err.println("Could not load font file: " + e);
+				System.err.println("[Error] Could not load font file: " + e);
 			}
 		}
 	}
