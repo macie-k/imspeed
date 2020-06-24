@@ -25,7 +25,7 @@ public class Select {
 	private static Stage window = Window.window;
 	private static int how_many_lngs;
 	
-	private static String[] loadedLanguages = Words.loadLanguages();
+	private static String[][] loadedLanguages = Words.loadLanguages();
 	private static String[] loadedDifficulties= Words.loadDifficulties();
 	
 	
@@ -45,7 +45,7 @@ public class Select {
 		Option[] diff = new Option[5];		
 		for(int i=0; i<5; i++) {
 			int calcY = 220 + 25*i;
-			diff[i] = new Option(calcY, loadedDifficulties[i], "diff", x==i);
+			diff[i] = new Option(calcY, loadedDifficulties[i], x==i);
 		}
 		
 		root.getChildren().add(header);
@@ -106,7 +106,7 @@ public class Select {
 		Option[] lngs = new Option[how_many_lngs];
 		for(int i=0; i<how_many_lngs; i++) {
 			int calcY = 220 + 25*i;
-			lngs[i] = new Option(calcY, loadedLanguages[i], "lng", x==i);
+			lngs[i] = new Option(calcY, loadedLanguages[0][i], loadedLanguages[1][i], x==i);
 		}
 		
 		root.getChildren().add(header);
@@ -164,7 +164,7 @@ public class Select {
 					
 					if(!Words.loadWords(selected_lng_files).isEmpty()) {
 							System.out.print("[OK] Languages: ");
-							selected_lng_names.forEach(slf -> System.out.print("{" + slf + "} ")); System.out.println();
+							selected_lng_names.forEach(slf -> System.out.print("{" + slf + "} ")); System.out.println("\n");
 						Window.startGame(selected_lng_files);
 					}
 					break;
@@ -182,14 +182,14 @@ public class Select {
 		if(type.equals("lng")) {
 			for(int i=0; i<how_many_lngs; i++) {
 				int calcY = 220 + 25*i;
-				option[i] = new Option(calcY, Words.loadLanguages()[i], "lng", i==x);
+				option[i] = new Option(calcY, Words.loadLanguages()[0][i], Words.loadLanguages()[1][i], i==x);
 			}
 		}
 		
 		if(type.equals("diff")) {
 			for(int i=0; i<5; i++) {
 				int calcY = 220 + 25*i;
-				option[i] = new Option(calcY, loadedDifficulties[i], "diff", i==x);
+				option[i] = new Option(calcY, loadedDifficulties[i], i==x);
 			}
 		}
 		
@@ -205,7 +205,7 @@ public class Select {
 				return true;
 			}
 		} catch (IOException er) {
-			System.out.println(er);
+			System.out.println("[ERROR] Could not read file: " + er);
 			return true;
 		}
 	}
