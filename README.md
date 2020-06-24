@@ -1,5 +1,5 @@
 ## imspeed
-Remake of bisqwit's "wspeed" game
+Typing game kind of as remake of bisqwit's "wspeed" game
 
 <br>
 
