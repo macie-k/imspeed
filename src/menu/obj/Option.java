@@ -10,26 +10,29 @@ import javafx.scene.text.Text;
 
 public class Option extends StackPane {
 	
-	private final Text text;
+	private final Text val;
+	private final Text check;
 	private final Rectangle background;
 	
-	public Option(int y, String value, String type, boolean highlighted) {	
-				
-		int textX=0; int bgX=0; int bgWidth=0;
-		if(type.equals("lng")) {
-			textX = 315;
-			bgX = 315;
-			bgWidth = 170;
-		} if(type.equals("diff")) {
-			textX = 290;
-			bgX = 280;
-			bgWidth = 240;
-		}
+	public Option(int y, String value, boolean highlighted) {
+		this(y, "", value, highlighted);
+	}
+	
+	public Option(int y, String checked, String value, boolean highlighted) {	
+						
+		int textX = 240;
+		int bgX = 240;
+		int bgWidth = 320;
 		
-		text = new Text(value);
-		text.setTranslateX(textX);
-		text.setTranslateY(y);
-		text.setFont(Font.font("Courier new", 14));
+		check = new Text(checked);
+		check.setTranslateX(250);
+		check.setTranslateY(y);
+		check.setFont(Font.font("Courier new", 14));
+		
+		val = new Text(value);
+		val.setTranslateX(textX);
+		val.setTranslateY(y);
+		val.setFont(Font.font("Courier new", 14));
 		
 		background = new Rectangle(bgWidth, 25, Color.WHITE);
 		background.setTranslateX(bgX);
@@ -37,13 +40,16 @@ public class Option extends StackPane {
 		
 		if(highlighted) {
 			background.setFill(Color.WHITE);
-			text.setFill(Color.BLACK);
+			val.setFill(Color.BLACK);
+			check.setFill(Color.BLACK);
 		} else {
 			background.setFill(Window.BACKGROUND);
-			text.setFill(Color.WHITE);
+			val.setFill(Color.WHITE);
+			check.setFill(Color.WHITE);
 		}
 		
-		setAlignment(text, Pos.CENTER_LEFT);
-		getChildren().addAll(background, this.text);	
+		setAlignment(val, Pos.CENTER);
+		setAlignment(check, Pos.CENTER_LEFT);
+		getChildren().addAll(background, val, check);	
 	}
 }
