@@ -1,6 +1,9 @@
 package base;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,6 +15,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
@@ -64,7 +68,8 @@ public class Window extends Application {
 		}
 		
 		window = primaryStage;
-		
+		window.getIcons().add(new Image("/icon.jpg"));
+
 		Scenes.fontSetup();		
 		System.out.println();setDiff();
 		
@@ -150,7 +155,7 @@ public class Window extends Application {
 	
 	public static void gameOver() {
 		
-		System.out.println("\n[GAME OVER]\n");
+		System.out.println("[GAME OVER]\n");
 			
 		if(CPMs.size() > 0) {
 			for(int c : CPMs) avgCPM += c;
@@ -409,7 +414,9 @@ public class Window extends Application {
 						if(w.getTranslateX()>803) {	// if word leaves beyond the window
 							
 							Scenes.missedVal.setText(String.valueOf(++strike));	// update missed and increase strikes
-							System.out.println("[STRIKE]: " +  strike);
+							if(typedWords != 0) {
+								System.out.println("[STRIKE]: " +  strike);
+							}
 							
 							if(strike < 10) {
 								multiplier = 1;	// reset multiplier
@@ -418,6 +425,7 @@ public class Window extends Application {
 								del.add(w);	// add word to deletion list
 							} else {
 								root.getChildren().removeAll(words);	// remove all objects
+								System.out.println();
 								curtain(scene, root);
 							}
 						}
@@ -571,7 +579,18 @@ public class Window extends Application {
 		return new Word(x, y, value);
 	}
 	
-	public static void main (String[] args) {
+	public static void main (String[] args) throws FileNotFoundException {
+				
+		if(args.length>0) {
+			if(args[0].equals("--log")) { 
+				System.out.println("[OK] Logging enabled");
+				
+				PrintStream outputLog = new PrintStream(new FileOutputStream(new File("log.txt")));
+					System.setOut(outputLog);
+					System.setErr(outputLog);
+			}
+		}
+		
 		launch(args);
 	}
 
