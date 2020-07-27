@@ -1,5 +1,5 @@
 ## imspeed
-Typing game kind of as remake of bisqwit's "wspeed" game
+Typing inspired by bisqwit's "wspeed" game
 
 <br>
 
