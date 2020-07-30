@@ -6,34 +6,42 @@ import javafx.scene.text.Text;
 
 public class Word extends Text {
 	
-	final private String value;
-	
+	private String value;
+
 	public Word(int x, int y, String value) {
-		
+		this(x, y, value, "#FFF");
+	}
+	
+	public Word(int x, int y, String value, String color) {
 		super(value);
+		
 		this.value = value;
 	
 		setTranslateX(x);
 		setTranslateY(y);
 		
-		setFont(Font.font("Courier New Bold", 14.49));	// for some reason 'm' bugs when bigger size is set?
-				
 		setFill(Color.WHITE);
+		setFont(Font.font("Courier New Bold", 14.49));	// for some reason 'm' bugs when bigger size is set?
+	}
+	
+	public void setColor(String color) {
+		setFill(Color.web(color));
 	}
 	
 	public int getLength() {
-		return this.value.length();
+		return value.length();
 	}
 	
 	public void setValue(String s) {
-		this.setValue(s);
+		setText(s);
+		value = s;
 	}
 	
 	public String getValue() {
-		return this.value;
+		return value;
 	}
 	
 	public void moveForward() {
-		this.setTranslateX(this.getTranslateX() + 15);
+		setTranslateX(getTranslateX() + 15);
 	}
 }
