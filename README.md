@@ -24,12 +24,18 @@ Typing inspired by bisqwit's "wspeed" game
 
 <br>  
 
+## Download
+
+* Download the latest release [here](https://github.com/emermacko/imspeed/releases)  
+
+<br>
+
 ## General info
 
 * Make sure `words` folder is in the same directory as the game
 * **Custom languages** can be added by editing `.words` files
 * `fonts` folder is optional, in case the downloading doesn't work
-* Any critical errors should be logged in the `error_log.txt` file
+* If something doesn't work use `--log` option when launching
    
 <br>
 
