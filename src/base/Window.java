@@ -34,6 +34,9 @@ public class Window extends Application {
 	public static String OS, slash;
 	public static Color BACKGROUND = Color.web("#0e0e0e");
 	
+	public static List<Scene> SCENES = new ArrayList<Scene>();
+	public static int SCENE_INDEX = -1;
+		
 	static String SCORE_DIR;	// directory to save backup and fonts
 	
 	static double points;
@@ -42,6 +45,7 @@ public class Window extends Application {
 	
 	private static List<Integer> xVal, yVal;
 	private static boolean curtain;
+	private static boolean pause = false;
 	
 	private static AnimationTimer WORDS_ANIMATION, BACKGROUND_ANIMATION, GAMEOVER_ANIMATION, CURTAIN_ANIMATION, TIMER;
 	
@@ -50,10 +54,12 @@ public class Window extends Application {
 	private static double multiplier;
 	private static long startTime;
 	
-	private static long howOften;
-	private static long howFast;
-	private static int howMuch;
-	private static double multiplierAdd;
+	public static long howOften;
+	public static long howFast;
+	public static int maxWords;
+	public static int howMany;
+	public static double multiplierAdd;
+
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -62,34 +68,46 @@ public class Window extends Application {
 		if(System.getProperty("os.name").toLowerCase().equals("linux")) {
 			OS = "linux";
 			slash = "/";
+			SCORE_DIR = System.getenv("HOME") + "/.imspeed/";
 		} else {
 			OS = "windows";
 			slash = "\\";
+			SCORE_DIR = System.getenv("appdata") + "\\imspeed\\";
 		}
 		
 		window = primaryStage;
 		window.getIcons().add(new Image("/icon.jpg"));
 
-		Scenes.fontSetup();		
-		System.out.println();setDiff();
+		Scenes.fontSetup();		System.out.println();
+		setDiff();
 		
 		window.setTitle("I'm speed");
 		window.setResizable(false);
 		window.show();
 	}
-	
-	public static void setDiff() {
-		Pane root = new Pane();
-			root.setPrefSize(800, 500);
 		
-		Select.selectDifficulty(root);
+	public static void error(String err) {
+		
+		Scene error = new Scene(Scenes.error(err));
+		window.setScene(error);
+		
+		error.setOnKeyPressed(e -> {
+			switch (e.getCode()) {
+				case ESCAPE:
+					setDiff();
+					break;
+			default:
+				break;
+			}
+		});
 	}
 	
-	public static void setLang() {
-		Pane lng = new Pane();
-			lng.setPrefSize(800, 500);
-			
-		Select.selectLanguage(lng);	// run menu scene
+	public static void setDiff() {		
+		Select.selectDifficulty();
+	}
+	
+	public static void setLang(boolean custom) {			
+		Select.selectLanguage(custom);
 	}
 	
 	public static void curtain(Scene scene, Pane root) {
@@ -158,7 +176,9 @@ public class Window extends Application {
 		System.out.println("[GAME OVER]\n");
 			
 		if(CPMs.size() > 0) {
-			for(int c : CPMs) avgCPM += c;
+			for(int c : CPMs) {
+				avgCPM += c;
+			}
 			avgCPM /= CPMs.size();
 		} else {
 			avgCPM = 0;
@@ -166,18 +186,18 @@ public class Window extends Application {
 
 		Save.saveScore(Scenes.pointsVal.getText());
 		
-		Pane root = new Pane();
+		Pane root = Scenes.gameOver();
 			root.setPrefSize(800, 500);
 		
 		Text retry = new Text("> Press enter to try again <");
-				retry.setFill(Color.WHITE);
-				retry.setTranslateX(308);
-				retry.setTranslateY(370);
-				retry.setFont(Font.font("Courier new", 11));
+			retry.setFill(Color.WHITE);
+			retry.setTranslateX(308);
+			retry.setTranslateY(370);
+			retry.setFont(Font.font("Courier new", 11));
 				
-		Scene scene = Scenes.gameOver(root);
-		
+		Scene scene = new Scene(root);
 		root.getChildren().add(retry);
+		
 		window.setScene(scene);
 		
 		GAMEOVER_ANIMATION = new AnimationTimer() {
@@ -196,18 +216,16 @@ public class Window extends Application {
 		
         scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
             if (e.getCode() == KeyCode.ENTER) {
-            	GAMEOVER_ANIMATION.stop();
-                System.out.println();setDiff(); 
+            	GAMEOVER_ANIMATION.stop();	System.out.println(); 
+                setDiff(); 
             } e.consume();
         });
 	}
 	
 	public static void startGame(List<File> selected) {
 		
-		Pane root = new Pane(); 
-			root.setPrefSize(800, 500);
-		
-		Scene scene = Scenes.game(root);
+		Pane root = Scenes.game(); 
+		Scene scene = new Scene(root);
 		
 		List<Particle> particles = new ArrayList<Particle>();	// list of all particles
 		Random random = new Random();
@@ -218,7 +236,7 @@ public class Window extends Application {
 		}
 		
 		/* generate particle with its trail */
-		for(int i=0; i<200; i++) {
+		for(int i=0; i<70; i++) {
 			Particle p = new Particle(random.nextInt(790)+10, particleY[random.nextInt(398)], random.nextDouble());
 				particles.add(p); root.getChildren().add(p);
 			
@@ -272,41 +290,42 @@ public class Window extends Application {
 		window.setScene(scene);	// render scene
 				
 		/* set difficulty variables */ 
-		switch(DIFFICULTY) {
-			case 1:
-				multiplierAdd = 0;
-				howOften = 7_000_000_000l;
-				howFast = 2_000_000_000;
-				howMuch = 3;
-			break;
-			
-			case 2:
-				multiplierAdd = 0.01;
-				howOften = 7_000_000_000l;
-				howFast = 1_000_000_000;
-				howMuch = 5;
-			break;
-			
-			case 3:
-				multiplierAdd = 0.02;
-				howOften = 6_000_000_000l;
-				howFast = 700_000_000;
-				howMuch = 5;
-			break;
-			
-			case 4:
-				multiplierAdd = 0.04;
-				howOften = 6_000_000_000l;
-				howFast = 650_000_000;
-				howMuch = 6;
-			break;
-			
-			case 5:
-				multiplierAdd = 0.1;
-				howOften = 4_500_000_000l;
-				howFast = 600_000_000;
-				howMuch = 6;
-			break;
+		switch(DIFFICULTY) {		
+		case 1:
+			maxWords = 16;
+			multiplierAdd = 0.01;
+			howOften = 7_000_000_000l;
+			howFast = 1_650_000_000;
+			howMany = 3;
+		break;
+		
+		case 2:
+			maxWords = 17;
+			multiplierAdd = 0.03;
+			howOften = 6_000_000_000l;
+			howFast = 750_000_000;
+			howMany = 5;
+		break;
+		
+		case 3:
+			maxWords = 17;
+			multiplierAdd = 0.05;
+			howOften = 5_500_000_000l;
+			howFast = 650_000_000;
+			howMany = 6;
+		break;
+		
+		case 4:
+			maxWords = 18;
+			multiplierAdd = 0.1;
+			howOften = 4_500_000_000l;
+			howFast = 550_000_000;
+			howMany = 6;
+		break;
+		
+		case 5:
+			maxWords = 100;
+		break;
 		}
 		
 		/* timer for calculating CPM */
@@ -329,8 +348,8 @@ public class Window extends Application {
 					if(calc > -1 && typedWords > 1) {
 						CPMs.add(calc);
 						Scenes.CPM.setText(String.valueOf(calc));
-						
-						if(calc == 69) {	// you gay?
+
+						if(calc == 69) {
 							Scenes.CPM.setStyle(Scenes.Color_GAY_GRADIENT);  
 						} else {
 							/* ranges for color change */
@@ -359,7 +378,7 @@ public class Window extends Application {
 				if(now - particle_move >= 5_000_000) {
 					List<Particle> toRemove = new ArrayList<Particle>();
 					
-					for(Particle p : particles) {
+					for(Particle p : particles) {						
 						if(p.getTranslateX()>800) {
 							toRemove.add(p);
 						} else {
@@ -375,8 +394,7 @@ public class Window extends Application {
 				}
 				
 				if(!curtain) {
-					
-					if(now - particle_create >= 7_000_000) {
+					if(now - particle_create >= 50_000_000) {
 						Particle p = new Particle(-2, particleY[random.nextInt(398)], random.nextDouble());
 							particles.add(p); root.getChildren().add(p);
 							
@@ -408,10 +426,12 @@ public class Window extends Application {
 					List<Word> del = new ArrayList<Word>();		// list of words to deletion after loop
 					
 					for(Word w : words) {
-						if(curtain) break;
 						
+						if(curtain) break;
 						w.moveForward(); 	// move all words forward
-						if(w.getTranslateX()>803) {	// if word leaves beyond the window
+						
+						double xPos = w.getTranslateX();
+						if(xPos > 805) {	// if word leaves beyond the window
 							
 							Scenes.missedVal.setText(String.valueOf(++strike));	// update missed and increase strikes
 							if(typedWords != 0) {
@@ -427,10 +447,24 @@ public class Window extends Application {
 								root.getChildren().removeAll(words);	// remove all objects
 								System.out.println();
 								curtain(scene, root);
+								break;
 							}
 						}
 						
-						if(w.getTranslateX() > max_word_len) {
+						/* lets leave the gays be */
+						if(!w.getValue().equals("I'm gay")) {
+							if(xPos > 370) {
+								w.setColor(Scenes.Color_YELLOW);
+							}
+							if(xPos > 500) {
+								w.setColor(Scenes.Color_ORANGE);
+							}
+							if(xPos > 630) {
+								w.setColor(Scenes.Color_RED);
+							}
+						}
+						
+						if(xPos > max_word_len) {
 							fresh.remove(w);	// if word is further than longest word remove it from list of new words
 						}						
 					}
@@ -442,7 +476,7 @@ public class Window extends Application {
 							if(typedWords == 0) {	// if fist word wasn't typed end the game
 								curtain(scene, root);
 							} else {	// else generate new words
-								for(int i=0; i<howMuch; i++) {		
+								for(int i=0; i<howMany; i++) {		
 									Word word = createWord(strings, xVal_final, yVal_final, fresh);
 										fresh.add(word);
 										words.add(word);
@@ -451,18 +485,17 @@ public class Window extends Application {
 							}
 						}
 					}
-					
 					lastUpdate = now;
 				}
 				
 				/* every [n] seconds add [m] new words if less than 17 are displayed */
 				if(now - lastUpdate2 >= howOften && typedWords > 4) {
-					if(words.size() < 17) {
-						for(int i=0; i<howMuch; i++) {		
+					for(int i=0; i<howMany; i++) {		
+						if(words.size() < maxWords) {
 							Word word = createWord(strings, xVal_final, yVal_final, fresh);
-								fresh.add(word);
-								words.add(word);
-								root.getChildren().add(word);
+							fresh.add(word);
+							words.add(word);
+							root.getChildren().add(word);
 						}
 					} lastUpdate2 = now;
 				}
@@ -473,72 +506,95 @@ public class Window extends Application {
 		Scenes.input.setOnKeyPressed(e -> {
 			
 			switch (e.getCode()) {
+			case ESCAPE:
+
+				if(!pause) {
+					WORDS_ANIMATION.stop();
+					BACKGROUND_ANIMATION.stop();
+					TIMER.stop();
+					Scenes.input.setEditable(false);
+					Scenes.pauseBox.setVisible(true);
+					Scenes.pauseBox.toFront();
+				} else {
+					WORDS_ANIMATION.start();
+					BACKGROUND_ANIMATION.start();
+					TIMER.start();
+					Scenes.input.setEditable(true);
+					Scenes.pauseBox.setVisible(false);
+				}
 				
-				case ENTER:	// every ENTER pressed:
+				pause = !pause;			
+				break;
+			
+			case ENTER:
+				
+				if(Scenes.input.getText().equals("killmenow")) {	// special word to end the game
+					curtain(scene, root);
+				}
+																							
+				List<Word> del = new ArrayList<Word>();		// list for words to be deleted from "words" list
+				List<Word> add = new ArrayList<Word>();		// list for words to be added to "words" list
+				
+				for(Word w : words) {
 					
-					if(Scenes.input.getText().equals("killmenow")) {	// special word to end the game
-						curtain(scene, root);
-					}
-																								
-					List<Word> del = new ArrayList<Word>();		// list for words to be deleted from "words" list
-					List<Word> add = new ArrayList<Word>();		// list for words to be added to "words" list
-					
-					for(Word w : words) {
+					if(w.getValue().equals(Scenes.input.getText())) {	// if typed word is equal to eny currently displayed
+										
+						points += w.getLength()*multiplier; // add points accordingly to multiplier,
+						multiplier += multiplierAdd;	// increase multiplier
+						typedWords++; typedChars += w.getValue().length();	// increase the amount of typed words and characters
+							
+						if(w.getValue().equals("I'm gay")) {
+							w.setValue("lmao");
+							w.setColor("#FFF");
+							continue;
+						}
+						fresh.remove(w); del.add(w);	// remove from new words and add to deletion from main list
+						root.getChildren().remove(w);	// remove from pane
 						
-						if(w.getValue().equals(Scenes.input.getText())) {	// if typed word is equal to eny currently displayed
-											
-							points += w.getLength()*multiplier; // add points accordingly to multiplier,
-							multiplier += multiplierAdd;	// increase multiplier
-							typedWords++; typedChars += w.getValue().length();	// increase the amount of typed words and characters
-								
-							fresh.remove(w); del.add(w);	// remove from new words and add to deletion from main list
-							root.getChildren().remove(w);	// remove from pane
+						Scenes.pointsVal.setText(String.valueOf(Math.round(points)));	// update the points
+						
+						switch (typedWords) {
+						case 1:
+							startTime = System.nanoTime(); TIMER.start();	// after typing first word start timer for CPM
 							
-							Scenes.pointsVal.setText(String.valueOf(Math.round(points)));	// update the points
-							
-							switch (typedWords) {
-							
-								case 1:
-									startTime = System.nanoTime(); TIMER.start();	// after typing first word start timer for CPM
-									
-									/* add [m] new words */
-									for(int i=0; i<howMuch; i++) {					
-										Word word = createWord(strings, xVal_final, yVal_final, fresh);
-											fresh.add(word);
-											add.add(word);
-											root.getChildren().add(word);
-									}
-								break;
-								
-								case 3:
-									for(int i=0; i<3; i++) {
-										Word word = createWord(strings, xVal_final, yVal_final, fresh);
-											fresh.add(word);
-											add.add(word);
-											root.getChildren().add(word);
-									}
-								break;
-								
-								default:
-									/* every 6th typed word add [m] new words */
-									if(typedWords%6==0) {
-										for(int i=0; i<howMuch; i++) {
-											Word word = createWord(strings, xVal_final, yVal_final, fresh);
-												fresh.add(word);
-												add.add(word);
-												root.getChildren().add(word);
-										}
-									}
-								break;
+							/* add [m] new words */
+							for(int i=0; i<howMany; i++) {					
+								Word word = createWord(strings, xVal_final, yVal_final, fresh);
+									fresh.add(word);
+									add.add(word);
+									root.getChildren().add(word);
 							}
+							break;
+						
+						case 3:
+							for(int i=0; i<3; i++) {
+								Word word = createWord(strings, xVal_final, yVal_final, fresh);
+									fresh.add(word);
+									add.add(word);
+									root.getChildren().add(word);
+							}
+							break;
+						
+						default:
+							/* every 6th typed word add [m] new words */
+							if(typedWords%6==0) {
+								for(int i=0; i<howMany; i++) {
+									Word word = createWord(strings, xVal_final, yVal_final, fresh);
+										fresh.add(word);
+										add.add(word);
+										root.getChildren().add(word);
+								}
+							}
+							break;
 						}
 					}
-					words.addAll(add);	// add words
-					words.removeAll(del);	// delete words
-					Scenes.input.clear(); // clear text field
-					break ;	
-					
-				default: break;
+				}
+				words.addAll(add);	// add words
+				words.removeAll(del);	// delete words
+				Scenes.input.clear(); // clear text field
+				break ;	
+				
+			default: break;
 			}
 		});
 	}
@@ -574,24 +630,36 @@ public class Window extends Application {
 					x -= 5;
 				}
 			}
+		}	
+		
+		Word w = new Word(x, y, value);
+		
+		/* there is 0.00043687199 chance at most, that it will happen, pls don't get mad */
+		if(value.equals("I'm gay")) {
+			w.setStyle(Scenes.Color_GAY_GRADIENT);
 		}
-					
-		return new Word(x, y, value);
+		
+		return w;
 	}
 	
 	public static void main (String[] args) throws FileNotFoundException {
 				
 		if(args.length>0) {
-			if(args[0].equals("--log")) { 
-				System.out.println("[OK] Logging enabled");
+			for(String arg : args) {
 				
-				PrintStream outputLog = new PrintStream(new FileOutputStream(new File("log.txt")));
-					System.setOut(outputLog);
-					System.setErr(outputLog);
+				switch(arg) {
+					case "--log":
+						System.out.println("[OK] Logging enabled");
+						
+						PrintStream outputLog = new PrintStream(new FileOutputStream(new File("log.txt")));
+							System.setOut(outputLog);
+							System.setErr(outputLog);
+					break;
+					
+					default: break;
+				}
 			}
 		}
-		
 		launch(args);
 	}
-
 }
