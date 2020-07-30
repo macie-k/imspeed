@@ -53,6 +53,7 @@ public class Window extends Application {
 	private static int max_word_len = 0;
 	private static double multiplier;
 	private static long startTime;
+	private static long pauseTime;
 	
 	public static long howOften;
 	public static long howFast;
@@ -330,11 +331,15 @@ public class Window extends Application {
 		
 		/* timer for calculating CPM */
 		TIMER = new AnimationTimer() {
-			
+						
 			private long lastUpdate = 0;
 
 			@Override
 			public void handle(long now) {
+				
+				if(pause) {
+					lastUpdate = now;
+				}
 				
 				/* every 1s */
 				if(now - lastUpdate >= 1_000_000_000) {
@@ -511,14 +516,16 @@ public class Window extends Application {
 				if(!pause) {
 					WORDS_ANIMATION.stop();
 					BACKGROUND_ANIMATION.stop();
-					TIMER.stop();
+					pauseTime = System.nanoTime();
+					System.out.println("Pause: " + pauseTime);
 					Scenes.input.setEditable(false);
 					Scenes.pauseBox.setVisible(true);
 					Scenes.pauseBox.toFront();
 				} else {
 					WORDS_ANIMATION.start();
 					BACKGROUND_ANIMATION.start();
-					TIMER.start();
+					startTime = System.nanoTime() - (pauseTime - startTime);
+					System.err.println(startTime);
 					Scenes.input.setEditable(true);
 					Scenes.pauseBox.setVisible(false);
 				}
@@ -556,6 +563,7 @@ public class Window extends Application {
 						switch (typedWords) {
 						case 1:
 							startTime = System.nanoTime(); TIMER.start();	// after typing first word start timer for CPM
+							System.out.println(startTime);
 							
 							/* add [m] new words */
 							for(int i=0; i<howMany; i++) {					
