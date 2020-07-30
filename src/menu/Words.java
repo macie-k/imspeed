@@ -22,7 +22,7 @@ public class Words {
 	static int how_many_lngs;
 	
 	public static String[] loadDifficulties() {
-		String[] diffs = {"Very easy", "Easy", "Normal", "Hard", "Asian"};
+		String[] diffs = {"Easy", "Normal", "Hard", "Asian", "Custom"};
 		return diffs;		
 	}
 	
@@ -30,8 +30,8 @@ public class Words {
 		
 		String path = new File("").getAbsolutePath() + slash + "words" + slash;
 		String splitslash = slash;
-		
-		/* case when launching from github repo and `words` are one directory lower */
+					
+		/* case when launching from old github repo and `words` are one directory below */
 		if(Window.OS.equals("windows")) {
 			splitslash = "\\\\";
 		}
@@ -44,40 +44,46 @@ public class Words {
 			path += "words" + slash;
 		}
 		
-		File folder = new File(path);
-		listOfFiles = folder.listFiles();	// get all available language files
-		
-		Arrays.sort(listOfFiles, Collections.reverseOrder());	// reverse them
-		
-		if(listOfFiles.length > 8) {
-			how_many_lngs = 8;
-		} else if(listOfFiles.length < 1) {
-			how_many_lngs = 1;
-		} else {
-			how_many_lngs = listOfFiles.length;
-		}
-		
-		String[][] lngs = new String[2][how_many_lngs];
-
-		for(int i=0; i<how_many_lngs; i++) {
-			try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName()))){
-				
-				String s = b.readLine();
-				
-				if(Select.selected_lng_files.contains(listOfFiles[i])) {
-					lngs[0][i] = "[ x ]"; 	// if selected add "x" in box else empty box
-				} else {
-					lngs[0][i] = "[   ]";		
-				}
-				
-				lngsNames.add(s);
-				lngs[1][i] = s;	// add language name from file's first line
-					
-			} catch (IOException e) {
-				System.err.println("\n[ERROR] " + e);
+		File folder = new File(path);	
+			
+		if(folder.listFiles() != null) {
+			
+			listOfFiles = folder.listFiles();	// get all available language files
+			Arrays.sort(listOfFiles, Collections.reverseOrder());	// reverse them
+			
+			if(listOfFiles.length > 8) {
+				how_many_lngs = 8;
+			} else if(listOfFiles.length < 1) {
+				how_many_lngs = 1;
+			} else {
+				how_many_lngs = listOfFiles.length;
 			}
+			
+			String[][] lngs = new String[how_many_lngs][2];
+
+			for(int i=0; i<how_many_lngs; i++) {
+				try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName()))){
+					
+					String s = b.readLine();
+					
+					if(Select.selected_lng_files.contains(listOfFiles[i])) {
+						lngs[i][0] = "[ x ]"; 	// if selected add "x" in box else empty box
+					} else {
+						lngs[i][0] = "[   ]";		
+					}
+					
+					lngsNames.add(s);
+					lngs[i][1] = s;	// add language name from file's first line
+						
+				} catch (IOException e) {
+					System.err.println("\n[ERROR] " + e);
+				}
+			}
+			return lngs;	
+		} else {
+			return null;
 		}
-		return lngs;		
+	
 	}
 	
 	public static List<String> loadWords(List<File> selected) {
