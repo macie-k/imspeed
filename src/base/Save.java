@@ -22,10 +22,9 @@ public class Save {
 	
 	static void saveScore(String points) {
 		
-		ifExists();
-		
 		if(isModified(scoreboard)) {
 			scoreboard.delete();
+			ifExists();
 		}
 		
 		PrintWriter saver = null;	// pre-declare PrintWriter so it can be closed in {catch}
@@ -52,6 +51,7 @@ public class Save {
 		} catch (Exception e) {
 			saver.close();
 			System.err.println("[ERROR] Could not save score: " + e);
+			Window.error("Could not save score: " + e);
 		}
 	}
 	
@@ -130,7 +130,6 @@ public class Save {
 				return true;
 			}
 		} else {
-			System.err.println("[ERROR] File doesn't exist: " + file.getName());
 			return true;
 		}
 	}
