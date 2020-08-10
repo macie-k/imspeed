@@ -1,4 +1,4 @@
-## imspeed
+# imspeed
 Typing game inspired by bisqwit's "wspeed"
 
 <br>  
