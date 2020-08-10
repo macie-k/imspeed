@@ -1,6 +1,12 @@
 ## imspeed
 Typing game inspired by bisqwit's "wspeed"
 
+<br>  
+
+## Download
+
+* Download the latest release [here](https://github.com/emermacko/imspeed/releases)  
+
 <br>
 
 ## Overview
@@ -21,12 +27,6 @@ Typing game inspired by bisqwit's "wspeed"
 * `JAVA_HOME` System Variable leading to JRE root directory.
 
 **If you want to compile the program yourself you'll need JDK with JFX**  
-
-<br>  
-
-## Download
-
-* Download the latest release [here](https://github.com/emermacko/imspeed/releases)  
 
 <br>
 
