@@ -29,7 +29,7 @@ Typing game inspired by bisqwit's "wspeed"
 ![JAVA_HOME](https://user-images.githubusercontent.com/25122875/90809392-b054e100-e321-11ea-854e-09486aa8f21f.png)
 
 
-**If you want to compile the program yourself you'll need JDK with JFX**  
+- If you want to compile the program yourself you'll need **JDK with JFX**
 
 <br>
 
