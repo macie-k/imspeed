@@ -28,9 +28,6 @@ Typing game inspired by bisqwit's "wspeed"
 
 ![JAVA_HOME](https://user-images.githubusercontent.com/25122875/90809392-b054e100-e321-11ea-854e-09486aa8f21f.png)
 
-
-- If you want to compile the program yourself you'll need **JDK with JFX**
-
 <br>
 
 ## General info
@@ -46,12 +43,8 @@ Typing game inspired by bisqwit's "wspeed"
 ## How to use:
   * Just double click on `.exe` file or:
   * `java -jar imspeed.jar`
-  * For self testing use either the IDE launch option or the `run.bat` file: <br>
-    ```batch
-     javac -cp ".\base\*;.\menu\*;..\words\*;" .\base\Window.java
-     java -cp ".\base\*;.\menu\*;..\words\*;" base.Window 2> error_log.txt
-    ```
-  <br>  
+  * For self testing use either the IDE launch option or the `run.bat`
+    - you'll need **JDK with JFX**
   
 **Sidenote:** `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program with a double-click.
 <br>
