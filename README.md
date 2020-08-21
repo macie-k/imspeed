@@ -5,7 +5,7 @@ Typing game inspired by bisqwit's "wspeed"
 
 ## Download
 
-* Download the latest release [here](https://github.com/emermacko/imspeed/releases)  
+* Download the latest release [here](https://bit.ly/imspeed-releases)  
 
 <br>
 
