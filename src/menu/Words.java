@@ -15,35 +15,19 @@ import base.Window;
 
 public class Words {
 	
-	public static List<String> lngsNames = new ArrayList<String>();
+	public static final List<String> lngsNames = new ArrayList<String>();
 	
 	static File[] listOfFiles;
-	static String slash = Window.slash;
-	static int how_many_lngs;
+	static final String slash = Window.slash;
+	public static int how_many_lngs;
 	
 	public static String[] loadDifficulties() {
-		String[] diffs = {"Easy", "Normal", "Hard", "Asian", "Custom"};
-		return diffs;		
+		return new String[] {"Easy", "Normal", "Hard", "Asian", "Custom"};
 	}
 	
 	public static String[][] loadLanguages() {
 		
-		String path = new File("").getAbsolutePath() + slash + "words" + slash;
-		String splitslash = slash;
-					
-		/* case when launching from old github repo and `words` are one directory below */
-		if(Window.OS.equals("windows")) {
-			splitslash = "\\\\";
-		}
-		if(!new File(path).exists()) {
-			String d[] = path.split(splitslash);
-			path="";
-			for(int i=0; i<d.length-2; i++) {
-				path += d[i] + slash;
-			}
-			path += "words" + slash;
-		}
-		
+		String path = new File("").getAbsolutePath() + slash + "words" + slash;		
 		File folder = new File(path);	
 			
 		if(folder.listFiles() != null) {
@@ -65,15 +49,10 @@ public class Words {
 				try (BufferedReader b = new BufferedReader(new FileReader(path + listOfFiles[i].getName()))){
 					
 					String s = b.readLine();
-					
-					if(Select.selected_lng_files.contains(listOfFiles[i])) {
-						lngs[i][0] = "[ x ]"; 	// if selected add "x" in box else empty box
-					} else {
-						lngs[i][0] = "[   ]";		
-					}
-					
 					lngsNames.add(s);
-					lngs[i][1] = s;	// add language name from file's first line
+					
+					lngs[i][0] = Select.selected_lng_files.contains(listOfFiles[i]) ? "[ x ]" : "[   ]";	// if selected add "x" in box else empty box
+					lngs[i][1] = s;	// add language name from file's first line					
 						
 				} catch (IOException e) {
 					System.err.println("\n[ERROR] " + e);
