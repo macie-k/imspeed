@@ -17,7 +17,7 @@ import base.Window;
 
 public class Select {
 	
-	public static final List<File> selected_lng_files= new ArrayList<File>();
+	public static final List<File> selected_lng_files = new ArrayList<File>();
 	public static final List<String> selected_lng_names = new ArrayList<String>();
 	
 	public static int[] x = {4, 4, 4};
