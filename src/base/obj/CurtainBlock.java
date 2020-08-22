@@ -7,13 +7,12 @@ import javafx.scene.transform.Rotate;
 
 public class CurtainBlock extends Rectangle {
 
-	final private double speed;
+	private final double speed;
 		
 	public CurtainBlock(int y, double speed, String LR) {
-		super(0, 50, Color.web(Scenes.Color_RED));
+		super(0, 50, Color.web(Scenes.COLOR_RED));
 		
 		this.speed = speed;
-		
 		if(LR.equals("R")) {
 			getTransforms().add(new Rotate(180));
 			setTranslateY(y+50);
