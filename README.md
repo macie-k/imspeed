@@ -35,7 +35,6 @@ Typing game inspired by bisqwit's "wspeed"
 * Make sure `words` folder is in the same directory as the game
 * **Custom languages** can be added by editing `.words` files
 * `fonts` folder is optional, in case the downloading doesn't work
-* If something doesn't work use `--log` option when launching
    
 <br>
 
@@ -43,7 +42,7 @@ Typing game inspired by bisqwit's "wspeed"
 ## How to use:
   * Just double click on `.exe` file or:
   * `java -jar imspeed.jar`
-  * optionally use `--log` argument
+  * Optionally use `--log` argument if something doesn't work
   
 **Sidenote:** `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program with a double-click.
 <br>
