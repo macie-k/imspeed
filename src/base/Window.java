@@ -28,93 +28,73 @@ import menu.Select;
 import menu.Words;
 
 public class Window extends Application {
-		
-	public static int DIFFICULTY;
-	public static Stage window;
-	public static String OS, slash;
-	public static Color BACKGROUND = Color.web("#0e0e0e");
 	
-	public static List<Scene> SCENES = new ArrayList<Scene>();
-	public static int SCENE_INDEX = -1;
-		
-	static String SCORE_DIR;	// directory to save backup and fonts
+	public static final Color BACKGROUND = Color.web("#0e0e0e");
+	public static int gameDifficulty;
+	public static Stage window;
+	public static long howOften, howFast;
+	public static int maxWords, howMany;
+	public static double multiplierAdd;
+	public static boolean saved = false;
+	public static boolean infinite = false;
+	
+	public static String slash = "\\";	// path slash dependent on OS
+	static String saveDirectory;	// directory to save score and fonts
 	
 	static double points;
-	static List<Integer> CPMs = new ArrayList<Integer>();	// list of all registered CPMs [for average calculating]
-	static int avgCPM;	// average CPM [for saving]
+	static final List<Integer> CPMs = new ArrayList<Integer>();	// list of all registered CPMs [for average calculating]
+	static int avgCPM;	// average CPM (for saving)
+	static double totalSeconds;
 	
+	private static AnimationTimer animation_words, animation_background, animation_gameover, animation_curtain, game_timer;
 	private static List<Integer> xVal, yVal;
-	private static boolean curtain;
-	private static boolean pause = false;
-	
-	private static AnimationTimer WORDS_ANIMATION, BACKGROUND_ANIMATION, GAMEOVER_ANIMATION, CURTAIN_ANIMATION, TIMER;
-	
-	private static int typedWords, typedChars;
-	private static int max_word_len = 0;
+	private static boolean curtain, pause = false;
+	private static int typedWords, typedChars, maxWordLen = 0;
 	private static double multiplier;
-	private static long startTime;
-	private static long pauseTime;
+	private static long startTime, pauseTime;
 	
-	public static long howOften;
-	public static long howFast;
-	public static int maxWords;
-	public static int howMany;
-	public static double multiplierAdd;
-
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 				
-		/* Detect OS for file manipulation */
+		/* Assume OS is windows, else change the variables */
 		if(System.getProperty("os.name").toLowerCase().equals("linux")) {
-			OS = "linux";
 			slash = "/";
-			SCORE_DIR = System.getenv("HOME") + "/.imspeed/";
+			saveDirectory = System.getenv("HOME") + "/.imspeed/";
 		} else {
-			OS = "windows";
-			slash = "\\";
-			SCORE_DIR = System.getenv("appdata") + "\\imspeed\\";
+			saveDirectory = System.getenv("appdata") + "\\imspeed\\";
 		}
 		
 		window = primaryStage;
 		window.getIcons().add(new Image("/icon.jpg"));
 
-		Scenes.fontSetup();		System.out.println();
-		setDiff();
+		Scenes.fontSetup();
+		Select.selectDifficulty();
 		
 		window.setTitle("I'm speed");
 		window.setResizable(false);
 		window.show();
+		window.setOnCloseRequest(e -> gameOver());	// save the score when game is exited via [x] button
 	}
 		
 	public static void error(String err) {
-		
 		Scene error = new Scene(Scenes.error(err));
 		window.setScene(error);
 		
 		error.setOnKeyPressed(e -> {
 			switch (e.getCode()) {
 				case ESCAPE:
-					setDiff();
+					Select.selectDifficulty();
 					break;
 			default:
 				break;
 			}
 		});
 	}
-	
-	public static void setDiff() {		
-		Select.selectDifficulty();
-	}
-	
-	public static void setLang(boolean custom) {			
-		Select.selectLanguage(custom);
-	}
-	
+		
 	public static void curtain(Scene scene, Pane root) {
 		
-		TIMER.stop();	// stop the CPM timer
-		
+		game_timer.stop();	// stop the CPM timer
 		curtain = true;
 		
 		Rectangle cover = new Rectangle(800, 500, BACKGROUND);
@@ -136,7 +116,7 @@ public class Window extends Application {
 		
 		window.setScene(scene);
 		
-		CURTAIN_ANIMATION = new AnimationTimer() {
+		animation_curtain = new AnimationTimer() {
 
 			private long lastUpdate = 0;
 			boolean reverse = false;
@@ -148,8 +128,8 @@ public class Window extends Application {
 										
 					if(!reverse) {
 						if(blocks.get(0).getWidth() > 450) {
-							BACKGROUND_ANIMATION.stop();
-							WORDS_ANIMATION.stop();
+							animation_background.stop();
+							animation_words.stop();
 							
 							reverse = true;
 							cover.setVisible(true);
@@ -158,7 +138,7 @@ public class Window extends Application {
 						}
 					} else {
 						if(blocks.get(8).getWidth() < 1) {
-							CURTAIN_ANIMATION.stop();
+							animation_curtain.stop();
 							gameOver();
 							return;
 						} else {
@@ -169,13 +149,11 @@ public class Window extends Application {
 				}
 			}
 			
-		}; CURTAIN_ANIMATION.start();
+		}; animation_curtain.start();
 	}
 	
 	public static void gameOver() {
 		
-		System.out.println("[GAME OVER]\n");
-			
 		if(CPMs.size() > 0) {
 			for(int c : CPMs) {
 				avgCPM += c;
@@ -184,8 +162,17 @@ public class Window extends Application {
 		} else {
 			avgCPM = 0;
 		}
+		
+		System.out.println("\n[GAME OVER]\n");
+		System.out.printf("[OK] Total game time: %s:%s:%s\n",
+				Save.formatTimePlayed(totalSeconds)[0],
+				Save.formatTimePlayed(totalSeconds)[1],
+				Save.formatTimePlayed(totalSeconds)[2]);
 
-		Save.saveScore(Scenes.pointsVal.getText());
+		/* because gameOver() is called whenever the window is closed, check if there is anything to save, else return */
+		if(!saved && points > 0) {
+			Save.saveScore(Scenes.pointsVal.getText());
+		}
 		
 		Pane root = Scenes.gameOver();
 			root.setPrefSize(800, 500);
@@ -201,7 +188,7 @@ public class Window extends Application {
 		
 		window.setScene(scene);
 		
-		GAMEOVER_ANIMATION = new AnimationTimer() {
+		animation_gameover = new AnimationTimer() {
 			
 			private long lastUpdate = 0;
 						
@@ -213,18 +200,19 @@ public class Window extends Application {
 					lastUpdate = now;
 				}
 			}
-		}; GAMEOVER_ANIMATION.start();
+		}; animation_gameover.start();
 		
         scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
             if (e.getCode() == KeyCode.ENTER) {
-            	GAMEOVER_ANIMATION.stop();	System.out.println(); 
-                setDiff(); 
+            	animation_gameover.stop();	System.out.println(); 
+            	Select.selectDifficulty(); 
             } e.consume();
         });
 	}
 	
 	public static void startGame(List<File> selected) {
 		
+		saved = false;
 		Pane root = Scenes.game(); 
 		Scene scene = new Scene(root);
 		
@@ -266,11 +254,11 @@ public class Window extends Application {
 		
 		// get longest word's length
 		for(String s : strings) {
-			if(s.length()>max_word_len) {
-				max_word_len = s.length();
+			if(s.length()>maxWordLen) {
+				maxWordLen = s.length();
 			}
 		}
-		max_word_len *= 9; // multiply by pixels of 1 letter with space
+		maxWordLen *= 9; // multiply by pixels of 1 letter with space
 		
 		// list for predefined x & y coordinates
 		final List<Integer> xVal_final = new ArrayList<Integer>();
@@ -291,14 +279,14 @@ public class Window extends Application {
 		window.setScene(scene);	// render scene
 				
 		/* set difficulty variables */ 
-		switch(DIFFICULTY) {		
+		switch(gameDifficulty) {		
 		case 1:
 			maxWords = 16;
 			multiplierAdd = 0.01;
 			howOften = 7_000_000_000l;
 			howFast = 1_650_000_000;
 			howMany = 3;
-		break;
+			break;
 		
 		case 2:
 			maxWords = 17;
@@ -306,7 +294,7 @@ public class Window extends Application {
 			howOften = 6_000_000_000l;
 			howFast = 750_000_000;
 			howMany = 5;
-		break;
+			break;
 		
 		case 3:
 			maxWords = 17;
@@ -314,7 +302,7 @@ public class Window extends Application {
 			howOften = 5_500_000_000l;
 			howFast = 650_000_000;
 			howMany = 6;
-		break;
+			break;
 		
 		case 4:
 			maxWords = 18;
@@ -322,15 +310,20 @@ public class Window extends Application {
 			howOften = 4_500_000_000l;
 			howFast = 550_000_000;
 			howMany = 6;
-		break;
+			break;
 		
 		case 5:
 			maxWords = 100;
-		break;
+			break;
+		
+		case 6:
+			infinite = true;
+			break;
+			
 		}
 		
 		/* timer for calculating CPM */
-		TIMER = new AnimationTimer() {
+		game_timer = new AnimationTimer() {
 						
 			private long lastUpdate = 0;
 
@@ -345,8 +338,8 @@ public class Window extends Application {
 				if(now - lastUpdate >= 1_000_000_000) {
 					
 					/* calculating CPM */
-					double seconds = (now - startTime) / 1_000_000_000l;
-					double minutes = seconds/60;
+					totalSeconds = (now - startTime) / 1_000_000_000l;
+					double minutes = totalSeconds/60;
 					int calc = (int) Math.round(typedChars/minutes);
 					
 					/* skip the 1st word*/
@@ -355,14 +348,14 @@ public class Window extends Application {
 						Scenes.CPM.setText(String.valueOf(calc));
 
 						if(calc == 69) {
-							Scenes.CPM.setStyle(Scenes.Color_GAY_GRADIENT);  
+							Scenes.CPM.setStyle(Scenes.COLOR_GAY_GRADIENT);  
 						} else {
 							/* ranges for color change */
-							/* >350 */ 		if(calc > 350) Scenes.CPM.setStyle(Scenes.Color_GOLD_GRADIENT); else 
-							/* 250-350 */ 	if(calc > 250) Scenes.CPM.setFill(Color.web(Scenes.Color_GREEN)); else
-							/* 200-250 */ 	if(calc > 200) Scenes.CPM.setFill(Color.web(Scenes.Color_YELLOW)); else
-							/* 150-200 */	if(calc > 150) Scenes.CPM.setFill(Color.web(Scenes.Color_ORANGE));
-							/* <150 */ 		else Scenes.CPM.setFill(Color.web(Scenes.Color_RED));
+							/* >350 */ 		if(calc > 350) Scenes.CPM.setStyle(Scenes.COLOR_GOLD_GRADIENT); else 
+							/* 250-350 */ 	if(calc > 250) Scenes.CPM.setFill(Color.web(Scenes.COLOR_GREEN)); else
+							/* 200-250 */ 	if(calc > 200) Scenes.CPM.setFill(Color.web(Scenes.COLOR_YELLOW)); else
+							/* 150-200 */	if(calc > 150) Scenes.CPM.setFill(Color.web(Scenes.COLOR_ORANGE));
+							/* <150 */ 		else Scenes.CPM.setFill(Color.web(Scenes.COLOR_RED));
 						}
 					}
 					lastUpdate = now;
@@ -372,7 +365,7 @@ public class Window extends Application {
 		};
 		
 		/* animating particles */
-		BACKGROUND_ANIMATION = new AnimationTimer() {
+		animation_background = new AnimationTimer() {
 
 			private long particle_create = 0;
 			private long particle_move = 0;
@@ -414,10 +407,10 @@ public class Window extends Application {
 				}
 			}
 			
-		}; BACKGROUND_ANIMATION.start();
+		}; animation_background.start();
 						
 		/* animating words */
-		WORDS_ANIMATION = new AnimationTimer() {
+		animation_words = new AnimationTimer() {
 						
 			private long lastUpdate = 0;
 			private long lastUpdate2 = 0;
@@ -440,36 +433,35 @@ public class Window extends Application {
 							
 							Scenes.missedVal.setText(String.valueOf(++strike));	// update missed and increase strikes
 							if(typedWords != 0) {
-								System.out.println("[STRIKE]: " +  strike);
+								String firstStrike = (strike == 1) ? "\n" : "";
+								System.out.println(firstStrike + "[STRIKE]: " +  strike);
 							}
 							
-							if(strike < 10) {
+							if(infinite || strike < 10) {
 								multiplier = 1;	// reset multiplier
 								
 								root.getChildren().remove(w);	// remove word from the pane
 								del.add(w);	// add word to deletion list
 							} else {
 								root.getChildren().removeAll(words);	// remove all objects
-								System.out.println();
 								curtain(scene, root);
 								break;
 							}
 						}
 						
-						/* lets leave the gays be */
-						if(!w.getValue().equals("I'm gay")) {
+						if(!w.getValue().equals("I'm gay")) {	// gay will remain proudly rainbowish
 							if(xPos > 370) {
-								w.setColor(Scenes.Color_YELLOW);
+								w.setColor(Scenes.COLOR_YELLOW);
 							}
 							if(xPos > 500) {
-								w.setColor(Scenes.Color_ORANGE);
+								w.setColor(Scenes.COLOR_ORANGE);
 							}
 							if(xPos > 630) {
-								w.setColor(Scenes.Color_RED);
+								w.setColor(Scenes.COLOR_RED);
 							}
 						}
 						
-						if(xPos > max_word_len) {
+						if(xPos > maxWordLen) {
 							fresh.remove(w);	// if word is further than longest word remove it from list of new words
 						}						
 					}
@@ -477,8 +469,8 @@ public class Window extends Application {
 					words.removeAll(del);
 					
 					if(words.isEmpty()) { // if no words are on the screen
-						if(!curtain) {
-							if(typedWords == 0) {	// if fist word wasn't typed end the game
+						if(!curtain) {	// and it's not the end of the game
+							if(typedWords == 0) {	// ANDD the first word wasn't typed end the game
 								curtain(scene, root);
 							} else {	// else generate new words
 								for(int i=0; i<howMany; i++) {		
@@ -493,7 +485,7 @@ public class Window extends Application {
 					lastUpdate = now;
 				}
 				
-				/* every [n] seconds add [m] new words if less than 17 are displayed */
+				/* every [n] seconds add [m] new words if less than [x] are displayed */
 				if(now - lastUpdate2 >= howOften && typedWords > 4) {
 					for(int i=0; i<howMany; i++) {		
 						if(words.size() < maxWords) {
@@ -502,11 +494,12 @@ public class Window extends Application {
 							words.add(word);
 							root.getChildren().add(word);
 						}
-					} lastUpdate2 = now;
+					}
+					lastUpdate2 = now;
 				}
 			}
 			
-		}; WORDS_ANIMATION.start();
+		}; animation_words.start();
 
 		Scenes.input.setOnKeyPressed(e -> {
 			
@@ -514,18 +507,18 @@ public class Window extends Application {
 			case ESCAPE:
 
 				if(!pause) {
-					WORDS_ANIMATION.stop();
-					BACKGROUND_ANIMATION.stop();
+					animation_words.stop();
+					animation_background.stop();
 					pauseTime = System.nanoTime();
-					System.out.println("Pause: " + pauseTime);
+					
 					Scenes.input.setEditable(false);
 					Scenes.pauseBox.setVisible(true);
 					Scenes.pauseBox.toFront();
 				} else {
-					WORDS_ANIMATION.start();
-					BACKGROUND_ANIMATION.start();
+					animation_words.start();
+					animation_background.start();
 					startTime = System.nanoTime() - (pauseTime - startTime);
-					System.err.println(startTime);
+					
 					Scenes.input.setEditable(true);
 					Scenes.pauseBox.setVisible(false);
 				}
@@ -562,8 +555,7 @@ public class Window extends Application {
 						
 						switch (typedWords) {
 						case 1:
-							startTime = System.nanoTime(); TIMER.start();	// after typing first word start timer for CPM
-							System.out.println(startTime);
+							startTime = System.nanoTime(); game_timer.start();	// after typing first word start timer for CPM
 							
 							/* add [m] new words */
 							for(int i=0; i<howMany; i++) {					
@@ -644,7 +636,7 @@ public class Window extends Application {
 		
 		/* there is 0.00043687199 chance at most, that it will happen, pls don't get mad */
 		if(value.equals("I'm gay")) {
-			w.setStyle(Scenes.Color_GAY_GRADIENT);
+			w.setStyle(Scenes.COLOR_GAY_GRADIENT);
 		}
 		
 		return w;
@@ -654,7 +646,6 @@ public class Window extends Application {
 				
 		if(args.length>0) {
 			for(String arg : args) {
-				
 				switch(arg) {
 					case "--log":
 						System.out.println("[OK] Logging enabled");
