@@ -6,16 +6,12 @@ import javafx.scene.text.Text;
 
 public class Word extends Text {
 	
-	private String value;
-
 	public Word(int x, int y, String value) {
 		this(x, y, value, "#FFF");
 	}
 	
 	public Word(int x, int y, String value, String color) {
 		super(value);
-		
-		this.value = value;
 	
 		setTranslateX(x);
 		setTranslateY(y);
@@ -25,23 +21,22 @@ public class Word extends Text {
 	}
 	
 	public void setColor(String color) {
-		setFill(Color.web(color));
+		this.setFill(Color.web(color));
 	}
 	
 	public int getLength() {
-		return value.length();
+		return this.getText().length();
 	}
 	
 	public void setValue(String s) {
-		setText(s);
-		value = s;
+		this.setText(s);
 	}
 	
 	public String getValue() {
-		return value;
+		return this.getText();
 	}
 	
 	public void moveForward() {
-		setTranslateX(getTranslateX() + 15);
+		this.setTranslateX(this.getTranslateX() + 15);
 	}
 }
