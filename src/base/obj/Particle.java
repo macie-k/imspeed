@@ -5,7 +5,7 @@ import javafx.scene.shape.Rectangle;
 
 public class Particle extends Rectangle {
 	
-	private double alpha;
+	private final double alpha;
 	
 	public Particle(double x, double y, double alpha) {
 		super(1, 1, Color.rgb(255, 255, 255, alpha));
