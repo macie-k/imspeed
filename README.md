@@ -43,8 +43,7 @@ Typing game inspired by bisqwit's "wspeed"
 ## How to use:
   * Just double click on `.exe` file or:
   * `java -jar imspeed.jar`
-  * For self testing use either the IDE launch option or the `run.bat`
-    - you'll need **JDK with JFX**
+  * optionally use `--log` argument
   
 **Sidenote:** `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program with a double-click.
 <br>
