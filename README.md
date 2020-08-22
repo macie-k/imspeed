@@ -16,7 +16,7 @@ Typing game inspired by bisqwit's "wspeed"
 </p>  
 <br>
 <p align="center">
-  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/85625655-1697ed00-b66c-11ea-880a-833b069b29a5.jpg">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/90965608-02386b00-e4ca-11ea-92f4-bc0417cff629.png">
 </p>
 
 <br>
