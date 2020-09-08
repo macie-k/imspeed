@@ -4,7 +4,7 @@ Typing game inspired by bisqwit's "wspeed"
 <br>  
 
 <p align="center">
-  <a href="https://www.buymeacoffee.com/maciekk" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee" height="50px"></a>
+  <a href="http://bit.ly/BuyMeACoffee-GitHub" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-black.png" alt="Buy Me A Coffee" height="50px"></a>
 </p>
 
 ## Download
