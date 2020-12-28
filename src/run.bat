@@ -1,15 +1,16 @@
 @echo off
 
-ECHO.
-
 SET CLASSPATH=".\base\*;.\menu\*;..\words\*;"
+SET JFX="%JAVA_HOME%\lib"
+SET MODULES="javafx.controls,javafx.base,javafx.graphics"
 
-javac -cp %CLASSPATH% .\base\Window.java
-java -cp %CLASSPATH% base.Window
+javac --module-path %JFXX% --add-modules javafx.controls,javafx.base,javafx.graphics -cp %CLASSPATH% .\base\Window.java
+java --module-path %JFXX% --add-modules javafx.controls,javafx.base,javafx.graphics -cp %CLASSPATH% base.Window
 
-ECHO Removing class files . . .
-ECHO.
-ECHO.
-del /s /q *.class > nul
+echo.
+echo Deleting .class files . . .
+echo ----------------------------
+del /s /q *.class
+echo ----------------------------
 
 pause

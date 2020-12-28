@@ -1,14 +1,5 @@
 package base;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -29,7 +20,7 @@ public class Scenes {
 	static AnimationTimer timer;
 	
 	static Text pointsVal = new Text("0");
-	static Text missedVal = new Text("0");
+	static Text conditionVal = new Text();	// create empty text and assign value later based on gamemode
 	static Text CPM = new Text("0");
 	static final StackPane pauseBox = new StackPane();
 		
@@ -42,13 +33,14 @@ public class Scenes {
 	
 	public static final TextField input = new TextField();
 	public static final Text pointer = createText(">", Color.WHITE, "Courier new", 15);
-	public static final ScaleBox[][] scales = new ScaleBox[3][10];
+	public static final Option[] gamemodes = {new Option(250, "Normal", 40, true),
+											new Option(290, "Marathon", 40, false)};
 	
-	public static String fontsPath;
-	
-	public static Option[] lngs;
-	public static Option[] diffs = new Option[5];;
+	public static ScaleBox[][] scales;
+	public static Option[] difficulties = new Option[5];
 	public static String[] loadedDifficulties = Words.loadDifficulties();
+	public static Option[] lngs;
+	public static String fontsPath;
 	
 		
 	public static Pane selectMenu(String type) {
@@ -56,26 +48,38 @@ public class Scenes {
 			root.setPrefSize(800, 500);
 			root.setStyle("-fx-background-color: rgb(14, 14, 14)");
 	
-		Text header = createText(type, Color.WHITE,"Grixel Kyrou 7 Wide Bold", 50);
+		Text header = createText(type, Color.WHITE, "Grixel Kyrou 7 Wide Bold", 50);
 			header.setTranslateX((800 - header.getLayoutBounds().getWidth())/2);
 			header.setTranslateY(130);
 		
 		root.getChildren().add(header);
 		
 		switch(type) {
+			case "GAMEMODE":
+				root.getChildren().addAll(gamemodes);
+				break;
+				
+			case "DIFFICULTY":
+				for(int i=0; i<5; i++) {
+					difficulties[i] = new Option((i==4) ? 345 : 220 + 25*i, loadedDifficulties[i], i==0);	// list all difficulties with one empty line for 'Custom'
+				}
+				root.getChildren().addAll(difficulties);
+				break;
+				
 			case "CUSTOM":
 				Text subHeader = createText("DIFFICULTY", Color.WHITE,"Grixel Kyrou 7 Wide Bold", 18);
 					subHeader.setTranslateX((800 - subHeader.getLayoutBounds().getWidth())/2);
 					subHeader.setTranslateY(120 + subHeader.getLayoutBounds().getHeight());
-			
+					
+				int startY = Window.gameMode == 0 ? 260 : 245;
 				StackPane sPaneText = new StackPane();
 					sPaneText.setTranslateX(245);
-					sPaneText.setTranslateY(260);
+					sPaneText.setTranslateY(startY);
 					sPaneText.setAlignment(Pos.CENTER_LEFT);
 					
 				StackPane sPaneScales = new StackPane();
 					sPaneScales.setTranslateX(385);
-					sPaneScales.setTranslateY(260);
+					sPaneScales.setTranslateY(startY);
 					sPaneScales.setAlignment(Pos.CENTER_LEFT);
 					
 				pointer.setTranslateX(-30);
@@ -88,21 +92,26 @@ public class Scenes {
 				Text howMany = createText("Amount", Color.WHITE, "Courier new", 16);
 					howMany.setTranslateY(60);
 					
-				for(int i=0; i<3; i++) {
+				Text startTime = createText(Window.gameMode == 0 ? "" : "Start time", Color.WHITE, "Courier new", 16);	
+					startTime.setTranslateY(90);
+										
+				scales = new ScaleBox[Window.gameMode == 0 ? 3 : 4][10];
+				for(int i=0; i<scales.length; i++) {
 					for(int j=0; j<10; j++) {
 						int x = j*17; int y = i*30;
 						scales[i][j] = new ScaleBox(x, y);	// 
 						sPaneScales.getChildren().add(scales[i][j]);
 					}
 				}
-					
-				sPaneText.getChildren().addAll(pointer, howFast, howOften, howMany);
+				
+				
+				sPaneText.getChildren().addAll(pointer, howFast, howOften, howMany, startTime);
 				root.getChildren().addAll(subHeader, sPaneText, sPaneScales);
 				break;
 				
 			case "LANGUAGES":
 				String[][] loadedLanguages = Words.loadLanguages();
-				lngs = new Option[Words.how_many_lngs];	// needs to be defined later because before 'Words.loadLanguages()' is called 'how_many_lngs' will be 0
+				lngs = new Option[Words.how_many_lngs];	// needs to be defined here because before 'Words.loadLanguages()' is called 'how_many_lngs' will be 0
 				
 				/* load all available languages */
 				for(int i=0; i<Words.how_many_lngs; i++) {
@@ -110,16 +119,8 @@ public class Scenes {
 				}
 				root.getChildren().addAll(lngs);
 				break;
-				
-			case "DIFFICULTY":
-				for(int i=0; i<5; i++) {
-					diffs[i] = new Option((i==4) ? 345 : 220 + 25*i, loadedDifficulties[i], i==0);	// list all difficulties with one empty line for 'Custom'
-				}
-				root.getChildren().addAll(diffs);
-				break;
 		}
-			
-		return root;
+		return root;	// return pane with selected elements
 	}
 	
 	public static Pane gameOver() {
@@ -176,14 +177,14 @@ public class Scenes {
 			pointsVal.setTranslateX(50+10*pointsLen);
 			pointsVal.setFont(Font.font("Courier new", 17));
 		
-		Text missedText = new Text("Missed: ");
-			missedText.setFill(Color.WHITE);
-			missedText.setTranslateX(230);
-			missedText.setFont(Font.font("Courier new", 17));
+		Text conditionText = new Text(Window.gameMode == 0 ? "Missed: " : "Time left: ");	// if default gamemode, set "Missed" else "Time left" for marathon mode
+			conditionText.setFill(Color.WHITE);
+			conditionText.setTranslateX(230);
+			conditionText.setFont(Font.font("Courier new", 17));
 			
-			missedVal.setFill(Color.web(COLOR_RED));
-			missedVal.setTranslateX(310);
-			missedVal.setFont(Font.font("Courier new", 17));
+			conditionVal.setFill(Color.web(COLOR_RED));
+			conditionVal.setTranslateX(conditionText.getTranslateX() + conditionText.getLayoutBounds().getWidth());
+			conditionVal.setFont(Font.font("Courier new", 17));
 		
 		Text CPMText = new Text("CPM: ");
 			CPMText.setFill(Color.WHITE);
@@ -236,7 +237,7 @@ public class Scenes {
 			topStack.setTranslateY(425);
 			topStack.setMaxWidth(800);
 			topStack.setPrefWidth(800);
-		topStack.getChildren().addAll(pointsText, pointsVal, missedText, missedVal);
+		topStack.getChildren().addAll(pointsText, pointsVal, conditionText, conditionVal);
 				
 		StackPane bottomStack = new StackPane();
 			bottomStack.setTranslateX(0);
@@ -299,52 +300,70 @@ public class Scenes {
 		return t;
 	}
 	
-	/* spaghetti for downloading and loading fonts */
 	public static void fontSetup() {
+		/* list of required font names */
+		String[] fontNames = {
+				"Grixel Kyrou 7 Wide Bold.ttf",
+				"Courier New.ttf",
+				"Courier New Bold.ttf"
+		};
 		
-		/* fonts to be loaded */
-		String[] fontNames = {	"Kyrou 7 Wide Bold.ttf",
-								"Courier New.ttf",
-								"Courier New Bold.ttf" };	
-				
-		fontsPath = Window.saveDirectory;
-		
-		if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {		// if 'imspeed' folder doesn't exist and cannot be created throw an error
-			System.err.println("[ERROR] Could not create 'imspeed' directory");
-		} else {
-			fontsPath += "fonts" + Window.slash;	// add 'fonts' to the path with OS-dependent slash
-			
-			if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {		// if 'fonts' folder doesn't exist and cannot be created throw an error
-				System.err.println("[ERROR] Could not create 'fonts' directory");
-			} else {
-				
-				for(int i=0; i<fontNames.length; i++) {		// iterate all fonts
-					if(!new File(fontsPath + fontNames[i]).exists()) {
-						try {
-							URL font = new URL("https://kazmierczyk.me/--imspeed/" + URLEncoder.encode(fontNames[i], "UTF-8").replace("+", "%20"));		// change encoding for url
-							InputStream url = font.openStream();
-							Files.copy(url, Paths.get(fontsPath + fontNames[i]));	// download fonts from private hosting and save in dedicated folder
-							url.close();
-							System.out.println("[OK] Success downloading {" + fontNames[i] + "}");
-						} catch (Exception e) {
-							System.err.println("[ERROR] Could not download font: " + e);
-						}		
-					} else {
-						System.out.println("[OK] {" + fontNames[i] + "} already downloaded");
-					}
-				}
-			}
-		}
-		
-		/* load every front */
-		for(int i=0; i<fontNames.length; i++) {
+		/* load each font */
+		for(String font : fontNames) {
 			try {
-				InputStream font = new FileInputStream(fontsPath + fontNames[i]);
-				Font.loadFont(font, 15);
-			} catch (FileNotFoundException e) {
-				System.err.println("[Error] Could not load font file: " + e);
+				Font.loadFont(Scenes.class.getResourceAsStream("/resources/fonts/" + font), 20);
+			} catch (Exception e) {
+				System.err.println(String.format("Unable to load font {%s}: {%s}", font, e));
 			}
-		} System.out.println();
+		}		
 	}
+	
+	/* spaghetti for downloading and loading fonts */
+//	public static void fontSetup() {
+//		
+//		/* fonts to be loaded */
+//		String[] fontNames = {	"Grixel Kyrou 7 Wide Bold.ttf",
+//								"Courier New.ttf",
+//								"Courier New Bold.ttf" };	
+//				
+//		fontsPath = Window.saveDirectory;
+//		
+//		if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {		// if 'imspeed' folder doesn't exist and cannot be created throw an error
+//			System.err.println("[ERROR] Could not create 'imspeed' directory");
+//		} else {
+//			fontsPath += "fonts" + Window.slash;	// add 'fonts' to the path with OS-dependent slash
+//			
+//			if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {		// if 'fonts' folder doesn't exist and cannot be created throw an error
+//				System.err.println("[ERROR] Could not create 'fonts' directory");
+//			} else {
+//				
+//				for(int i=0; i<fontNames.length; i++) {		// iterate all fonts
+//					if(!new File(fontsPath + fontNames[i]).exists()) {
+//						try {
+//							URL font = new URL("https://kazmierczyk.me/--imspeed/" + URLEncoder.encode(fontNames[i], "UTF-8").replace("+", "%20"));		// change encoding for url
+//							InputStream url = font.openStream();
+//							Files.copy(url, Paths.get(fontsPath + fontNames[i]));	// download fonts from private hosting and save in dedicated folder
+//							url.close();
+//							System.out.println("[OK] Success downloading {" + fontNames[i] + "}");
+//						} catch (Exception e) {
+//							System.err.println("[ERROR] Could not download font: " + e);
+//						}		
+//					} else {
+//						System.out.println("[OK] {" + fontNames[i] + "} already downloaded");
+//					}
+//				}
+//			}
+//		}
+//		
+//		/* load every front */
+//		for(int i=0; i<fontNames.length; i++) {
+//			try {
+//				InputStream font = new FileInputStream(fontsPath + fontNames[i]);
+//				Font.loadFont(font, 15);
+//			} catch (FileNotFoundException e) {
+//				System.err.println("[Error] Could not load font file: " + e);
+//			}
+//		} System.out.println();
+//	}
 	
 }

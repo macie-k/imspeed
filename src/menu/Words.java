@@ -22,6 +22,12 @@ public class Words {
 	public static int how_many_lngs;
 	
 	public static String[] loadDifficulties() {
+//		String infinitySymbol = null;
+//		try {
+//		    infinitySymbol = new String(String.valueOf(Character.toString('\u221E')).getBytes("UTF-8"), "UTF-8");
+//		} catch (UnsupportedEncodingException ex) {
+//		    infinitySymbol = "Infinite";
+//		}
 		return new String[] {"Easy", "Normal", "Hard", "Asian", "Custom"};
 	}
 	

@@ -30,13 +30,12 @@ import menu.Words;
 public class Window extends Application {
 	
 	public static final Color BACKGROUND = Color.web("#0e0e0e");
-	public static int gameDifficulty;
 	public static Stage window;
 	public static long howOften, howFast;
 	public static int maxWords, howMany;
+	public static int timeLeft;
 	public static double multiplierAdd;
 	public static boolean saved = false;
-	public static boolean infinite = false;
 	
 	public static String slash = "\\";	// path slash dependent on OS
 	static String saveDirectory;	// directory to save score and fonts
@@ -53,6 +52,9 @@ public class Window extends Application {
 	private static double multiplier;
 	private static long startTime, pauseTime;
 	
+	public static int gameDifficulty;
+	public static int gameMode;
+	public static boolean infinite = false;
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -66,10 +68,10 @@ public class Window extends Application {
 		}
 		
 		window = primaryStage;
-		window.getIcons().add(new Image("/icon.jpg"));
+		window.getIcons().add(new Image("/resources/img/icon.jpg"));
 
 		Scenes.fontSetup();
-		Select.selectDifficulty();
+		Select.selectGamemode();
 		
 		window.setTitle("I'm speed");
 		window.setResizable(false);
@@ -205,7 +207,7 @@ public class Window extends Application {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
             if (e.getCode() == KeyCode.ENTER) {
             	animation_gameover.stop();	System.out.println(); 
-            	Select.selectDifficulty(); 
+            	Select.selectGamemode(); 
             } e.consume();
         });
 	}
@@ -244,7 +246,6 @@ public class Window extends Application {
 		points = -7;		
 		CPMs.clear();
 		
-		Scenes.missedVal.setText("0");
 		Scenes.CPM.setText("0");
 		Scenes.pointsVal.setText("0");	
 
@@ -286,6 +287,7 @@ public class Window extends Application {
 			howOften = 7_000_000_000l;
 			howFast = 1_650_000_000;
 			howMany = 3;
+			timeLeft = 25;
 			break;
 		
 		case 2:
@@ -294,6 +296,7 @@ public class Window extends Application {
 			howOften = 6_000_000_000l;
 			howFast = 750_000_000;
 			howMany = 5;
+			timeLeft = 15;
 			break;
 		
 		case 3:
@@ -302,6 +305,7 @@ public class Window extends Application {
 			howOften = 5_500_000_000l;
 			howFast = 650_000_000;
 			howMany = 6;
+			timeLeft = 10;
 			break;
 		
 		case 4:
@@ -310,17 +314,16 @@ public class Window extends Application {
 			howOften = 4_500_000_000l;
 			howFast = 550_000_000;
 			howMany = 6;
+			timeLeft = 5;
 			break;
 		
 		case 5:
 			maxWords = 100;
 			break;
-		
-		case 6:
-			infinite = true;
-			break;
-			
+					
 		}
+		
+		Scenes.conditionVal.setText(Window.gameMode == 0 ? "0" : String.valueOf(timeLeft));
 		
 		/* timer for calculating CPM */
 		game_timer = new AnimationTimer() {
@@ -336,6 +339,14 @@ public class Window extends Application {
 				
 				/* every 1s */
 				if(now - lastUpdate >= 1_000_000_000) {
+					
+					if(gameMode == 1) {
+						Scenes.conditionVal.setText(String.valueOf(--timeLeft));
+						if(timeLeft <= 0) {
+							root.getChildren().removeAll(words);	// remove all objects
+							curtain(scene, root);
+						}
+					}
 					
 					/* calculating CPM */
 					totalSeconds = (now - startTime) / 1_000_000_000l;
@@ -422,30 +433,43 @@ public class Window extends Application {
 				 
 				if(now - lastUpdate >= howFast) {
 					List<Word> del = new ArrayList<Word>();		// list of words to deletion after loop
+					boolean gameOver = false;
 					
-					for(Word w : words) {
+		outerloop: for(Word w : words) {
 						
-						if(curtain) break;
+						if(curtain) {
+							break;
+						}
 						w.moveForward(); 	// move all words forward
 						
 						double xPos = w.getTranslateX();
 						if(xPos > 805) {	// if word leaves beyond the window
 							
-							Scenes.missedVal.setText(String.valueOf(++strike));	// update missed and increase strikes
-							if(typedWords != 0) {
-								String firstStrike = (strike == 1) ? "\n" : "";
-								System.out.println(firstStrike + "[STRIKE]: " +  strike);
-							}
+							multiplier = 1;	// reset multiplier
+							root.getChildren().remove(w);	// remove word from the pane
+							del.add(w);	// add word to deletion list
 							
-							if(infinite || strike < 10) {
-								multiplier = 1;	// reset multiplier
-								
-								root.getChildren().remove(w);	// remove word from the pane
-								del.add(w);	// add word to deletion list
-							} else {
-								root.getChildren().removeAll(words);	// remove all objects
-								curtain(scene, root);
-								break;
+							switch(gameMode) {
+								case 0:
+									Scenes.conditionVal.setText(String.valueOf(++strike));	// update missed and increase strikes
+									if(typedWords != 0) {
+										String firstStrike = (strike == 1) ? "\n" : "";		// case for first strike to print new line
+										System.out.println(firstStrike + "[STRIKE]: " +  strike);
+									}
+									if(!infinite && strike >= 10) {
+										gameOver = true;
+										break outerloop;
+									}
+									break;
+								case 1:
+									timeLeft -= 10;
+									if(timeLeft <= 0) {
+										gameOver = true;
+										break outerloop;
+									} else {
+										Scenes.conditionVal.setText(String.valueOf(timeLeft));
+									}
+									break;
 							}
 						}
 						
@@ -466,11 +490,16 @@ public class Window extends Application {
 						}						
 					}
 					
-					words.removeAll(del);
+					if(gameOver) {
+						root.getChildren().removeAll(words);	// remove all objects
+						curtain(scene, root);
+					} else {
+						words.removeAll(del);
+					}
 					
 					if(words.isEmpty()) { // if no words are on the screen
 						if(!curtain) {	// and it's not the end of the game
-							if(typedWords == 0) {	// ANDD the first word wasn't typed end the game
+							if(typedWords == 0) {	// and the first word wasn't typed end the game
 								curtain(scene, root);
 							} else {	// else generate new words
 								for(int i=0; i<howMany; i++) {		
@@ -538,8 +567,9 @@ public class Window extends Application {
 				for(Word w : words) {
 					
 					if(w.getValue().equals(Scenes.input.getText())) {	// if typed word is equal to eny currently displayed
-										
-						points += w.getLength()*multiplier; // add points accordingly to multiplier,
+						
+						timeLeft += (typedWords > 0) ? w.getLength()/3*multiplier : 0;	// for marathon add time for typed word
+						points += w.getLength()*multiplier; // add points accordingly to multiplier
 						multiplier += multiplierAdd;	// increase multiplier
 						typedWords++; typedChars += w.getValue().length();	// increase the amount of typed words and characters
 							

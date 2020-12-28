@@ -15,12 +15,23 @@ public class Option extends StackPane {
 	private boolean checked = false;
 	private Text checkVal;
 	
-	/* Constructor for difficulties */
+	/* short constructor with default height */
 	public Option(int y, String value, boolean highlighted) {
-		this(y, "", value, highlighted);
+		this(y, "", value, 25, highlighted);
 	}
 	
-	public Option(int y, String checkVal, String value, boolean highlighted) {	
+	/* custom height constructor */
+	public Option(int y, String value, int height, boolean highlighted) {
+		this(y, "", value, height, highlighted);
+	}
+	
+	/* for old declarations */
+	public Option(int y, String checkVal, String value, boolean hightlighed) {
+		this(y, checkVal, value, 25, hightlighed);
+	}
+	
+	/* constructor for languages (or anything requiring checkbox) */
+	public Option(int y, String checkVal, String value, int height, boolean highlighted) {	
 						
 		int textX = 240;
 		int bgX = 240;
@@ -36,7 +47,7 @@ public class Option extends StackPane {
 		this.value.setTranslateY(y);
 		this.value.setFont(Font.font("Courier new", 14));
 		
-		background = new Rectangle(bgWidth, 25, Color.WHITE);
+		background = new Rectangle(bgWidth, height, Color.WHITE);
 		background.setTranslateX(bgX);
 		background.setTranslateY(y);
 		
@@ -54,6 +65,10 @@ public class Option extends StackPane {
 	
 	public boolean getChecked() {
 		return this.checked;
+	}
+	
+	public String getValue() {
+		return this.value.getText();
 	}
 	
 	public void setHighlighted(boolean highlighted) {
