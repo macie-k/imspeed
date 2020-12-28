@@ -9,7 +9,7 @@ Typing game inspired by bisqwit's "wspeed"
 
 ## Download
 
-* Download the latest release [here](https://bit.ly/imspeed-releases)  
+- Download the latest release [here](https://bit.ly/imspeed-releases)  
 
 <br>
 
@@ -27,8 +27,8 @@ Typing game inspired by bisqwit's "wspeed"
 
 ## Requirements
 
-* [`Java`](https://www.java.com/download/)
-* **`JAVA_HOME` System Variable leading to JRE root directory.** - if using `.exe`
+- [`Java`](https://www.java.com/download/)
+- **`JAVA_HOME` System Variable leading to JRE root directory.** - if using `.exe`
 
 ![JAVA_HOME](https://user-images.githubusercontent.com/25122875/90809392-b054e100-e321-11ea-854e-09486aa8f21f.png)
 
@@ -36,17 +36,22 @@ Typing game inspired by bisqwit's "wspeed"
 
 ## General info
 
-* Make sure `words` folder is in the same directory as the game
-* **Custom languages** can be added by editing `.words` files
-* `fonts` folder is optional, in case the downloading doesn't work
+- Make sure `words` folder is in the same directory as the game
+- **Custom languages** can be added by editing `.words` files
+- `fonts` folder is optional, in case the downloading doesn't work
    
 <br>
 
 
 ## How to use:
-  * Just double click on `.exe` file or:
-  * `java -jar imspeed.jar`
-  * Optionally use `--log` argument if something doesn't work
+  - Just double click on `.exe` file or:
+  - `java -jar imspeed.jar`
+  - Optionally use `--log` argument if something doesn't work
   
-**Sidenote:** `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program with a double-click.
+<br>
+
+## Sidenotes
+- `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program with a double-click.
+- Versions **below 3.x** are will no longer load fonts correctly  
+
 <br>
