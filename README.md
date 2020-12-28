@@ -52,6 +52,6 @@ Typing game inspired by bisqwit's "wspeed"
 
 ## Sidenotes
 - `.exe` file is in fact a wrapped jar, allowing for the icon and to run the program with a double-click.
-- Versions **below 3.x** are will no longer load fonts correctly  
+- Versions **below 3.x** will no longer load fonts correctly  
 
 <br>
