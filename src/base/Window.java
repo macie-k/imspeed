@@ -61,6 +61,7 @@ public class Window extends Application {
 
 		Scenes.fontSetup();
 		Select.selectGamemode();
+		Utils.createScoreboard();
 		
 		window.setTitle("I'm speed");
 		window.setResizable(false);
@@ -160,6 +161,7 @@ public class Window extends Application {
 			avgCPM = 0;
 		}
 		
+		/* dont log on close */
 		if(!closed) {
 			System.out.println();
 			Log.warning("[GAME OVER]");

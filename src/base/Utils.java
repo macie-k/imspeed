@@ -1,9 +1,11 @@
 package base;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -35,18 +37,13 @@ public class Utils {
 	private static int save_retry = 0;
 	
 	/* creates data file and sets new key */
-	public static void createData() {		
+	public static void createScoreboard() {
+		new File(SAVE_DIR).mkdir();
 		try {
 			/* copy template data to byte array */
-			InputStream privateData = Window.class.getResourceAsStream(PATH_SCORE_TEMPLATE);
-				byte[] privateBytes = new byte[privateData.available()];
-				privateData.read(privateBytes);
-				privateData.close();
-
-			/* write byte array to data file in game folder */
-			FileOutputStream publicData = new FileOutputStream(PATH_SCORE_PUBLIC);
-				publicData.write(privateBytes);
-				publicData.close();
+			InputStream privateData = Window.class.getResourceAsStream(PATH_SCORE_TEMPLATE);				
+			Files.copy(privateData, Paths.get(PATH_SCORE_PUBLIC), StandardCopyOption.REPLACE_EXISTING);
+			privateData.close();
 				
 			/* set new key */
 			if(setDataKey(getNewKey())) {
@@ -94,13 +91,13 @@ public class Utils {
 	/* saves score to scoreboard file */
 	public static boolean saveScore(String scoreStr) {
 		if(!fileExists(PATH_SCORE_PUBLIC)) {
-			createData();
+			createScoreboard();
 		} else {
 			if(isCorrectHash()) {
 				Log.success("Hash is correct");
 			} else {
 				Log.warning("Hash is incorrect, reseting...");
-				createData();
+				createScoreboard();
 			}
 		}
 		
