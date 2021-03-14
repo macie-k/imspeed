@@ -54,14 +54,12 @@ public class Window extends Application {
 	public static boolean infinite = false;
 	
 	@Override
-	public void start(Stage primaryStage) throws Exception {
-					
+	public void start(Stage primaryStage) throws Exception {	
 		window = primaryStage;
 		window.getIcons().add(new Image("/resources/img/icon.jpg"));
 
 		Scenes.fontSetup();
 		Select.selectGamemode();
-		Utils.createScoreboard();
 		
 		window.setTitle("I'm speed");
 		window.setResizable(false);

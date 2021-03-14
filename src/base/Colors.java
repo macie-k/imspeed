@@ -3,7 +3,6 @@ package base;
 import javafx.scene.paint.Color;
 
 public interface Colors {
-	
 	public static final String BACKGROUND = "#0E0E0E";
 	public static final String COLOR_RED = "#FF554D";
 	public static final String COLOR_ORANGE = "#FCA103";
