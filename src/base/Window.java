@@ -27,18 +27,16 @@ import javafx.stage.Stage;
 import menu.Select;
 import menu.Words;
 
+import static base.Utils.createWord;
 public class Window extends Application {
 	
-	public static final Color BACKGROUND = Color.web("#0e0e0e");
 	public static Stage window;
 	public static long howOften, howFast;
 	public static int maxWords, howMany;
 	public static int timeLeft;
 	public static double multiplierAdd;
 	public static boolean saved = false;
-	
-	public static String slash = "\\";	// path slash dependent on OS
-	static String saveDirectory;	// directory to save score and fonts
+	public static List<Integer> xVal, yVal;
 	
 	static double points;
 	static final List<Integer> CPMs = new ArrayList<Integer>();	// list of all registered CPMs [for average calculating]
@@ -46,7 +44,6 @@ public class Window extends Application {
 	static double totalSeconds;
 	
 	private static AnimationTimer animation_words, animation_background, animation_gameover, animation_curtain, game_timer;
-	private static List<Integer> xVal, yVal;
 	private static boolean curtain, pause = false;
 	private static int typedWords, typedChars, maxWordLen = 0;
 	private static double multiplier;
@@ -58,15 +55,7 @@ public class Window extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-				
-		/* Assume OS is windows, else change the variables */
-		if(System.getProperty("os.name").toLowerCase().equals("linux")) {
-			slash = "/";
-			saveDirectory = System.getenv("HOME") + "/.imspeed/";
-		} else {
-			saveDirectory = System.getenv("appdata") + "\\imspeed\\";
-		}
-		
+					
 		window = primaryStage;
 		window.getIcons().add(new Image("/resources/img/icon.jpg"));
 
@@ -76,7 +65,7 @@ public class Window extends Application {
 		window.setTitle("I'm speed");
 		window.setResizable(false);
 		window.show();
-		window.setOnCloseRequest(e -> gameOver());	// save the score when game is exited via [x] button
+		window.setOnCloseRequest(e -> gameOver(true));	// save the score when game is exited via [x] button
 	}
 		
 	public static void error(String err) {
@@ -97,12 +86,13 @@ public class Window extends Application {
 	public static void curtain(Scene scene, Pane root) {
 		
 		game_timer.stop();	// stop the CPM timer
+		
 		curtain = true;
 		
-		Rectangle cover = new Rectangle(800, 500, BACKGROUND);
+		Rectangle cover = new Rectangle(800, 500, Colors.BACKGROUND_C);
 			cover.setVisible(false);
 			
-		root.getChildren().add(new Rectangle(800, 500, BACKGROUND));
+		root.getChildren().add(cover);
 		
 		List<CurtainBlock> blocks = new ArrayList<>();
 		
@@ -154,7 +144,12 @@ public class Window extends Application {
 		}; animation_curtain.start();
 	}
 	
+	/* fallback function */
 	public static void gameOver() {
+		gameOver(false);
+	}
+	
+	public static void gameOver(boolean closed) {
 		
 		if(CPMs.size() > 0) {
 			for(int c : CPMs) {
@@ -165,15 +160,16 @@ public class Window extends Application {
 			avgCPM = 0;
 		}
 		
-		System.out.println("\n[GAME OVER]\n");
-		System.out.printf("[OK] Total game time: %s:%s:%s\n",
-				Save.formatTimePlayed(totalSeconds)[0],
-				Save.formatTimePlayed(totalSeconds)[1],
-				Save.formatTimePlayed(totalSeconds)[2]);
+		if(!closed) {
+			System.out.println();
+			Log.warning("[GAME OVER]");
+			final String[] t = Utils.formatTimePlayed(totalSeconds);
+			Log.success(String.format("Total game time: %s:%s:%s", t[0], t[1], t[2]));
+		}
 
 		/* because gameOver() is called whenever the window is closed, check if there is anything to save, else return */
 		if(!saved && points > 0) {
-			Save.saveScore(Scenes.pointsVal.getText());
+			Utils.saveScore(Scenes.pointsVal.getText());
 		}
 		
 		Pane root = Scenes.gameOver();
@@ -185,10 +181,14 @@ public class Window extends Application {
 			retry.setTranslateY(370);
 			retry.setFont(Font.font("Courier new", 11));
 				
-		Scene scene = new Scene(root);
 		root.getChildren().add(retry);
+			root.setOpacity(0);
 		
+		Scene scene = new Scene(root);
+			scene.setFill(Colors.BACKGROUND_C);
+			
 		window.setScene(scene);
+		Utils.fadeIn(root, 300);
 		
 		animation_gameover = new AnimationTimer() {
 			
@@ -359,14 +359,16 @@ public class Window extends Application {
 						Scenes.CPM.setText(String.valueOf(calc));
 
 						if(calc == 69) {
-							Scenes.CPM.setStyle(Scenes.COLOR_GAY_GRADIENT);  
+							Scenes.CPM.setStyle(Colors.COLOR_GAY_GRADIENT);  
 						} else {
 							/* ranges for color change */
-							/* >350 */ 		if(calc > 350) Scenes.CPM.setStyle(Scenes.COLOR_GOLD_GRADIENT); else 
-							/* 250-350 */ 	if(calc > 250) Scenes.CPM.setFill(Color.web(Scenes.COLOR_GREEN)); else
-							/* 200-250 */ 	if(calc > 200) Scenes.CPM.setFill(Color.web(Scenes.COLOR_YELLOW)); else
-							/* 150-200 */	if(calc > 150) Scenes.CPM.setFill(Color.web(Scenes.COLOR_ORANGE));
-							/* <150 */ 		else Scenes.CPM.setFill(Color.web(Scenes.COLOR_RED));
+					 		if(calc > 350) Scenes.CPM.setStyle(Colors.COLOR_GOLD_GRADIENT);  /* >350 */
+					 		else Scenes.CPM.setFill(
+								(calc > 250) ? Colors.COLOR_GREEN_C :		/* 250-350 */
+								(calc > 200) ? Colors.COLOR_YELLOW_C :		/* 200-250 */
+								(calc > 150) ? Colors.COLOR_ORANGE_C :		/* 150-200 */
+								Colors.COLOR_RED_C							/* <150 */
+							);						 		
 						}
 					}
 					lastUpdate = now;
@@ -454,7 +456,7 @@ public class Window extends Application {
 									Scenes.conditionVal.setText(String.valueOf(++strike));	// update missed and increase strikes
 									if(typedWords != 0) {
 										String firstStrike = (strike == 1) ? "\n" : "";		// case for first strike to print new line
-										System.out.println(firstStrike + "[STRIKE]: " +  strike);
+										Log.warning(firstStrike + "[STRIKE]: " +  strike);
 									}
 									if(!infinite && strike >= 10) {
 										gameOver = true;
@@ -475,13 +477,13 @@ public class Window extends Application {
 						
 						if(!w.getValue().equals("I'm gay")) {	// gay will remain proudly rainbowish
 							if(xPos > 370) {
-								w.setColor(Scenes.COLOR_YELLOW);
+								w.setColor(Colors.COLOR_YELLOW);
 							}
 							if(xPos > 500) {
-								w.setColor(Scenes.COLOR_ORANGE);
+								w.setColor(Colors.COLOR_ORANGE);
 							}
 							if(xPos > 630) {
-								w.setColor(Scenes.COLOR_RED);
+								w.setColor(Colors.COLOR_RED);
 							}
 						}
 						
@@ -629,56 +631,13 @@ public class Window extends Application {
 		});
 	}
 	
-	/* function to calculate new word's position and value */
-	public static Word createWord(List<String> strings, List<Integer> xVal_final, List<Integer> yVal_final, List<Word> fresh) {
-		
-		if(xVal.size() < 1) {
-			xVal = new ArrayList<>(xVal_final);
-		}
-		if(yVal.size() < 1) {
-			yVal = new ArrayList<>(yVal_final);
-		}
-		
-		Random random = new Random();
-
-		/* get random indexes */
-		int rndmx = random.nextInt(xVal.size());	
-		int rndmy = random.nextInt(yVal.size());
-	
-		String value = strings.get(random.nextInt(strings.size()));		// get random text from all words
-		
-		/* set x,y and remove them from lists */
-		int y = yVal.get(rndmy);
-			yVal.remove(rndmy);
-		int x = xVal.get(rndmx);
-			xVal.remove(rndmx);
-		
-		/* check for word collision in the same row and calculate the final x coordinate */
-		for(Word w : fresh) {
-			if(w.getTranslateY() == y) {
-				while(w.getTranslateX() <= (value.length()*9)+x+20) {
-					x -= 5;
-				}
-			}
-		}	
-		
-		Word w = new Word(x, y, value);
-		
-		/* there is 0.00043687199 chance at most, that it will happen, pls don't get mad */
-		if(value.equals("I'm gay")) {
-			w.setStyle(Scenes.COLOR_GAY_GRADIENT);
-		}
-		
-		return w;
-	}
-	
 	public static void main (String[] args) throws FileNotFoundException {
 				
 		if(args.length>0) {
 			for(String arg : args) {
 				switch(arg) {
 					case "--log":
-						System.out.println("[OK] Logging enabled");
+						Log.success("Logging enabled");
 						
 						PrintStream outputLog = new PrintStream(new FileOutputStream(new File("log.txt")));
 							System.setOut(outputLog);

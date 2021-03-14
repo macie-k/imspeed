@@ -2,7 +2,6 @@ package menu;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
 import menu.obj.Option;
 
 import java.io.File;
@@ -12,8 +11,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import base.Log;
 import base.Scenes;
 import base.Window;
+import static base.Window.window;
 
 public class Select {
 	
@@ -25,8 +26,6 @@ public class Select {
 	private static int row;
 	private static int how_many_lngs;
 	
-	private final static Stage window = Window.window;
-
 	
 	public static void selectGamemode() {
 		row = 0; setHighlight(Scenes.gamemodes);
@@ -50,7 +49,7 @@ public class Select {
 					
 				case ENTER:
 					Window.gameMode = row;
-					System.out.println("[OK] Gamemode: " + Scenes.gamemodes[row].getValue());
+					Log.success("Gamemode: " + Scenes.gamemodes[row].getValue());
 					Select.selectDifficulty();
 					break;
 					
@@ -86,7 +85,7 @@ public class Select {
 					if(row == 4) {
 						customDifficulty(false);
 					} else {
-						System.out.println("[OK] Difficulty: " + Scenes.loadedDifficulties[row]);
+						Log.success("Difficulty: " + Scenes.loadedDifficulties[row]);
 						selectLanguage(false);
 					}
 					break;
@@ -102,7 +101,7 @@ public class Select {
 	}
 	
 	/* custom difficulty selection */
-	public static void customDifficulty(boolean infinite) {
+	private static void customDifficulty(boolean infinite) {
 		
 		row=0; 
 		Scenes.pointer.setTranslateY(0);
@@ -162,13 +161,13 @@ public class Select {
 					Window.gameDifficulty = 5;
 					
 					int hF = x[0]+1; int hO = x[1]+1; int hM = x[2]+1; int tL = x[3]+1;
-					System.out.println("[OK] Difficulty: Custom ["
-																+ hF + ":"
-																+ hO + ":"
-																+ hM
-																+ (Window.gameMode == 0 ? "" : ":"+tL)
-																+ "]"
-																+ ((infinite) ? " :: Infinite" : ""));
+					Log.success("Difficulty: Custom ["
+									+ hF + ":"
+									+ hO + ":"
+									+ hM
+									+ (Window.gameMode == 0 ? "" : ":"+tL)
+									+ "]"
+									+ ((infinite) ? " :: Infinite" : ""));
 					
 					parseCustom(hF, hO, hM, tL);
 					selectLanguage(true);
@@ -180,7 +179,7 @@ public class Select {
 		});		
 	}
 	
-	static void parseCustom(int howFast, int howOften, int howMany, int timeLeft) {
+	private static void parseCustom(int howFast, int howOften, int howMany, int timeLeft) {
 		Window.howMany = howMany;
 		Window.howFast = 1_650_000_000 - 150_000_000*howFast;
 		Window.howOften = 8_000_000_000l - 500_000_000*howOften;
@@ -189,7 +188,7 @@ public class Select {
 	}
 	
 	/* select languages */
-	public static void selectLanguage(boolean custom) {
+	private static void selectLanguage(boolean custom) {
 		
 		// reset stuff
 		selected_lng_files.clear();
@@ -242,8 +241,12 @@ public class Select {
 					}
 									
 					if(!Words.loadWords(selected_lng_files).isEmpty()) {
-							System.out.print("[OK] Languages: ");
-							selected_lng_names.forEach(sln -> System.out.print("{" + sln + "} ")); System.out.println();
+							String lngs = "";
+							for(String s : selected_lng_names) {
+								lngs += "{" + s + "} ";
+							}
+							Log.success("Languages: " + lngs);
+							
 						Window.startGame(selected_lng_files);
 					}
 					break;
@@ -261,22 +264,22 @@ public class Select {
 		});
 	}
 	
-	static void setCheck() {
+	private static void setCheck() {
 		Scenes.lngs[row].setChecked(!Scenes.lngs[row].getChecked());
 	}
 	
-	static void setHighlight(Option[] tab) {
+	private static void setHighlight(Option[] tab) {
 		int index = 0;
 		for (Option o : tab) {
 			o.setHighlighted(index++ == row);
 		}
 	}
 		
-	static boolean isEmpty(int y) {
+	private static boolean isEmpty(int y) {
 		try {
 			return !(Files.lines(Paths.get(Words.listOfFiles[y].toString())).count() > 1);
 		} catch (IOException e) {
-			System.err.println("[ERROR] Could not read file: " + e);
+			Log.error("Could not read file: " + e);
 			return true;
 		}
 	}

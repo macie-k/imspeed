@@ -1,6 +1,6 @@
 package menu.obj;
 
-import base.Window;
+import base.Colors;
 import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -77,7 +77,7 @@ public class Option extends StackPane {
 			this.value.setFill(Color.BLACK);
 			this.checkVal.setFill(Color.BLACK);
 		} else {
-			this.background.setFill(Window.BACKGROUND);
+			this.background.setFill(Colors.BACKGROUND_C);
 			this.value.setFill(Color.WHITE);
 			this.checkVal.setFill(Color.WHITE);
 		}

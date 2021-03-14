@@ -1,16 +1,16 @@
 package base.obj;
 
-import base.Scenes;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Rotate;
+
+import base.Colors;
 
 public class CurtainBlock extends Rectangle {
 
 	private final double speed;
 		
 	public CurtainBlock(int y, double speed, String LR) {
-		super(0, 50, Color.web(Scenes.COLOR_RED));
+		super(0, 50, Colors.COLOR_RED_C);
 		
 		this.speed = speed;
 		if(LR.equals("R")) {

@@ -11,29 +11,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import base.Window;
+import base.Log;
 
 public class Words {
 	
 	public static final List<String> lngsNames = new ArrayList<String>();
 	
 	static File[] listOfFiles;
-	static final String slash = Window.slash;
 	public static int how_many_lngs;
 	
 	public static String[] loadDifficulties() {
-//		String infinitySymbol = null;
-//		try {
-//		    infinitySymbol = new String(String.valueOf(Character.toString('\u221E')).getBytes("UTF-8"), "UTF-8");
-//		} catch (UnsupportedEncodingException ex) {
-//		    infinitySymbol = "Infinite";
-//		}
 		return new String[] {"Easy", "Normal", "Hard", "Asian", "Custom"};
 	}
 	
 	public static String[][] loadLanguages() {
 		
-		String path = new File("").getAbsolutePath() + slash + "words" + slash;		
+		String path = new File("").getAbsolutePath() + "/words/";		
 		File folder = new File(path);	
 			
 		if(folder.listFiles() != null) {
@@ -61,7 +54,7 @@ public class Words {
 					lngs[i][1] = s;	// add language name from file's first line					
 						
 				} catch (IOException e) {
-					System.err.println("\n[ERROR] " + e);
+					Log.error("\n" + e);
 				}
 			}
 			return lngs;	
@@ -84,7 +77,7 @@ public class Words {
 				}
 				
 			} catch (IOException e) {
-				System.err.println("\n[Error] " + e);
+				Log.error("\n" + e);
 			}
 		}
 		return allWords;

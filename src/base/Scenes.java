@@ -23,14 +23,7 @@ public class Scenes {
 	static Text conditionVal = new Text();	// create empty text and assign value later based on gamemode
 	static Text CPM = new Text("0");
 	static final StackPane pauseBox = new StackPane();
-		
-	public static final String COLOR_RED = "#FF554D";
-	public static final String COLOR_ORANGE = "#FCA103";
-	public static final String COLOR_YELLOW = "#F0FC03";
-	public static final String COLOR_GREEN = "#7FFC03";
-	public static final String COLOR_GAY_GRADIENT = "-fx-fill: linear-gradient(to right, #FF3030, #FF6A00, #FFF200, #4AFF59, #00FF7B, #34ABEB, #A200FF, #FF36AB);";
-	public static final String COLOR_GOLD_GRADIENT = "-fx-fill: linear-gradient(#FFA200, #FFD500);";
-	
+
 	public static final TextField input = new TextField();
 	public static final Text pointer = createText(">", Color.WHITE, "Courier new", 15);
 	public static final Option[] gamemodes = {new Option(250, "Normal", 40, true),
@@ -127,13 +120,15 @@ public class Scenes {
 		
 		Pane root = new Pane();
 			root.setPrefSize(800, 500);
+			root.setStyle("-fx-background: " + Colors.BACKGROUND);
 			
 		StackPane stack = new StackPane();
-		
+			stack.setTranslateY(200);
+			
 		Rectangle background = new Rectangle(800, 500);
 			background.setTranslateX(0);
 			background.setTranslateY(0);
-			background.setFill(Window.BACKGROUND);
+			background.setFill(Colors.BACKGROUND_C);
 				
 		int pointsLen = String.valueOf(Math.round(Window.points)).length();		// calculation needed for good placement of the points
 		Text pointsText = new Text("Your score: ");
@@ -147,7 +142,6 @@ public class Scenes {
 			pointsVal.setTranslateX(pointsText.getTranslateX() + (305+pointsLen*36)/2);
 		
 		stack.getChildren().addAll(pointsText, pointsVal);
-		stack.setTranslateY(200);
 		root.getChildren().addAll(background, stack);
 					
 		return root;
@@ -164,7 +158,7 @@ public class Scenes {
 		
 		Rectangle background = new Rectangle(800, 500);
 			background.setTranslateX(0); background.setTranslateY(0);
-			background.setFill(Window.BACKGROUND);	
+			background.setFill(Colors.BACKGROUND_C);	
 			
 		int pointsLen = String.valueOf(Math.round(Window.points)).length()+5;
 				
@@ -173,7 +167,7 @@ public class Scenes {
 			pointsText.setTranslateX(30);
 			pointsText.setFont(Font.font("Courier new", 17));
 			
-			pointsVal.setFill(Color.web(COLOR_GREEN));
+			pointsVal.setFill(Colors.COLOR_GREEN_C);
 			pointsVal.setTranslateX(50+10*pointsLen);
 			pointsVal.setFont(Font.font("Courier new", 17));
 		
@@ -182,7 +176,7 @@ public class Scenes {
 			conditionText.setTranslateX(230);
 			conditionText.setFont(Font.font("Courier new", 17));
 			
-			conditionVal.setFill(Color.web(COLOR_RED));
+			conditionVal.setFill(Colors.COLOR_RED_C);
 			conditionVal.setTranslateX(conditionText.getTranslateX() + conditionText.getLayoutBounds().getWidth());
 			conditionVal.setFont(Font.font("Courier new", 17));
 		
@@ -191,7 +185,7 @@ public class Scenes {
 			CPMText.setTranslateX(230);
 			CPMText.setFont(Font.font("Courier new", 17));
 			
-			CPM.setFill(Color.web(COLOR_YELLOW));
+			CPM.setFill(Colors.COLOR_YELLOW_C);
 			CPM.setTranslateX(280);
 			CPM.setFont(Font.font("Courier new", 17));
 			
@@ -206,11 +200,11 @@ public class Scenes {
 			signR.setFont(Font.font("Courier new", 17));
 			
 		Text pause = new Text("PAUSE");
-			pause.setFill(Color.web(COLOR_RED));
+			pause.setFill(Colors.COLOR_RED_C);
 			pause.setFont(Font.font("Courier new", 25));
 			
 		Rectangle pauseBg = new Rectangle(100, 40);
-			pauseBg.setFill(Window.BACKGROUND);
+			pauseBg.setFill(Colors.BACKGROUND_C);
 		
 		pauseBox.getChildren().addAll(pauseBg, pause);
 			pauseBox.setTranslateX(350);
@@ -313,7 +307,7 @@ public class Scenes {
 			try {
 				Font.loadFont(Scenes.class.getResourceAsStream("/resources/fonts/" + font), 20);
 			} catch (Exception e) {
-				System.err.println(String.format("Unable to load font {%s}: {%s}", font, e));
+				Log.error(String.format("Unable to load font {%s}: {%s}", font, e));
 			}
 		}		
 	}
