@@ -22,7 +22,7 @@ public class Words {
 	
 	public static String[] loadDifficulties() {
 		return new String[] {"Easy", "Normal", "Hard", "Asian", "Custom"};
-	}
+	} 
 	
 	public static String[][] loadLanguages() {
 		
