@@ -1,4 +1,4 @@
-package base;
+﻿kage base;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,10 +6,8 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import base.obj.CurtainBlock;
-import base.obj.Particle;
 import base.obj.Word;
 import javafx.scene.shape.Rectangle;
 import javafx.animation.AnimationTimer;
@@ -60,6 +58,8 @@ public class Window extends Application {
 
 		Scenes.fontSetup();
 		Select.selectGamemode();
+		
+//		window.setScene(new Scene(Scenes.scoreboard()));
 		
 		window.setTitle("I'm speed");
 		window.setResizable(false);
@@ -218,25 +218,6 @@ public class Window extends Application {
 		Pane root = Scenes.game(); 
 		Scene scene = new Scene(root);
 		
-		List<Particle> particles = new ArrayList<Particle>();	// list of all particles
-		Random random = new Random();
-		
-		int[] particleY = new int[398];
-		for(int i=0; i<398; i++) {
-			particleY[i] = i+2;	// array of predefined Y values
-		}
-		
-		/* generate particle with its trail */
-		for(int i=0; i<70; i++) {
-			Particle p = new Particle(random.nextInt(790)+10, particleY[random.nextInt(398)], random.nextDouble());
-				particles.add(p); root.getChildren().add(p);
-			
-			Particle trail_1 = new Particle(p.getTranslateX()-1, p.getTranslateY(), p.getAlpha()*0.66);
-				particles.add(trail_1); root.getChildren().add(trail_1);
-				
-			Particle trail_2 = new Particle(p.getTranslateX()-2, p.getTranslateY(), p.getAlpha()*0.33);
-				particles.add(trail_2); root.getChildren().add(trail_2);
-		}
 		
 		/* RESET EVERYTHING */
 		curtain = false;
@@ -377,51 +358,9 @@ public class Window extends Application {
 			
 		};
 		
-		/* animating particles */
-		animation_background = new AnimationTimer() {
-
-			private long particle_create = 0;
-			private long particle_move = 0;
-			
-			@Override
-			public void handle(long now) { 
-				
-				if(now - particle_move >= 5_000_000) {
-					List<Particle> toRemove = new ArrayList<Particle>();
-					
-					for(Particle p : particles) {						
-						if(p.getTranslateX()>800) {
-							toRemove.add(p);
-						} else {
-							p.moveForward();
-						}
-					} 
-					
-					particles.removeAll(toRemove);
-					root.getChildren().removeAll(toRemove);
-					toRemove.clear();
-					
-					particle_move = now;
-				}
-				
-				if(!curtain) {
-					if(now - particle_create >= 50_000_000) {
-						Particle p = new Particle(-2, particleY[random.nextInt(398)], random.nextDouble());
-							particles.add(p); root.getChildren().add(p);
-							
-						Particle trail_1 = new Particle(-3, p.getTranslateY(), p.getAlpha()*0.66);
-							particles.add(trail_1); root.getChildren().add(trail_1);
-							
-						Particle trail_2 = new Particle(-4, p.getTranslateY(), p.getAlpha()*0.33);
-							particles.add(trail_2); root.getChildren().add(trail_2);
-							
-						particle_create = now;	
-					}
-				}
-			}
-			
-		}; animation_background.start();
-						
+		animation_background = Utils.getBackgroundTimer(790, 398, root);
+			animation_background.start();
+		
 		/* animating words */
 		animation_words = new AnimationTimer() {
 						

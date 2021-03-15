@@ -1,5 +1,6 @@
 package base;
 
+import base.obj.ScoreboardEntry;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -11,6 +12,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+
 import menu.Words;
 import menu.obj.Option;
 import menu.obj.ScaleBox;
@@ -35,13 +37,45 @@ public class Scenes {
 	public static Option[] lngs;
 	public static String fontsPath;
 	
+	private final static String titleFont = "Grixel Kyrou 7 Wide Bold";
+	
+	public static Pane scoreboard() {
+		
+		Text title = createText("SCOREBOARD", Color.WHITE, titleFont, 26);
+			title.setTranslateY(62);
+			title.setTranslateX(257);
+			
+		Pane root = new Pane();
+			root.setPrefSize(800, 500);
+			root.setStyle("-fx-background-color: rgb(14, 14, 14)");
+				
+		Pane results = new Pane();
+			results.setTranslateX(25);
+			results.setTranslateY(100);
+			results.setPrefSize(752, 354);
+			results.setStyle("-fx-border-color: white;");
+			
+		AnimationTimer animation_bg = Utils.getBackgroundTimer(790, 590, root, results);
+			animation_bg.start();
+			
+		final ScoreboardEntry headers = new ScoreboardEntry(1, "SCORE", "CPM", "DIFFICULTY", "LANGUAGE", "GAMEMODE", "DATE", "NAME");
+			results.getChildren().add(headers);
+		for(int i=0; i<15; i++) {
+			results.getChildren().add(new ScoreboardEntry(23+i*22, i+1, "69", "420", "ASIAN", "POLISH", "NORMAL", "01.01.1969", "USERNAME"));
+		}
+		
+		results.toFront();
+		
+		root.getChildren().addAll(results, title);
+		return root;
+	}
 		
 	public static Pane selectMenu(String type) {
 		Pane root = new Pane();
 			root.setPrefSize(800, 500);
 			root.setStyle("-fx-background-color: rgb(14, 14, 14)");
 	
-		Text header = createText(type, Color.WHITE, "Grixel Kyrou 7 Wide Bold", 50);
+		Text header = createText(type, Color.WHITE, titleFont, 50);
 			header.setTranslateX((800 - header.getLayoutBounds().getWidth())/2);
 			header.setTranslateY(130);
 		
@@ -60,7 +94,7 @@ public class Scenes {
 				break;
 				
 			case "CUSTOM":
-				Text subHeader = createText("DIFFICULTY", Color.WHITE,"Grixel Kyrou 7 Wide Bold", 18);
+				Text subHeader = createText("DIFFICULTY", Color.WHITE,titleFont, 18);
 					subHeader.setTranslateX((800 - subHeader.getLayoutBounds().getWidth())/2);
 					subHeader.setTranslateY(120 + subHeader.getLayoutBounds().getHeight());
 					
@@ -132,12 +166,12 @@ public class Scenes {
 				
 		int pointsLen = String.valueOf(Math.round(Window.points)).length();		// calculation needed for good placement of the points
 		Text pointsText = new Text("Your score: ");
-			pointsText.setFont(Font.font("Grixel Kyrou 7 Wide Bold", 30));
+			pointsText.setFont(Font.font(titleFont, 30));
 			pointsText.setFill(Color.WHITE);
 			pointsText.setTranslateX(400-(300+pointsLen*36)/2);
 			
 		Text pointsVal = new Text(Scenes.pointsVal.getText());
-			pointsVal.setFont(Font.font("Grixel Kyrou 7 Wide Bold", 32));
+			pointsVal.setFont(Font.font(titleFont, 32));
 			pointsVal.setFill(Color.web("#FF554D"));
 			pointsVal.setTranslateX(pointsText.getTranslateX() + (305+pointsLen*36)/2);
 		

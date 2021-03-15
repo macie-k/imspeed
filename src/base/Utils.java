@@ -18,9 +18,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import base.obj.Particle;
 import base.obj.Word;
+import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.scene.Node;
+import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import menu.Select;
 
@@ -105,7 +108,7 @@ public class Utils {
 		
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
 		final long modTime = scoreboard.lastModified();
-		final String sql = "INSERT INTO scoreboard (Score, Difficulty, Language, AvgCPM, Gamemode, DatePlayed, TimePlayed) VALUES (?, ?, ?, ?, ?, ?, ?)";
+		final String sql = "INSERT INTO scoreboard (Score, AvgCPM, Difficulty, Language, Gamemode, DatePlayed, TimePlayed) VALUES (?, ?, ?, ?, ?, ?, ?)";
 		
 		final int score = Integer.valueOf(scoreStr);
 		final String diff = String.valueOf(Window.gameDifficulty);
@@ -116,9 +119,9 @@ public class Utils {
 			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
 			PreparedStatement ps = st.getConnection().prepareStatement(sql);
 				ps.setInt(1, score);
-				ps.setString(2, diff);
-				ps.setString(3, language);
-				ps.setInt(4, Window.avgCPM);
+				ps.setInt(2, Window.avgCPM);
+				ps.setString(3, diff);
+				ps.setString(4, language);
 				ps.setString(5, String.valueOf(Window.gameMode));
 				ps.setString(6, now);
 				ps.setInt(7, (int) Window.totalSeconds);
@@ -243,6 +246,84 @@ public class Utils {
 			ft.setFromValue(node.getOpacity());
 		    ft.setToValue(1);
 		    ft.play();
+	}
+	
+	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, Node... toFront) {
+		return getBackgroundTimer(xRange, yRange, root, 70, 50_000_000, 5_000_000, toFront);
+	}
+	
+	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root) {
+		return getBackgroundTimer(xRange, yRange, root, 70, 50_000_000, 5_000_000);
+	}
+	
+	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, int initialAmount, long creationDelay, long speed, Node... toFront) {
+		List<Particle> particles = new ArrayList<Particle>();	// list of all particles
+		Random random = new Random();
+		
+		int[] particleY = new int[yRange];
+		for(int i=0; i<yRange; i++) {
+			particleY[i] = i+2;	// array of predefined Y values
+		}
+		
+		/* generate particle with its trail */
+		for(int i=0; i<initialAmount; i++) {
+			Particle p = new Particle(random.nextInt(xRange)+10, particleY[random.nextInt(yRange)], random.nextDouble());
+				particles.add(p); root.getChildren().add(p);
+			
+			Particle trail_1 = new Particle(p.getTranslateX()-1, p.getTranslateY(), p.getAlpha()*0.66);
+				particles.add(trail_1); root.getChildren().add(trail_1);
+				
+			Particle trail_2 = new Particle(p.getTranslateX()-2, p.getTranslateY(), p.getAlpha()*0.33);
+				particles.add(trail_2); root.getChildren().add(trail_2);
+		}
+		
+		/* animating particles */
+		AnimationTimer animation_background = new AnimationTimer() {
+
+			private long particle_create = 0;
+			private long particle_move = 0;
+			
+			@Override
+			public void handle(long now) { 
+				
+				if(now - particle_move >= speed) {
+					List<Particle> toRemove = new ArrayList<Particle>();
+					
+					for(Particle p : particles) {						
+						if(p.getTranslateX()>800) {
+							toRemove.add(p);
+						} else {
+							p.moveForward();
+						}
+					} 
+					
+					particles.removeAll(toRemove);
+					root.getChildren().removeAll(toRemove);
+					toRemove.clear();
+					
+					particle_move = now;
+				}
+				
+				if(now - particle_create >= creationDelay) {
+					Particle p = new Particle(-2, particleY[random.nextInt(yRange)], random.nextDouble());
+						particles.add(p); root.getChildren().add(p);
+						
+					Particle trail_1 = new Particle(-3, p.getTranslateY(), p.getAlpha()*0.66);
+						particles.add(trail_1); root.getChildren().add(trail_1);
+						
+					Particle trail_2 = new Particle(-4, p.getTranslateY(), p.getAlpha()*0.33);
+						particles.add(trail_2); root.getChildren().add(trail_2);
+						
+					for(Node n : toFront) {
+						n.toFront();
+					}
+					particle_create = now;	
+				}
+			}
+			
+		};
+		
+		return animation_background;
 	}
 	
 	public static boolean fileExists(String name) {
