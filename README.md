@@ -27,10 +27,7 @@ Typing game inspired by bisqwit's "wspeed"
 
 ## Requirements
 
-- [`Java`](https://www.java.com/download/)
-- **`JAVA_HOME` System Variable leading to JRE root directory.** - if using `.exe`
-
-![JAVA_HOME](https://user-images.githubusercontent.com/25122875/90809392-b054e100-e321-11ea-854e-09486aa8f21f.png)
+- [`Java 1.8`](https://www.java.com/download/)
 
 <br>
 
