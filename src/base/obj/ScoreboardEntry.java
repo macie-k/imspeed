@@ -4,18 +4,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import base.Colors;
+import base.Scenes;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 public class ScoreboardEntry extends StackPane {
 	
-	static boolean colorSwitch = false;			// flag for changing color
+	public static boolean colorSwitch = false;			// flag for changing color
 	public static ScoreboardEntry activeEntry;	// storing active entry object
 	
-	final static int COL_WIDTHS[] = {30, 90, 70, 90, 110, 110, 110, 140};	// storing widths of scoreboard columns + index (first one)
+	final static int COL_WIDTHS[] = {40, 100, 60, 90, 100, 90, 130, 140};	// storing widths of scoreboard columns + index (first one)
 	
+	final private boolean header;
 	final private boolean active;
 	final private String date;
 	final private int nr;
@@ -29,6 +32,7 @@ public class ScoreboardEntry extends StackPane {
 		this.active = active;
 		this.date = date;
 		this.nr = nr;
+		this.header = nr == 0;
 		
 		/* save active entry */
 		if(active) {
@@ -55,30 +59,32 @@ public class ScoreboardEntry extends StackPane {
 				l.setTextFill(Color.WHITE);
 				l.setAlignment(Pos.CENTER_RIGHT);
 				l.setTranslateX(currentX);
+				l.setFont(Font.font(Scenes.FONT_TEXT));
 				
 				/* add style to it */
-				String style = "-fx-border-color: white;"
-						+ "-fx-padding: 0 10 0 0;"
-						+ "-fx-border-style: hidden solid hidden hidden;"
-						+ "-fx-background-color: ";
-					style += (colorSwitch ? Colors.LIGHT_GREY : Colors.DARK_GREY) + ";";	// switching grey colors for rows
-					
-					/* set different colors for active entry */
-					if(active) {
-						style += "-fx-background-color: #00AAAA;";
-						l.setTextFill(Color.web("#ECF95B"));
-					}
-					
-					if(index == 0) style += "-fx-padding: 0 5 0 0;";					// different padding for index value
-					if(index == values.size()-1) style += "-fx-border-style: hidden;";	// hide border of the last value to not overlap with container border
-					
+			String style = "-fx-border-color: white;"
+					+ "-fx-padding: 0 10 0 0;"
+					+ "-fx-border-style: hidden solid hidden hidden;"
+					+ "-fx-background-color: ";
+				style += (colorSwitch ? Colors.MID_GREY : Colors.DARK_GREY) + ";";	// switching grey colors for rows
+				
+			/* set different colors for active entry */
+			if(active) {
+				style += "-fx-background-color: #00AAAA;";
+				l.setTextFill(Color.web("#ECF95B"));
+			}
+			
+			if(index == 0) style += "-fx-padding: 0 5 0 0;";					// different padding for index value
+			if(index == values.size()-1) style += "-fx-border-style: hidden;";	// hide border of the last value to not overlap with container border
+										
 			/* headers row styling */
 			if(nr == 0) {
 				if(index == 0) {
 					l.setText("#");
 				}
 				style += "-fx-font-weight: bold;"
-						+ "-fx-background-color: #FFF;";
+						+ "-fx-background-color: #FFF;"
+						+ "-fx-padding: 0;";
 				l.setTextFill(Color.BLACK);
 				l.setAlignment(Pos.CENTER);
 			}
@@ -92,9 +98,18 @@ public class ScoreboardEntry extends StackPane {
 		colorSwitch = (nr%15 == 0) ? false : !colorSwitch;	// reset color switching for each page
 	}
 	
+	public boolean isHeader() {
+		return header;
+	}
+	
 	/* returns page where entry is */
 	public int getEntryPage() {
 		return (int) Math.ceil(this.nr/15.0);
+	}
+	
+	public String getName() {
+		Label nameField = (Label) getChildren().get(getChildren().size()-1);	// get the last node of stackpane
+		return nameField.getText();
 	}
 	
 	/* sets visible name value */

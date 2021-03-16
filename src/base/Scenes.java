@@ -1,9 +1,10 @@
 package base;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import base.obj.KeyButton;
 import base.obj.ScoreboardEntry;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
@@ -11,6 +12,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -25,11 +27,12 @@ import menu.obj.ScaleBox;
 
 import static base.Utils.showScoreboardPage;
 import static base.Utils.blinkingNodeTimer;
+import static base.Utils.createText;
 
 public class Scenes {
 
-	private final static String FONT_TITLE = "Grixel Kyrou 7 Wide Bold";
-	final static String FONT_TEXT = "Courier new";
+	public final static String FONT_TITLE = "Grixel Kyrou 7 Wide Bold";
+	public final static String FONT_TEXT = "Courier new";
 	
 	static Text pointsVal = new Text("0");
 	static Text conditionVal = new Text();	// create empty text and assign value later based on gamemode
@@ -49,6 +52,22 @@ public class Scenes {
 	public static Option[] lngs;
 	public static String fontsPath;
 	
+	private static ArrayList<ScoreboardEntry> entries;
+
+	@SuppressWarnings("serial")
+	private static Map<String, String> columns = new LinkedHashMap<String, String>() {{
+		put("Score", "DESC");
+		put("CPM", "DESC");
+		put("Difficulty", "ASC");
+		put("Language", "ASC");
+		put("Gamemode", "ASC");
+		put("DateTime", "DESC");
+		put("Name", "ASC");
+	}};
+	
+	private static String[] columnsKeys = {"Score", "CPM", "Difficulty", "Language", "Gamemode", "DateTime", "Name"};
+	private static int columnsIndex = 0;
+	
 	private static int currentPage = 1;
 	static boolean saved;
 	
@@ -62,14 +81,13 @@ public class Scenes {
 			root.setStyle("-fx-background-color: #0E0E0E");
 		
 		/* text with error information when SQLException occurs */
-		Text errorMsg = createText("Error getting some scores", Colors.RED_C, FONT_TEXT, 15);
+		Text errorMsg = createText("Could not get any scores", Colors.RED_C, FONT_TEXT, 15);
 			errorMsg.setTranslateX(10);
 			errorMsg.setTranslateY(20);
 			errorMsg.setVisible(false);
 			
 		/* title text */
 		Text title = createText("SCOREBOARD", Color.WHITE, FONT_TITLE, 26);
-			title.setTranslateY(57);
 			title.setTranslateX(257);
 			
 		/* stackpane with input box asking for name */
@@ -82,17 +100,17 @@ public class Scenes {
 			
 		Pane resultsContainer = new Pane();
 			resultsContainer.setTranslateX(25);
-			resultsContainer.setTranslateY(100);
+			resultsContainer.setTranslateY(95);
 			resultsContainer.setPrefSize(752, 354);
 			resultsContainer.setStyle("-fx-border-color: white;");
 			
 		Text newScoreText = createText("New score - Press enter to save", Colors.GREEN_C, FONT_TEXT, 15);
-			newScoreText.setTranslateY(85);
+			newScoreText.setTranslateY(80);
 			newScoreText.setTranslateX(261);
 		AnimationTimer newScoreTimer = blinkingNodeTimer(newScoreText, 750_000_000);
 			
 		StackPane pageStack = new StackPane();
-			pageStack.setTranslateY(465);
+			pageStack.setTranslateY(460);
 			pageStack.setTranslateX(325);
 			pageStack.setPrefSize(150, 25);
 			
@@ -106,37 +124,19 @@ public class Scenes {
 
 		pageStack.getChildren().addAll(pagePrev, pageNumber, pageNext);	
 			
-		/* animation timer with floating particles */
-		AnimationTimer animation_bg = Utils.getBackgroundTimer(790, 590, root, resultsContainer, newScoreText, nameInput);
-			animation_bg.start();
-			
+		entries = Utils.getRows("Score", "DESC");
+		for(ScoreboardEntry e : entries) {
+			if(e.isActive()) {
+				newScore = true;
+				break;
+			}
+		}
+		
 		/* create 1st entry as table headers */
-		final ScoreboardEntry headers = new ScoreboardEntry(1, "SCORE", "CPM", "DIFFICULTY", "LANGUAGE", "GAMEMODE", "DATE", "NAME");
+		final ScoreboardEntry headers = new ScoreboardEntry(1, columnsKeys);
 		resultsContainer.getChildren().add(headers);
 	
-		final ArrayList<ScoreboardEntry> entries = new ArrayList<>();	// list of all returned scores
-		try {
-			final ResultSet results = Utils.getScores();
-
-			int i = 0;
-			while(results.next()) {
-				boolean active = false;
-				final String score = String.valueOf(results.getInt("Score"));
-				final String cpm = String.valueOf(results.getInt("AvgCPM"));
-				final String diff = results.getString("Difficulty");
-				final String lang = results.getString("Language");
-				final String gm = results.getString("Gamemode");
-				final String dateNum = results.getString("DatePlayed");
-				final String date = Utils.formatDate(Long.valueOf(dateNum), "dd.MM.yy HH:mm");
-				final String username = results.getString("Name");
-					if(username.equals("NULL")) {
-						active = true;
-						newScore = true;
-					}
-				entries.add(new ScoreboardEntry(23+(i%15)*22, ++i, active, dateNum, score, cpm, diff, lang, gm, date, active ? "" : username));
-			}
-		} catch (SQLException e) {
-			Log.error("Could not retrieve scoreboard information: " + e);
+		if(entries.size() == 0)  {
 			errorMsg.setVisible(true);	// show error message
 		}
 		
@@ -149,7 +149,7 @@ public class Scenes {
 		
 		newScoreText.setVisible(newScore);
 		if(newScore) newScoreTimer.start();
-		title.setTranslateY(newScore ? 57 : 62);
+		title.setTranslateY(newScore ? 54 : 59);
 		
 		showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
 		
@@ -157,7 +157,7 @@ public class Scenes {
 		root.setId(String.valueOf(newScore));	// store information if there is new score, so it can be accessed inside lambda
 
 		Scene scene = new Scene(root);
-		
+				
 		scene.setOnKeyPressed(e -> {
 			
 			switch(e.getCode()) {
@@ -217,8 +217,37 @@ public class Scenes {
 			pagePrev.setVisible(currentPage != 1);
 			pageNext.setVisible(currentPage != pages);
 		});
+		
+		
+		Text sortText = createText("SORT BY: " + columnsKeys[columnsIndex], Color.WHITE, FONT_TEXT, 14);
+			sortText.setTranslateX(85);
+			sortText.setTranslateY(473);
+			
+		ButtonAction changeSort = new ButtonAction() {
+			@Override
+			public void callback(Pane root, boolean active) {
+				columnsIndex = (columnsIndex + 1 == columnsKeys.length) ? 0 : columnsIndex+1;
+				final String column = columnsKeys[columnsIndex];
+				final String order = columns.get(column);
+				entries = Utils.getRows(column, order);
+				ScoreboardEntry.colorSwitch = false;
+				
+				showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
+				sortText.setText("SORT BY: " + column);
+			}
+		};
+		
+		KeyButton sortButton = new KeyButton(scene, root, KeyCode.TAB, "TAB", 25, 460, 50, 20, 14, 8, changeSort);		
+		root.getChildren().addAll(sortButton, sortText);
+		
+		/* animation timer with floating particles */
+		AnimationTimer animation_bg = Utils.getBackgroundTimer(790, 590, root, resultsContainer, newScoreText, nameInput, sortButton, sortText);
+			animation_bg.start();
+			
+
 		return scene;
 	}
+
 			
 	public static Pane selectMenu(String type) {
 		Pane root = new Pane();
@@ -409,6 +438,12 @@ public class Scenes {
 				+ "-fx-highlight-text-fill: #000;"
 				+ "-fx-cursor: block;"
 				+ "-fx-font-family: 'Courier new', monospace;");
+		input.setOnKeyTyped(e -> {
+			final int maxCharacters = 30;
+	        if(input.getText().length() > maxCharacters) {
+	        	e.consume();
+	        }
+		});
 		
 		StackPane topStack = new StackPane();
 			topStack.setTranslateX(0);
@@ -469,15 +504,7 @@ public class Scenes {
 		
 		return root;
 	}
-	
-	public static Text createText(String value, Color fill, String fontName, int fontSize) {
-		Text t = new Text(value);
-		t.setFont(Font.font(fontName, fontSize));
-		t.setFill(fill);
 		
-		return t;
-	}
-	
 	public static void fontSetup() {
 		/* list of required font names */
 		String[] fontNames = {

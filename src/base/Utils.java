@@ -31,6 +31,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import menu.Select;
@@ -64,14 +65,14 @@ public class Utils {
 			Log.error("Could not create data file: " + e);
 		}
 	}
-	
-	public static ResultSet getScores() throws SQLException {
+		
+	public static ResultSet getScores(String sortBy, String order) throws SQLException {
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);	// get data file
 		final long modTime = scoreboard.lastModified();		// get modification time
 		
 		/* execute query to set the level value */
 		Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
-		PreparedStatement ps = st.getConnection().prepareStatement("SELECT * FROM scoreboard ORDER BY score DESC");
+		PreparedStatement ps = st.getConnection().prepareStatement("SELECT * FROM scoreboard ORDER BY " + sortBy + " " + order);
 		ResultSet results = ps.executeQuery();
 		
 		ps.close();
@@ -79,6 +80,38 @@ public class Utils {
 		scoreboard.setLastModified(modTime);	// restore  modification time
 		
 		return results;
+	}
+		
+	public static ArrayList<ScoreboardEntry> getRows(String sortBy, String order) {
+		final ArrayList<ScoreboardEntry> entries = new ArrayList<>();	// list of all returned scores
+		final ScoreboardEntry activeEntry = ScoreboardEntry.activeEntry;
+		try {
+			final ResultSet results = Utils.getScores(sortBy, order);
+
+			int i = 0;
+			while(results.next()) {
+				boolean active = false;
+				final String score = String.valueOf(results.getInt("Score"));
+				final String cpm = String.valueOf(results.getInt("CPM"));
+				final String diff = results.getString("Difficulty");
+				final String lang = results.getString("Language");
+				final String gm = results.getString("Gamemode");
+				final String dateNum = results.getString("DateTime");
+				final String date = Utils.formatDate(Long.valueOf(dateNum), "dd.MM.yy HH:mm");
+				String username = results.getString("Name");
+					if(username.equals("NULL")) {
+						active = true;
+					} 
+					if((activeEntry != null && activeEntry.getDate().equals(dateNum))) {
+						username = activeEntry.getName();
+						active = true;
+					}
+				entries.add(new ScoreboardEntry(23+(i%15)*22, ++i, active, dateNum, score, cpm, diff, lang, gm, date, username.equals("NULL") ? "" : username));
+			}
+		} catch (SQLException e) {
+			Log.error("Could not retrieve scoreboard information: " + e);
+		}
+		return entries;
 	}
 	
 	/* returns true only if data key was read and is correct, false otherwise */
@@ -132,12 +165,13 @@ public class Utils {
 		
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
 		final long modTime = scoreboard.lastModified();
-		final String sql = "INSERT INTO scoreboard (Score, AvgCPM, Difficulty, Language, Gamemode, DatePlayed, TimePlayed, Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		final String sql = "INSERT INTO scoreboard (Score, CPM, Difficulty, Language, Gamemode, DateTime, Name, TimePlayed) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		final int score = Integer.valueOf(scoreStr);
 		final String diff = parseDifficulty(Window.gameDifficulty);
 		final String language = (Select.selected_lng_names.size() > 1) ? "MIXED" : Select.selected_lng_names.get(0);
 		final String now = String.valueOf(new Date().getTime());
+		final String gm = Scenes.gamemodes[Window.gameMode].getValue();
 		
 		try {
 			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
@@ -146,10 +180,11 @@ public class Utils {
 				ps.setInt(2, Window.avgCPM);
 				ps.setString(3, diff);
 				ps.setString(4, language);
-				ps.setString(5, String.valueOf(Window.gameMode));
+				ps.setString(5, gm);
 				ps.setString(6, now);
-				ps.setInt(7, (int) Window.totalSeconds);
-				ps.setString(8, "NULL");
+				ps.setString(7, "NULL");
+				ps.setInt(8, (int) Window.totalSeconds);
+				
 				
 			ps.executeUpdate();
 				ps.close();
@@ -165,6 +200,8 @@ public class Utils {
 			return false;
 		}
 	}
+	
+	
 	
 	/* sets data key value */
 	public static boolean setDataKey(String value) {
@@ -238,7 +275,15 @@ public class Utils {
 	
 	public static void showScoreboardPage(int page, Pane resultsContainer, ArrayList<ScoreboardEntry> entries, Text pageNumNode) {
 		pageNumNode.setText(String.valueOf(page));
-		resultsContainer.getChildren().removeIf(node -> entries.contains(node));
+		
+		ArrayList<ScoreboardEntry> toRemove = new ArrayList<>();
+		resultsContainer.getChildren().forEach(node -> {
+			ScoreboardEntry e = (ScoreboardEntry) node;
+			if(!e.isHeader()) {
+				toRemove.add(e);
+			}
+		});
+		resultsContainer.getChildren().removeAll(toRemove);
 		
 		final int starting = (page-1)*15;
 		/* add max 15 new results per page */
@@ -246,7 +291,7 @@ public class Utils {
 			resultsContainer.getChildren().add(entries.get(i));
 		}
 	}
-	
+		
 	/* function to calculate new word's position and value */
 	public static Word createWord(List<String> strings, List<Integer> xVal_final, List<Integer> yVal_final, List<Word> fresh) {
 		List<Integer> xVal = Window.xVal, yVal = Window.yVal;
@@ -356,7 +401,7 @@ public class Utils {
 	public static boolean setScoreName(String name, String date) {
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
 		final long modTime = scoreboard.lastModified();
-		final String sql = "UPDATE scoreboard SET name=? WHERE DatePlayed='"+date+"'";
+		final String sql = "UPDATE scoreboard SET name=? WHERE DateTime='"+date+"'";
 		
 		try {
 			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
@@ -375,9 +420,20 @@ public class Utils {
 			return false;
 		}
 	}
-
+	
+	public static Text createText(String value, Color fill, String fontName, int fontSize) {
+		Text t = new Text(value);
+		t.setFont(Font.font(fontName, fontSize));
+		t.setFill(fill);
+		
+		return t;
+	}
 	
 	public static Node[] inputBox(String messageStr) {
+		return inputBox(messageStr, 15);
+	}
+	
+	public static Node[] inputBox(String messageStr, int maxChars) {
 		final StackPane stack = new StackPane();
 			stack.setAlignment(Pos.CENTER_LEFT);
 					
@@ -396,7 +452,7 @@ public class Utils {
 					+ "-fx-padding: 0 2 0 2;"
 					+ "-fx-font-family: 'Courier new', monospace;");
 			input.setOnKeyTyped(e -> {
-				final int maxCharacters = 14;
+				final int maxCharacters = maxChars;
 		        if(input.getText().length() > maxCharacters) {
 		        	e.consume();
 		        }
@@ -404,17 +460,17 @@ public class Utils {
 			
 		int shiftX = 20;
 			
-		Text message = Scenes.createText(messageStr, Color.WHITE, Scenes.FONT_TEXT, 17);
+		Text message = createText(messageStr, Color.WHITE, Scenes.FONT_TEXT, 17);
 			message.setTranslateX(shiftX);
 			
-		Text signL = Scenes.createText("[", Color.WHITE, Scenes.FONT_TEXT, 17);
+		Text signL = createText("[", Color.WHITE, Scenes.FONT_TEXT, 17);
 			shiftX += message.getLayoutBounds().getWidth() + 20;
 			signL.setTranslateX(shiftX);
 			
 		shiftX += 10;
 		input.setTranslateX(shiftX);
 		
-		Text signR = Scenes.createText("]", Color.WHITE, Scenes.FONT_TEXT, 17);
+		Text signR = createText("]", Color.WHITE, Scenes.FONT_TEXT, 17);
 			shiftX += 120;
 			signR.setTranslateX(shiftX);
 		
