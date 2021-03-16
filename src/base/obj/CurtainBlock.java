@@ -10,7 +10,7 @@ public class CurtainBlock extends Rectangle {
 	private final double speed;
 		
 	public CurtainBlock(int y, double speed, String LR) {
-		super(0, 50, Colors.COLOR_RED_C);
+		super(0, 50, Colors.RED_C);
 		
 		this.speed = speed;
 		if(LR.equals("R")) {

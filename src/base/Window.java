@@ -35,7 +35,6 @@ public class Window extends Application {
 	public static int maxWords, howMany;
 	public static int timeLeft;
 	public static double multiplierAdd;
-	public static boolean saved = false;
 	public static List<Integer> xVal, yVal;
 	
 	static double points;
@@ -60,13 +59,18 @@ public class Window extends Application {
 
 		Scenes.fontSetup();
 		Select.selectGamemode();
-		
-//		window.setScene(Scenes.scoreboard());
-		
+				
 		window.setTitle("I'm speed");
 		window.setResizable(false);
 		window.show();
-		window.setOnCloseRequest(e -> gameOver(true));	// save the score when game is exited via [x] button
+		
+		/* if user didn't confirm the score remove it from scoreboard file */
+		window.setOnCloseRequest(e -> {
+			Log.success("Exiting ...");
+			if(!Scenes.saved) {
+				Utils.removeNullScores(); 
+			}
+		});	
 	}
 		
 	public static void error(String err) {
@@ -107,7 +111,7 @@ public class Window extends Application {
 			root.getChildren().addAll(left_block, right_block);		
 		}
 		
-		window.setScene(scene);
+		blocks.forEach(block -> block.toFront());
 		
 		animation_curtain = new AnimationTimer() {
 
@@ -126,6 +130,8 @@ public class Window extends Application {
 							
 							reverse = true;
 							cover.setVisible(true);
+							cover.toFront();
+							blocks.forEach(block -> block.toFront());
 						} else {
 							blocks.forEach(block -> block.moveToMiddle());
 						}
@@ -169,7 +175,7 @@ public class Window extends Application {
 			Log.success(String.format("Total game time: %s:%s:%s", t[0], t[1], t[2]));
 		}
 		
-		if(!saved && points > 0) {
+		if(points > 0) {
 			Utils.saveScore(Scenes.pointsVal.getText());
 		}		
 		
@@ -192,7 +198,7 @@ public class Window extends Application {
 		Utils.fadeIn(root, 300);
 		
 		animation_gameover = blinkingNodeTimer(retry);
-		animation_gameover.start();
+			animation_gameover.start();
 		
         scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
             if (e.getCode() == KeyCode.ENTER) {
@@ -204,7 +210,6 @@ public class Window extends Application {
 	
 	public static void startGame(List<File> selected) {
 		
-		saved = false;
 		Pane root = Scenes.game(); 
 		Scene scene = new Scene(root);
 		
@@ -330,15 +335,15 @@ public class Window extends Application {
 						Scenes.CPM.setText(String.valueOf(calc));
 
 						if(calc == 69) {
-							Scenes.CPM.setStyle(Colors.COLOR_GAY_GRADIENT);  
+							Scenes.CPM.setStyle(Colors.GAY_GRADIENT);  
 						} else {
 							/* ranges for color change */
-					 		if(calc > 350) Scenes.CPM.setStyle(Colors.COLOR_GOLD_GRADIENT);  /* >350 */
+					 		if(calc > 350) Scenes.CPM.setStyle(Colors.GOLD_GRADIENT);  /* >350 */
 					 		else Scenes.CPM.setFill(
-								(calc > 250) ? Colors.COLOR_GREEN_C :		/* 250-350 */
-								(calc > 200) ? Colors.COLOR_YELLOW_C :		/* 200-250 */
-								(calc > 150) ? Colors.COLOR_ORANGE_C :		/* 150-200 */
-								Colors.COLOR_RED_C							/* <150 */
+								(calc > 250) ? Colors.GREEN_C :		/* 250-350 */
+								(calc > 200) ? Colors.YELLOW_C :		/* 200-250 */
+								(calc > 150) ? Colors.ORANGE_C :		/* 150-200 */
+								Colors.RED_C							/* <150 */
 							);						 		
 						}
 					}
@@ -405,13 +410,13 @@ public class Window extends Application {
 						
 						if(!w.getValue().equals("I'm gay")) {	// gay will remain proudly rainbowish
 							if(xPos > 370) {
-								w.setColor(Colors.COLOR_YELLOW);
+								w.setColor(Colors.YELLOW);
 							}
 							if(xPos > 500) {
-								w.setColor(Colors.COLOR_ORANGE);
+								w.setColor(Colors.ORANGE);
 							}
 							if(xPos > 630) {
-								w.setColor(Colors.COLOR_RED);
+								w.setColor(Colors.RED);
 							}
 						}
 						
@@ -576,6 +581,10 @@ public class Window extends Application {
 				}
 			}
 		}
-		launch(args);
+		try {
+			launch(args);
+		} catch (Exception e) {
+			Log.error(e.toString());
+		}
 	}
 }

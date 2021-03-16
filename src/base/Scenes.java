@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import base.obj.ScoreboardEntry;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -49,31 +50,35 @@ public class Scenes {
 	public static String fontsPath;
 	
 	private static int currentPage = 1;
-	private static boolean saved;
+	static boolean saved;
 	
 	public static Scene scoreboard() {
 		
-		boolean newScore = false;
+		boolean newScore = false;	// flag for asking for user's name
 		saved = false;
 				
 		Pane root = new Pane();
 			root.setPrefSize(800, 500);
-			root.setStyle("-fx-background-color: rgb(14, 14, 14)");
+			root.setStyle("-fx-background-color: #0E0E0E");
 		
 		/* text with error information when SQLException occurs */
-		Text errorMsg = createText("Error getting some scores", Colors.COLOR_RED_C, FONT_TEXT, 15);
+		Text errorMsg = createText("Error getting some scores", Colors.RED_C, FONT_TEXT, 15);
 			errorMsg.setTranslateX(10);
 			errorMsg.setTranslateY(20);
 			errorMsg.setVisible(false);
-				
+			
+		/* title text */
 		Text title = createText("SCOREBOARD", Color.WHITE, FONT_TITLE, 26);
 			title.setTranslateY(57);
 			title.setTranslateX(257);
 			
-		StackPane nameInput = Utils.inputBox("NAME");
+		/* stackpane with input box asking for name */
+		Node[] nameInputRes = Utils.inputBox("NAME");
+		StackPane nameInput = (StackPane) nameInputRes [0];
 				nameInput.setTranslateX((800 - nameInput.getPrefWidth())/2);
 				nameInput.setTranslateY((500 - nameInput.getPrefHeight())/2);
 				nameInput.setVisible(false);	
+		final TextField input = (TextField) nameInputRes[1];
 			
 		Pane resultsContainer = new Pane();
 			resultsContainer.setTranslateX(25);
@@ -81,11 +86,10 @@ public class Scenes {
 			resultsContainer.setPrefSize(752, 354);
 			resultsContainer.setStyle("-fx-border-color: white;");
 			
-		Text newScoreText = createText("New score - Press enter to save", Colors.COLOR_GREEN_C, FONT_TEXT, 15);
+		Text newScoreText = createText("New score - Press enter to save", Colors.GREEN_C, FONT_TEXT, 15);
 			newScoreText.setTranslateY(85);
 			newScoreText.setTranslateX(261);
 		AnimationTimer newScoreTimer = blinkingNodeTimer(newScoreText, 750_000_000);
-			newScoreTimer.start();
 			
 		StackPane pageStack = new StackPane();
 			pageStack.setTranslateY(465);
@@ -94,7 +98,6 @@ public class Scenes {
 			
 		Text pagePrev = createText("<", Color.WHITE, FONT_TEXT, 16);
 			pagePrev.setTranslateX(-30);
-			pagePrev.setVisible(false);
 			
 		Text pageNext = createText(">", Color.WHITE, FONT_TEXT, 16);
 			pageNext.setTranslateX(30);
@@ -123,83 +126,94 @@ public class Scenes {
 				final String diff = results.getString("Difficulty");
 				final String lang = results.getString("Language");
 				final String gm = results.getString("Gamemode");
-				final String date = Utils.formatDate(Long.valueOf(results.getString("DatePlayed")), "dd.MM.yy HH:mm");
+				final String dateNum = results.getString("DatePlayed");
+				final String date = Utils.formatDate(Long.valueOf(dateNum), "dd.MM.yy HH:mm");
 				final String username = results.getString("Name");
 					if(username.equals("NULL")) {
 						active = true;
 						newScore = true;
 					}
-					
-				ScoreboardEntry e = new ScoreboardEntry(23+(i%15)*22, ++i, active, score, cpm, diff, lang, gm, date, active ? "" : username);
-					e.setDate(results.getString("DatePlayed"));
-				entries.add(e);
+				entries.add(new ScoreboardEntry(23+(i%15)*22, ++i, active, dateNum, score, cpm, diff, lang, gm, date, active ? "" : username));
 			}
 		} catch (SQLException e) {
 			Log.error("Could not retrieve scoreboard information: " + e);
 			errorMsg.setVisible(true);	// show error message
 		}
 		
+		final ScoreboardEntry activeEntry = ScoreboardEntry.activeEntry;
 		final int pages = (int) Math.ceil(entries.size()/15.0);
-
-		pageNext.setVisible(pages > 1);
+		
+		currentPage = activeEntry != null ? ScoreboardEntry.activeEntry.getEntryPage() : 1;
+		pagePrev.setVisible(currentPage != 1);
+		pageNext.setVisible(currentPage != pages);
+		
 		newScoreText.setVisible(newScore);
+		if(newScore) newScoreTimer.start();
 		title.setTranslateY(newScore ? 57 : 62);
 		
 		showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
 		
 		root.getChildren().addAll(resultsContainer, title, errorMsg, pageStack, newScoreText, nameInput);
-		root.setId(String.valueOf(newScore));
+		root.setId(String.valueOf(newScore));	// store information if there is new score, so it can be accessed inside lambda
 
 		Scene scene = new Scene(root);
 		
-		final ScoreboardEntry activeEntry = ScoreboardEntry.activeEntry;
 		scene.setOnKeyPressed(e -> {
 			
 			switch(e.getCode()) {
+				/* show next page if possible */
 				case RIGHT:
 					if(currentPage + 1 <= pages) {
 						showScoreboardPage(++currentPage, resultsContainer, entries, pageNumber);
 					}
 				break;
+				/* show previous page if possible */
 				case LEFT:
 					if(currentPage - 1 >= 1) {
 						showScoreboardPage(--currentPage, resultsContainer, entries, pageNumber);
-						
 					}
 				break;
 				case ESCAPE:
-					if(!saved) Utils.removeCurrentScore(activeEntry.getDate());
-					Select.selectGamemode();
+					/* if input prompt is active, close it */
+					if(nameInput.isVisible()) {
+						nameInput.setVisible(false);
+						newScoreTimer.start();
+						root.setId("true");
+					} else {
+						/* else check if record should be removed */
+						if(Boolean.valueOf(root.getId())) {
+							Utils.removeNullScores();
+						}
+						/* and return to selection scene */
+						Select.selectGamemode();
+					}
 					break;
 				case ENTER:
+					/* if there is a new score */
 					if(Boolean.valueOf(root.getId())){
-						newScoreTimer.stop();
-						newScoreText.setVisible(false);
-						title.setTranslateY(62);
+						newScoreTimer.stop();			// stop new score animation
+						newScoreText.setVisible(false);	// and hide it
 						
-						nameInput.setVisible(true);
-						root.setId("false");
+						nameInput.setVisible(true);		// show name prompt
+						root.setId("false");			// update flag about new score
 					} else {
-						final TextField input = (TextField) nameInput.getChildren().get(nameInput.getChildren().size()-1);
-
+						/* if prompt is active and is not empty save the name */
 						if(nameInput.isVisible() && input.getText().trim().length() > 0) {
-							/* because gameOver() is called whenever the window is closed, check if there is anything to save, else return */
 							final String name = input.getText();
-							if(Utils.setScoreName(name)) {
-								activeEntry.setName(name);
-								ScoreboardEntry.activeEntry = null;
+							if(Utils.setScoreName(name, activeEntry.getDate())) {
+								activeEntry.setName(name);		// update visible user's name
 								saved = true;
 							} else {
+								/* if error occurs display information */
 								errorMsg.setText("Could not save name");
 								errorMsg.setVisible(true);
 							}
-							nameInput.setVisible(false);
+							nameInput.setVisible(false);	// hide name prompt
 						}
 					}
-						
-					
 				default: break;
 			}
+			/* hide/show navigation arrows */
 			pagePrev.setVisible(currentPage != 1);
 			pageNext.setVisible(currentPage != pages);
 		});
@@ -337,7 +351,7 @@ public class Scenes {
 			pointsText.setTranslateX(30);
 			pointsText.setFont(Font.font(FONT_TEXT, 17));
 			
-			pointsVal.setFill(Colors.COLOR_GREEN_C);
+			pointsVal.setFill(Colors.GREEN_C);
 			pointsVal.setTranslateX(50+10*pointsLen);
 			pointsVal.setFont(Font.font(FONT_TEXT, 17));
 		
@@ -346,7 +360,7 @@ public class Scenes {
 			conditionText.setTranslateX(230);
 			conditionText.setFont(Font.font(FONT_TEXT, 17));
 			
-			conditionVal.setFill(Colors.COLOR_RED_C);
+			conditionVal.setFill(Colors.RED_C);
 			conditionVal.setTranslateX(conditionText.getTranslateX() + conditionText.getLayoutBounds().getWidth());
 			conditionVal.setFont(Font.font(FONT_TEXT, 17));
 		
@@ -355,7 +369,7 @@ public class Scenes {
 			CPMText.setTranslateX(230);
 			CPMText.setFont(Font.font(FONT_TEXT, 17));
 			
-			CPM.setFill(Colors.COLOR_YELLOW_C);
+			CPM.setFill(Colors.YELLOW_C);
 			CPM.setTranslateX(280);
 			CPM.setFont(Font.font(FONT_TEXT, 17));
 			
@@ -370,7 +384,7 @@ public class Scenes {
 			signR.setFont(Font.font(FONT_TEXT, 17));
 			
 		Text pause = new Text("PAUSE");
-			pause.setFill(Colors.COLOR_RED_C);
+			pause.setFill(Colors.RED_C);
 			pause.setFont(Font.font(FONT_TEXT, 25));
 			
 		Rectangle pauseBg = new Rectangle(100, 40);

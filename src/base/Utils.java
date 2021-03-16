@@ -31,7 +31,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 import menu.Select;
@@ -157,7 +156,6 @@ public class Utils {
 				st.close();
 				
 			scoreboard.setLastModified(modTime);
-			Window.saved = true;
 			Log.success("Saved score");
 			save_retry = 0;
 			return true;
@@ -287,7 +285,7 @@ public class Utils {
 		
 		/* there is 0.00043687199 chance at most, that it will happen, pls don't get mad */
 		if(value.equals("I'm gay")) {
-			w.setStyle(Colors.COLOR_GAY_GRADIENT);
+			w.setStyle(Colors.GAY_GRADIENT);
 		}
 		
 		return w;
@@ -329,10 +327,11 @@ public class Utils {
 		};		
 	}
 	
-	public static boolean removeCurrentScore(String time) {
+	/* removes all not saved scores / all with NULL as name */
+	public static boolean removeNullScores() {
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
 		final long modTime = scoreboard.lastModified();
-		final String sql = "DELETE FROM scoreboard WHERE DatePlayed='"+time+"';";
+		final String sql = "DELETE FROM scoreboard WHERE Name='NULL';";
 				
 		try {
 			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
@@ -340,11 +339,12 @@ public class Utils {
 				st.close();
 				
 			scoreboard.setLastModified(modTime);
+			ScoreboardEntry.activeEntry = null;
 			if(rows > 0) {
-				Log.success("Removed score");
+				Log.success("Removed " + rows +" scores");
 				return true;
 			} else {
-				Log.error("Deleting query return 0 rows");
+				Log.success("No scores were removed");
 				return false;
 			}
 		} catch (Exception e) {
@@ -353,10 +353,10 @@ public class Utils {
 		}
 	}
 	
-	public static boolean setScoreName(String name) {
+	public static boolean setScoreName(String name, String date) {
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
 		final long modTime = scoreboard.lastModified();
-		final String sql = "UPDATE scoreboard SET name=?";
+		final String sql = "UPDATE scoreboard SET name=? WHERE DatePlayed='"+date+"'";
 		
 		try {
 			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
@@ -377,7 +377,7 @@ public class Utils {
 	}
 
 	
-	public static StackPane inputBox(final String messageStr) {
+	public static Node[] inputBox(String messageStr) {
 		final StackPane stack = new StackPane();
 			stack.setAlignment(Pos.CENTER_LEFT);
 					
@@ -425,7 +425,8 @@ public class Utils {
 		stack.setPrefSize(shiftX+20+2*borderWidth, 100+2*borderWidth);
 		stack.setStyle("-fx-border-color: #FFF; -fx-border-width: " + borderWidth);
 		stack.getChildren().addAll(bg, message, signL, signR, input);
-		return stack;
+		
+		return new Node[] {stack, input};
 	}
 	
 	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, int initialAmount, long creationDelay, long speed, Node... toFront) {
