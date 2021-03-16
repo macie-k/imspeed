@@ -1,4 +1,4 @@
-﻿kage base;
+package base;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,6 +26,8 @@ import menu.Select;
 import menu.Words;
 
 import static base.Utils.createWord;
+import static base.Utils.blinkingNodeTimer;
+
 public class Window extends Application {
 	
 	public static Stage window;
@@ -59,7 +61,7 @@ public class Window extends Application {
 		Scenes.fontSetup();
 		Select.selectGamemode();
 		
-//		window.setScene(new Scene(Scenes.scoreboard()));
+//		window.setScene(Scenes.scoreboard());
 		
 		window.setTitle("I'm speed");
 		window.setResizable(false);
@@ -166,11 +168,10 @@ public class Window extends Application {
 			final String[] t = Utils.formatTimePlayed(totalSeconds);
 			Log.success(String.format("Total game time: %s:%s:%s", t[0], t[1], t[2]));
 		}
-
-		/* because gameOver() is called whenever the window is closed, check if there is anything to save, else return */
+		
 		if(!saved && points > 0) {
 			Utils.saveScore(Scenes.pointsVal.getText());
-		}
+		}		
 		
 		Pane root = Scenes.gameOver();
 			root.setPrefSize(800, 500);
@@ -190,24 +191,13 @@ public class Window extends Application {
 		window.setScene(scene);
 		Utils.fadeIn(root, 300);
 		
-		animation_gameover = new AnimationTimer() {
-			
-			private long lastUpdate = 0;
-						
-			@Override
-			public void handle(long now) {		
-				
-				if(now - lastUpdate >= 500_000_000) {
-					retry.setVisible(!retry.isVisible());
-					lastUpdate = now;
-				}
-			}
-		}; animation_gameover.start();
+		animation_gameover = blinkingNodeTimer(retry);
+		animation_gameover.start();
 		
         scene.addEventFilter(KeyEvent.KEY_PRESSED, (KeyEvent e) -> {
             if (e.getCode() == KeyCode.ENTER) {
             	animation_gameover.stop();	System.out.println(); 
-            	Select.selectGamemode(); 
+            	window.setScene(Scenes.scoreboard());
             } e.consume();
         });
 	}
@@ -394,8 +384,7 @@ public class Window extends Application {
 								case 0:
 									Scenes.conditionVal.setText(String.valueOf(++strike));	// update missed and increase strikes
 									if(typedWords != 0) {
-										String firstStrike = (strike == 1) ? "\n" : "";		// case for first strike to print new line
-										Log.warning(firstStrike + "[STRIKE]: " +  strike);
+										Log.warning("[STRIKE]: " +  strike);
 									}
 									if(!infinite && strike >= 10) {
 										gameOver = true;

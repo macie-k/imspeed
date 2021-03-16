@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -19,11 +20,19 @@ import java.util.List;
 import java.util.Random;
 
 import base.obj.Particle;
+import base.obj.ScoreboardEntry;
 import base.obj.Word;
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import menu.Select;
 
@@ -55,6 +64,22 @@ public class Utils {
 		} catch (IOException e) {
 			Log.error("Could not create data file: " + e);
 		}
+	}
+	
+	public static ResultSet getScores() throws SQLException {
+		final File scoreboard = new File(PATH_SCORE_PUBLIC);	// get data file
+		final long modTime = scoreboard.lastModified();		// get modification time
+		
+		/* execute query to set the level value */
+		Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
+		PreparedStatement ps = st.getConnection().prepareStatement("SELECT * FROM scoreboard ORDER BY score DESC");
+		ResultSet results = ps.executeQuery();
+		
+		ps.close();
+		st.close();
+		scoreboard.setLastModified(modTime);	// restore  modification time
+		
+		return results;
 	}
 	
 	/* returns true only if data key was read and is correct, false otherwise */
@@ -108,10 +133,10 @@ public class Utils {
 		
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
 		final long modTime = scoreboard.lastModified();
-		final String sql = "INSERT INTO scoreboard (Score, AvgCPM, Difficulty, Language, Gamemode, DatePlayed, TimePlayed) VALUES (?, ?, ?, ?, ?, ?, ?)";
+		final String sql = "INSERT INTO scoreboard (Score, AvgCPM, Difficulty, Language, Gamemode, DatePlayed, TimePlayed, Name) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		final int score = Integer.valueOf(scoreStr);
-		final String diff = String.valueOf(Window.gameDifficulty);
+		final String diff = parseDifficulty(Window.gameDifficulty);
 		final String language = (Select.selected_lng_names.size() > 1) ? "MIXED" : Select.selected_lng_names.get(0);
 		final String now = String.valueOf(new Date().getTime());
 		
@@ -125,6 +150,7 @@ public class Utils {
 				ps.setString(5, String.valueOf(Window.gameMode));
 				ps.setString(6, now);
 				ps.setInt(7, (int) Window.totalSeconds);
+				ps.setString(8, "NULL");
 				
 			ps.executeUpdate();
 				ps.close();
@@ -166,6 +192,21 @@ public class Utils {
 		}
 	}
 	
+	/* returns formatted date from given time in milis */
+	public static String formatDate(long milis, String format) {
+		return new SimpleDateFormat(format).format(new Date(milis));
+	}
+	
+	/* fallback for default formatting */
+	public static String formatDate(long milis) {
+		return formatDate(milis, "dd.MM.yyyy HH:mm:ss");
+	}
+	
+	/* returns string name of the selected difficulty */
+	public static String parseDifficulty(int nr) {
+		return Scenes.loadedDifficulties[nr-1];
+	}
+	
 	/* formats seconds into readable time */
 	public static String[] formatTimePlayed(double totalSeconds) {
 		int total = (int)totalSeconds;
@@ -194,6 +235,18 @@ public class Utils {
 		final double calculatedKey = modTime*Math.pow(Math.E, x);			// calculate key
 		
 		return (x + Base64.getEncoder().encodeToString(String.valueOf(calculatedKey).getBytes()));	// return key in base64
+	}
+	
+	
+	public static void showScoreboardPage(int page, Pane resultsContainer, ArrayList<ScoreboardEntry> entries, Text pageNumNode) {
+		pageNumNode.setText(String.valueOf(page));
+		resultsContainer.getChildren().removeIf(node -> entries.contains(node));
+		
+		final int starting = (page-1)*15;
+		/* add max 15 new results per page */
+		for(int i=starting; i<starting+15 && i<entries.size(); i++) {
+			resultsContainer.getChildren().add(entries.get(i));
+		}
 	}
 	
 	/* function to calculate new word's position and value */
@@ -256,6 +309,125 @@ public class Utils {
 		return getBackgroundTimer(xRange, yRange, root, 70, 50_000_000, 5_000_000);
 	}
 	
+	public static AnimationTimer blinkingNodeTimer(Node node) {
+		return blinkingNodeTimer(node, 500_000_000);
+	}
+	
+	public static AnimationTimer blinkingNodeTimer(Node node, long speed) {
+		 return new AnimationTimer() {
+			
+			private long lastUpdate = 0;
+						
+			@Override
+			public void handle(long now) {		
+				
+				if(now - lastUpdate >= speed) {
+					node.setVisible(!node.isVisible());
+					lastUpdate = now;
+				}
+			}
+		};		
+	}
+	
+	public static boolean removeCurrentScore(String time) {
+		final File scoreboard = new File(PATH_SCORE_PUBLIC);
+		final long modTime = scoreboard.lastModified();
+		final String sql = "DELETE FROM scoreboard WHERE DatePlayed='"+time+"';";
+				
+		try {
+			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
+			final int rows = st.executeUpdate(sql);
+				st.close();
+				
+			scoreboard.setLastModified(modTime);
+			if(rows > 0) {
+				Log.success("Removed score");
+				return true;
+			} else {
+				Log.error("Deleting query return 0 rows");
+				return false;
+			}
+		} catch (Exception e) {
+			Log.error("Could not save score: " + e);
+			return false;
+		}
+	}
+	
+	public static boolean setScoreName(String name) {
+		final File scoreboard = new File(PATH_SCORE_PUBLIC);
+		final long modTime = scoreboard.lastModified();
+		final String sql = "UPDATE scoreboard SET name=?";
+		
+		try {
+			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
+			PreparedStatement ps = st.getConnection().prepareStatement(sql);
+				
+			ps.setString(1, name);
+			ps.executeUpdate();
+				ps.close();
+				st.close();
+				
+			scoreboard.setLastModified(modTime);
+			Log.success("Updated score name");
+			return true;
+		} catch (Exception e) {
+			Log.error("Could not update name: " + e);
+			return false;
+		}
+	}
+
+	
+	public static StackPane inputBox(final String messageStr) {
+		final StackPane stack = new StackPane();
+			stack.setAlignment(Pos.CENTER_LEFT);
+					
+		final TextField input = new TextField();
+			input.setMaxWidth(120);
+			input.setMaxHeight(20);
+			input.setAlignment(Pos.CENTER);
+			input.setStyle("-fx-faint-focus-color: transparent;"
+					+ "-fx-focus-color: transparent;"
+					+ "-fx-text-box-border: transparent;"
+					+ "-fx-background-color: transparent;"
+					+ "-fx-text-fill: #FFF;"
+					+ "-fx-highlight-fill: #FFF;"
+					+ "-fx-highlight-text-fill: #0E0E0E;"
+					+ "-fx-cursor: block;"
+					+ "-fx-padding: 0 2 0 2;"
+					+ "-fx-font-family: 'Courier new', monospace;");
+			input.setOnKeyTyped(e -> {
+				final int maxCharacters = 14;
+		        if(input.getText().length() > maxCharacters) {
+		        	e.consume();
+		        }
+			});
+			
+		int shiftX = 20;
+			
+		Text message = Scenes.createText(messageStr, Color.WHITE, Scenes.FONT_TEXT, 17);
+			message.setTranslateX(shiftX);
+			
+		Text signL = Scenes.createText("[", Color.WHITE, Scenes.FONT_TEXT, 17);
+			shiftX += message.getLayoutBounds().getWidth() + 20;
+			signL.setTranslateX(shiftX);
+			
+		shiftX += 10;
+		input.setTranslateX(shiftX);
+		
+		Text signR = Scenes.createText("]", Color.WHITE, Scenes.FONT_TEXT, 17);
+			shiftX += 120;
+			signR.setTranslateX(shiftX);
+		
+		final Rectangle bg = new Rectangle(shiftX+20, 100);
+			bg.setFill(Colors.BACKGROUND_C);
+		
+		final int borderWidth = 5;
+		stack.setPrefSize(shiftX+20+2*borderWidth, 100+2*borderWidth);
+		stack.setStyle("-fx-border-color: #FFF; -fx-border-width: " + borderWidth);
+		stack.getChildren().addAll(bg, message, signL, signR, input);
+		return stack;
+	}
+	
 	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, int initialAmount, long creationDelay, long speed, Node... toFront) {
 		List<Particle> particles = new ArrayList<Particle>();	// list of all particles
 		Random random = new Random();
@@ -278,7 +450,7 @@ public class Utils {
 		}
 		
 		/* animating particles */
-		AnimationTimer animation_background = new AnimationTimer() {
+		return new AnimationTimer() {
 
 			private long particle_create = 0;
 			private long particle_move = 0;
@@ -322,8 +494,6 @@ public class Utils {
 			}
 			
 		};
-		
-		return animation_background;
 	}
 	
 	public static boolean fileExists(String name) {

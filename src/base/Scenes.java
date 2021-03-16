@@ -1,8 +1,13 @@
 package base;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 import base.obj.ScoreboardEntry;
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
@@ -12,14 +17,18 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
-
+import menu.Select;
 import menu.Words;
 import menu.obj.Option;
 import menu.obj.ScaleBox;
 
+import static base.Utils.showScoreboardPage;
+import static base.Utils.blinkingNodeTimer;
+
 public class Scenes {
 
-	static AnimationTimer timer;
+	private final static String FONT_TITLE = "Grixel Kyrou 7 Wide Bold";
+	final static String FONT_TEXT = "Courier new";
 	
 	static Text pointsVal = new Text("0");
 	static Text conditionVal = new Text();	// create empty text and assign value later based on gamemode
@@ -27,9 +36,11 @@ public class Scenes {
 	static final StackPane pauseBox = new StackPane();
 
 	public static final TextField input = new TextField();
-	public static final Text pointer = createText(">", Color.WHITE, "Courier new", 15);
-	public static final Option[] gamemodes = {new Option(250, "Normal", 40, true),
-											new Option(290, "Marathon", 40, false)};
+	public static final Text pointer = createText(">", Color.WHITE, FONT_TEXT, 15);
+	public static final Option[] gamemodes = {
+			new Option(250, "Normal", 40, true),
+			new Option(290, "Marathon", 40, false)
+	};
 	
 	public static ScaleBox[][] scales;
 	public static Option[] difficulties = new Option[5];
@@ -37,45 +48,170 @@ public class Scenes {
 	public static Option[] lngs;
 	public static String fontsPath;
 	
-	private final static String titleFont = "Grixel Kyrou 7 Wide Bold";
+	private static int currentPage = 1;
+	private static boolean saved;
 	
-	public static Pane scoreboard() {
+	public static Scene scoreboard() {
 		
-		Text title = createText("SCOREBOARD", Color.WHITE, titleFont, 26);
-			title.setTranslateY(62);
-			title.setTranslateX(257);
-			
+		boolean newScore = false;
+		saved = false;
+				
 		Pane root = new Pane();
 			root.setPrefSize(800, 500);
 			root.setStyle("-fx-background-color: rgb(14, 14, 14)");
+		
+		/* text with error information when SQLException occurs */
+		Text errorMsg = createText("Error getting some scores", Colors.COLOR_RED_C, FONT_TEXT, 15);
+			errorMsg.setTranslateX(10);
+			errorMsg.setTranslateY(20);
+			errorMsg.setVisible(false);
 				
-		Pane results = new Pane();
-			results.setTranslateX(25);
-			results.setTranslateY(100);
-			results.setPrefSize(752, 354);
-			results.setStyle("-fx-border-color: white;");
+		Text title = createText("SCOREBOARD", Color.WHITE, FONT_TITLE, 26);
+			title.setTranslateY(57);
+			title.setTranslateX(257);
 			
-		AnimationTimer animation_bg = Utils.getBackgroundTimer(790, 590, root, results);
+		StackPane nameInput = Utils.inputBox("NAME");
+				nameInput.setTranslateX((800 - nameInput.getPrefWidth())/2);
+				nameInput.setTranslateY((500 - nameInput.getPrefHeight())/2);
+				nameInput.setVisible(false);	
+			
+		Pane resultsContainer = new Pane();
+			resultsContainer.setTranslateX(25);
+			resultsContainer.setTranslateY(100);
+			resultsContainer.setPrefSize(752, 354);
+			resultsContainer.setStyle("-fx-border-color: white;");
+			
+		Text newScoreText = createText("New score - Press enter to save", Colors.COLOR_GREEN_C, FONT_TEXT, 15);
+			newScoreText.setTranslateY(85);
+			newScoreText.setTranslateX(261);
+		AnimationTimer newScoreTimer = blinkingNodeTimer(newScoreText, 750_000_000);
+			newScoreTimer.start();
+			
+		StackPane pageStack = new StackPane();
+			pageStack.setTranslateY(465);
+			pageStack.setTranslateX(325);
+			pageStack.setPrefSize(150, 25);
+			
+		Text pagePrev = createText("<", Color.WHITE, FONT_TEXT, 16);
+			pagePrev.setTranslateX(-30);
+			pagePrev.setVisible(false);
+			
+		Text pageNext = createText(">", Color.WHITE, FONT_TEXT, 16);
+			pageNext.setTranslateX(30);
+			
+		Text pageNumber = createText("1", Color.WHITE, FONT_TEXT, 16);
+
+		pageStack.getChildren().addAll(pagePrev, pageNumber, pageNext);	
+			
+		/* animation timer with floating particles */
+		AnimationTimer animation_bg = Utils.getBackgroundTimer(790, 590, root, resultsContainer, newScoreText, nameInput);
 			animation_bg.start();
 			
+		/* create 1st entry as table headers */
 		final ScoreboardEntry headers = new ScoreboardEntry(1, "SCORE", "CPM", "DIFFICULTY", "LANGUAGE", "GAMEMODE", "DATE", "NAME");
-			results.getChildren().add(headers);
-		for(int i=0; i<15; i++) {
-			results.getChildren().add(new ScoreboardEntry(23+i*22, i+1, "69", "420", "ASIAN", "POLISH", "NORMAL", "01.01.1969", "USERNAME"));
+		resultsContainer.getChildren().add(headers);
+	
+		final ArrayList<ScoreboardEntry> entries = new ArrayList<>();	// list of all returned scores
+		try {
+			final ResultSet results = Utils.getScores();
+
+			int i = 0;
+			while(results.next()) {
+				boolean active = false;
+				final String score = String.valueOf(results.getInt("Score"));
+				final String cpm = String.valueOf(results.getInt("AvgCPM"));
+				final String diff = results.getString("Difficulty");
+				final String lang = results.getString("Language");
+				final String gm = results.getString("Gamemode");
+				final String date = Utils.formatDate(Long.valueOf(results.getString("DatePlayed")), "dd.MM.yy HH:mm");
+				final String username = results.getString("Name");
+					if(username.equals("NULL")) {
+						active = true;
+						newScore = true;
+					}
+					
+				ScoreboardEntry e = new ScoreboardEntry(23+(i%15)*22, ++i, active, score, cpm, diff, lang, gm, date, active ? "" : username);
+					e.setDate(results.getString("DatePlayed"));
+				entries.add(e);
+			}
+		} catch (SQLException e) {
+			Log.error("Could not retrieve scoreboard information: " + e);
+			errorMsg.setVisible(true);	// show error message
 		}
 		
-		results.toFront();
+		final int pages = (int) Math.ceil(entries.size()/15.0);
+
+		pageNext.setVisible(pages > 1);
+		newScoreText.setVisible(newScore);
+		title.setTranslateY(newScore ? 57 : 62);
 		
-		root.getChildren().addAll(results, title);
-		return root;
+		showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
+		
+		root.getChildren().addAll(resultsContainer, title, errorMsg, pageStack, newScoreText, nameInput);
+		root.setId(String.valueOf(newScore));
+
+		Scene scene = new Scene(root);
+		
+		final ScoreboardEntry activeEntry = ScoreboardEntry.activeEntry;
+		scene.setOnKeyPressed(e -> {
+			
+			switch(e.getCode()) {
+				case RIGHT:
+					if(currentPage + 1 <= pages) {
+						showScoreboardPage(++currentPage, resultsContainer, entries, pageNumber);
+					}
+				break;
+				case LEFT:
+					if(currentPage - 1 >= 1) {
+						showScoreboardPage(--currentPage, resultsContainer, entries, pageNumber);
+						
+					}
+				break;
+				case ESCAPE:
+					if(!saved) Utils.removeCurrentScore(activeEntry.getDate());
+					Select.selectGamemode();
+					break;
+				case ENTER:
+					if(Boolean.valueOf(root.getId())){
+						newScoreTimer.stop();
+						newScoreText.setVisible(false);
+						title.setTranslateY(62);
+						
+						nameInput.setVisible(true);
+						root.setId("false");
+					} else {
+						final TextField input = (TextField) nameInput.getChildren().get(nameInput.getChildren().size()-1);
+
+						if(nameInput.isVisible() && input.getText().trim().length() > 0) {
+							/* because gameOver() is called whenever the window is closed, check if there is anything to save, else return */
+							final String name = input.getText();
+							if(Utils.setScoreName(name)) {
+								activeEntry.setName(name);
+								ScoreboardEntry.activeEntry = null;
+								saved = true;
+							} else {
+								errorMsg.setText("Could not save name");
+								errorMsg.setVisible(true);
+							}
+							nameInput.setVisible(false);
+						}
+					}
+						
+					
+				default: break;
+			}
+			pagePrev.setVisible(currentPage != 1);
+			pageNext.setVisible(currentPage != pages);
+		});
+		return scene;
 	}
-		
+			
 	public static Pane selectMenu(String type) {
 		Pane root = new Pane();
 			root.setPrefSize(800, 500);
 			root.setStyle("-fx-background-color: rgb(14, 14, 14)");
 	
-		Text header = createText(type, Color.WHITE, titleFont, 50);
+		Text header = createText(type, Color.WHITE, FONT_TITLE, 50);
 			header.setTranslateX((800 - header.getLayoutBounds().getWidth())/2);
 			header.setTranslateY(130);
 		
@@ -94,7 +230,7 @@ public class Scenes {
 				break;
 				
 			case "CUSTOM":
-				Text subHeader = createText("DIFFICULTY", Color.WHITE,titleFont, 18);
+				Text subHeader = createText("DIFFICULTY", Color.WHITE,FONT_TITLE, 18);
 					subHeader.setTranslateX((800 - subHeader.getLayoutBounds().getWidth())/2);
 					subHeader.setTranslateY(120 + subHeader.getLayoutBounds().getHeight());
 					
@@ -111,15 +247,15 @@ public class Scenes {
 					
 				pointer.setTranslateX(-30);
 				
-				Text howFast = createText("Speed", Color.WHITE, "Courier new", 16);
+				Text howFast = createText("Speed", Color.WHITE, FONT_TEXT, 16);
 				
-				Text howOften = createText("Frequency", Color.WHITE, "Courier new", 16);
+				Text howOften = createText("Frequency", Color.WHITE, FONT_TEXT, 16);
 					howOften.setTranslateY(30);
 
-				Text howMany = createText("Amount", Color.WHITE, "Courier new", 16);
+				Text howMany = createText("Amount", Color.WHITE, FONT_TEXT, 16);
 					howMany.setTranslateY(60);
 					
-				Text startTime = createText(Window.gameMode == 0 ? "" : "Start time", Color.WHITE, "Courier new", 16);	
+				Text startTime = createText(Window.gameMode == 0 ? "" : "Start time", Color.WHITE, FONT_TEXT, 16);	
 					startTime.setTranslateY(90);
 										
 				scales = new ScaleBox[Window.gameMode == 0 ? 3 : 4][10];
@@ -166,12 +302,12 @@ public class Scenes {
 				
 		int pointsLen = String.valueOf(Math.round(Window.points)).length();		// calculation needed for good placement of the points
 		Text pointsText = new Text("Your score: ");
-			pointsText.setFont(Font.font(titleFont, 30));
+			pointsText.setFont(Font.font(FONT_TITLE, 30));
 			pointsText.setFill(Color.WHITE);
 			pointsText.setTranslateX(400-(300+pointsLen*36)/2);
 			
 		Text pointsVal = new Text(Scenes.pointsVal.getText());
-			pointsVal.setFont(Font.font(titleFont, 32));
+			pointsVal.setFont(Font.font(FONT_TITLE, 32));
 			pointsVal.setFill(Color.web("#FF554D"));
 			pointsVal.setTranslateX(pointsText.getTranslateX() + (305+pointsLen*36)/2);
 		
@@ -199,43 +335,43 @@ public class Scenes {
 		Text pointsText = new Text("Points: ");
 			pointsText.setFill(Color.WHITE);
 			pointsText.setTranslateX(30);
-			pointsText.setFont(Font.font("Courier new", 17));
+			pointsText.setFont(Font.font(FONT_TEXT, 17));
 			
 			pointsVal.setFill(Colors.COLOR_GREEN_C);
 			pointsVal.setTranslateX(50+10*pointsLen);
-			pointsVal.setFont(Font.font("Courier new", 17));
+			pointsVal.setFont(Font.font(FONT_TEXT, 17));
 		
 		Text conditionText = new Text(Window.gameMode == 0 ? "Missed: " : "Time left: ");	// if default gamemode, set "Missed" else "Time left" for marathon mode
 			conditionText.setFill(Color.WHITE);
 			conditionText.setTranslateX(230);
-			conditionText.setFont(Font.font("Courier new", 17));
+			conditionText.setFont(Font.font(FONT_TEXT, 17));
 			
 			conditionVal.setFill(Colors.COLOR_RED_C);
 			conditionVal.setTranslateX(conditionText.getTranslateX() + conditionText.getLayoutBounds().getWidth());
-			conditionVal.setFont(Font.font("Courier new", 17));
+			conditionVal.setFont(Font.font(FONT_TEXT, 17));
 		
 		Text CPMText = new Text("CPM: ");
 			CPMText.setFill(Color.WHITE);
 			CPMText.setTranslateX(230);
-			CPMText.setFont(Font.font("Courier new", 17));
+			CPMText.setFont(Font.font(FONT_TEXT, 17));
 			
 			CPM.setFill(Colors.COLOR_YELLOW_C);
 			CPM.setTranslateX(280);
-			CPM.setFont(Font.font("Courier new", 17));
+			CPM.setFont(Font.font(FONT_TEXT, 17));
 			
 		Text signL = new Text("[");
 			signL.setFill(Color.WHITE);
 			signL.setTranslateX(27);
-			signL.setFont(Font.font("Courier new", 17));
+			signL.setFont(Font.font(FONT_TEXT, 17));
 		
 		Text signR = new Text("]");
 			signR.setFill(Color.WHITE);
 			signR.setTranslateX(27+120+5);
-			signR.setFont(Font.font("Courier new", 17));
+			signR.setFont(Font.font(FONT_TEXT, 17));
 			
 		Text pause = new Text("PAUSE");
 			pause.setFill(Colors.COLOR_RED_C);
-			pause.setFont(Font.font("Courier new", 25));
+			pause.setFont(Font.font(FONT_TEXT, 25));
 			
 		Rectangle pauseBg = new Rectangle(100, 40);
 			pauseBg.setFill(Colors.BACKGROUND_C);
@@ -296,12 +432,12 @@ public class Scenes {
 			error.setTranslateY(-65);
 			error.setStyle("-fx-background-color: #0e0e0e;");
 			error.setTextFill(Color.WHITE);	
-			error.setFont(Font.font("Courier new", 25));
+			error.setFont(Font.font(FONT_TEXT, 25));
 			
 		Text errorMsg = new Text();
 			errorMsg.setWrappingWidth(350);
 			errorMsg.setFill(Color.WHITE);
-			errorMsg.setFont(Font.font("Courier new", 20));
+			errorMsg.setFont(Font.font(FONT_TEXT, 20));
 			errorMsg.setTextAlignment(TextAlignment.CENTER);
 
 		switch(err) {
