@@ -14,14 +14,15 @@ import javafx.scene.text.Font;
 public class ScoreboardEntry extends StackPane {
 	
 	public static boolean colorSwitch = false;			// flag for changing color
-	public static ScoreboardEntry activeEntry;	// storing active entry object
+	public static ScoreboardEntry activeEntry = null;	// storing active entry object
 	
 	final static int COL_WIDTHS[] = {40, 100, 60, 90, 100, 90, 130, 140};	// storing widths of scoreboard columns + index (first one)
 	
 	final private boolean header;
-	final private boolean active;
+	private boolean active;
 	final private String date;
 	final private int nr;
+	private String baseColor;
 	
 	/* constructor for table headers */
 	public ScoreboardEntry(int y, String... headers) {
@@ -34,11 +35,6 @@ public class ScoreboardEntry extends StackPane {
 		this.nr = nr;
 		this.header = nr == 0;
 		
-		/* save active entry */
-		if(active) {
-			activeEntry = this;
-		}
-
 		setPrefSize(750, 22);			// set size
 		setTranslateY(y);				// set Y
 		setAlignment(Pos.CENTER_LEFT);	// set alignment
@@ -61,12 +57,14 @@ public class ScoreboardEntry extends StackPane {
 				l.setTranslateX(currentX);
 				l.setFont(Font.font(Scenes.FONT_TEXT));
 				
-				/* add style to it */
+			baseColor = (colorSwitch ? Colors.MID_GREY : Colors.DARK_GREY);
+			
+			/* add style to it */
 			String style = "-fx-border-color: white;"
 					+ "-fx-padding: 0 10 0 0;"
 					+ "-fx-border-style: hidden solid hidden hidden;"
 					+ "-fx-background-color: ";
-				style += (colorSwitch ? Colors.MID_GREY : Colors.DARK_GREY) + ";";	// switching grey colors for rows
+				style += baseColor + ";";	// switching grey colors for rows
 				
 			/* set different colors for active entry */
 			if(active) {
@@ -95,7 +93,39 @@ public class ScoreboardEntry extends StackPane {
 			
 			getChildren().add(l);	// add to stackPane
 		}
+		
+		/* save active entry */
+		if(active) {
+			if(activeEntry == null) {
+				activeEntry = this;
+			} else {
+				ScoreboardEntry entryToDisable = null;
+				if(activeEntry.getDateNum() < this.getDateNum()) {
+					entryToDisable = activeEntry;
+					activeEntry = this;
+				} else {
+					entryToDisable = this;
+				}
+				setInactive(entryToDisable);
+				entryToDisable.active = false;
+			}
+		}
 		colorSwitch = (nr%15 == 0) ? false : !colorSwitch;	// reset color switching for each page
+	}
+	
+	private void setInactive(ScoreboardEntry entry) {
+		entry.getNameLabel().setText("- unfinished -");
+		entry.getChildren().forEach(child -> {
+			final Label label = (Label) child;
+			final Color baseColor = Color.web(entry.baseColor);
+			final String baseColorRGB = String.format("rgba(%d, %d, %d, %f)", (int) baseColor.getRed(), (int) baseColor.getGreen(), (int) baseColor.getBlue(), 0.3);
+				label.setStyle(label.getStyle() + ";-fx-background-color: " + baseColorRGB + ";");
+				label.setTextFill(Color.rgb(255, 255, 255, 0.3));
+		});
+	}
+		
+	public long getDateNum() {
+		return Long.valueOf(date);
 	}
 	
 	public boolean isHeader() {
@@ -108,13 +138,13 @@ public class ScoreboardEntry extends StackPane {
 	}
 	
 	public String getName() {
-		Label nameField = (Label) getChildren().get(getChildren().size()-1);	// get the last node of stackpane
+		Label nameField = getNameLabel();
 		return nameField.getText();
 	}
 	
 	/* sets visible name value */
 	public void setName(String name) {
-		Label nameField = (Label) getChildren().get(getChildren().size()-1);	// get the last node of stackpane
+		Label nameField = getNameLabel();
 		nameField.setText(name);
 	}
 	
@@ -126,5 +156,9 @@ public class ScoreboardEntry extends StackPane {
 	/* returns information if entry is active */
 	public boolean isActive() {
 		return active;
+	}
+	
+	private Label getNameLabel() {
+		return (Label) getChildren().get(getChildren().size()-1);
 	}
 }

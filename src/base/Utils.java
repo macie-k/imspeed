@@ -101,7 +101,9 @@ public class Utils {
 				final String date = Utils.formatDate(Long.valueOf(dateNum), "dd.MM.yy HH:mm");
 				String username = results.getString("Name");
 					if(username.equals("NULL")) {
-						active = true;
+						if(activeEntry == null) {
+							active = true;
+						} 
 					} else if((activeEntry != null && activeEntry.getDate().equals(dateNum))) {
 						username = activeEntry.getName();
 						active = true;
@@ -373,10 +375,10 @@ public class Utils {
 	}
 	
 	/* removes all not saved scores / all with NULL as name */
-	public static boolean removeNullScores() {
+	public static boolean removeActiveRecord(String date) {
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
 		final long modTime = scoreboard.lastModified();
-		final String sql = "DELETE FROM scoreboard WHERE Name='NULL';";
+		final String sql = String.format("DELETE FROM scoreboard WHERE DateTime='%s'", date);
 				
 		try {
 			Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();

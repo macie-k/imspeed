@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import base.obj.CurtainBlock;
+import base.obj.ScoreboardEntry;
 import base.obj.Word;
 import javafx.scene.shape.Rectangle;
 import javafx.animation.AnimationTimer;
@@ -70,7 +71,10 @@ public class Window extends Application {
 		window.setOnCloseRequest(e -> {
 			Log.success("Exiting ...");
 			if(!Scenes.saved) {
-				Utils.removeNullScores(); 
+				final ScoreboardEntry entry = ScoreboardEntry.activeEntry;
+				if(entry != null) {
+					Utils.removeActiveRecord(entry.getDate()); 
+				}
 			}
 		});	
 	}

@@ -182,7 +182,7 @@ public class Scenes {
 					} else {
 						/* else check if record should be removed */
 						if(Boolean.valueOf(root.getId())) {
-							Utils.removeNullScores();
+							Utils.removeActiveRecord(ScoreboardEntry.activeEntry.getDate());
 						}
 						/* and return to selection scene */
 						ScoreboardEntry.activeEntry = null;
