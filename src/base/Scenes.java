@@ -185,6 +185,7 @@ public class Scenes {
 							Utils.removeNullScores();
 						}
 						/* and return to selection scene */
+						ScoreboardEntry.activeEntry = null;
 						Select.selectGamemode();
 					}
 					break;
@@ -201,7 +202,7 @@ public class Scenes {
 						if(nameInput.isVisible() && input.getText().trim().length() > 0) {
 							final String name = input.getText();
 							if(Utils.setScoreName(name, activeEntry.getDate())) {
-								activeEntry.setName(name);		// update visible user's name
+								ScoreboardEntry.activeEntry.setName(name);		// update visible user's name
 								saved = true;
 							} else {
 								/* if error occurs display information */

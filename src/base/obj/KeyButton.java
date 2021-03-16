@@ -25,8 +25,8 @@ public class KeyButton extends StackPane {
 	private Text value;
 	private boolean active = false;
 	
-	private static ArrayList<Shape> primaryColored = new ArrayList<>();
-	private static ArrayList<Shape> secondaryColored = new ArrayList<>();
+	private ArrayList<Shape> primaryColored = new ArrayList<>();
+	private ArrayList<Shape> secondaryColored = new ArrayList<>();
 	
 	public KeyButton(Scene scene, Pane root, KeyCode trigger, String val, int x, int y, int width, int height, int fontSize, int radius, ButtonAction callback) {
 		this(scene, root, trigger, val, x, y, width, height, Colors.DARK_GREY_C, Color.WHITE, fontSize, radius, callback);
@@ -66,11 +66,15 @@ public class KeyButton extends StackPane {
 				setPressed();
 				callback.callback(root, active);
 				active = !active;
+			} else {
+				e.consume();
 			}
         });
 		scene.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
 			if(e.getCode() == trigger) {
 				setReleased();
+			} else {
+				e.consume();
 			}
         });
 	}

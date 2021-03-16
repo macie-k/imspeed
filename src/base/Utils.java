@@ -69,10 +69,11 @@ public class Utils {
 	public static ResultSet getScores(String sortBy, String order) throws SQLException {
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);	// get data file
 		final long modTime = scoreboard.lastModified();		// get modification time
+		final String sql = String.format("SELECT * FROM scoreboard ORDER BY %s %s, Score DESC", sortBy, order);
 		
 		/* execute query to set the level value */
 		Statement st = getDataConnection(PATH_SCORE_PUBLIC).createStatement();
-		PreparedStatement ps = st.getConnection().prepareStatement("SELECT * FROM scoreboard ORDER BY " + sortBy + " " + order);
+		PreparedStatement ps = st.getConnection().prepareStatement(sql);
 		ResultSet results = ps.executeQuery();
 		
 		ps.close();
@@ -101,8 +102,7 @@ public class Utils {
 				String username = results.getString("Name");
 					if(username.equals("NULL")) {
 						active = true;
-					} 
-					if((activeEntry != null && activeEntry.getDate().equals(dateNum))) {
+					} else if((activeEntry != null && activeEntry.getDate().equals(dateNum))) {
 						username = activeEntry.getName();
 						active = true;
 					}
