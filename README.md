@@ -22,6 +22,9 @@ Typing game inspired by bisqwit's "wspeed"
 <p align="center">
   <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/90965818-dcac6100-e4cb-11ea-9d74-20e80a79b3a7.jpg">
 </p>
+<p align="center">
+  <img width="auto" height="auto" src="https://user-images.githubusercontent.com/25122875/119225549-ad7f5a80-bb04-11eb-84a9-20d47ae1b3f1.png">
+</p>
 
 <br>
 
