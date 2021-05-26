@@ -1,5 +1,5 @@
 # imspeed
-Typing game inspired by bisqwit's "wspeed"
+Typing game inspired by bisqwit's "wspeed" working on modern OS
 
 <br>  
 
