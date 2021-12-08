@@ -38,14 +38,13 @@ Typing game inspired by bisqwit's "wspeed" working on modern OS
 
 - Make sure `words` folder is in the same directory as the game
 - **Custom languages** can be added by editing `.words` files
-- `fonts` folder is optional, in case the downloading doesn't work
    
 <br>
 
 
 ## How to use:
-  - Just double click on `.exe` file or:
-  - `java -jar imspeed.jar`
+  - Double click for the `.exe` file
+  - Double click or `java -jar imspeed.jar` for the `.jar` file
   - Optionally use `--log` argument if something doesn't work
   
 <br>
