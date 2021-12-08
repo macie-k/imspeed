@@ -1,11 +1,14 @@
-package base.obj;
+package app.obj;
 
 import javafx.scene.input.KeyEvent;
+
+import static app.Utils.createText;
+
 import java.util.ArrayList;
 
-import base.ButtonAction;
-import base.Colors;
-import base.Scenes;
+import app.ButtonAction;
+import app.Colors;
+import app.Scenes;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -15,8 +18,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
-
-import static base.Utils.createText;
 
 public class KeyButton extends StackPane {
 	

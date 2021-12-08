@@ -1,14 +1,11 @@
-package base;
+package app;
 
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Log {
-		
-	/* color logging if not in IDE */
-	public static boolean IDE = false;
-	
+			
 	public static void success(String s) {
 		System.out.println(getTime() + " [OK] " + s);
 	}

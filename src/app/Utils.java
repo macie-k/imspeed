@@ -1,4 +1,4 @@
-package base;
+package app;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,9 +19,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import base.obj.Particle;
-import base.obj.ScoreboardEntry;
-import base.obj.Word;
+import app.obj.Particle;
+import app.obj.ScoreboardEntry;
+import app.obj.Word;
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.geometry.Pos;
@@ -345,15 +345,7 @@ public class Utils {
 		    ft.setToValue(1);
 		    ft.play();
 	}
-	
-	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, Node... toFront) {
-		return getBackgroundTimer(xRange, yRange, root, 70, 50_000_000, 5_000_000, toFront);
-	}
-	
-	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root) {
-		return getBackgroundTimer(xRange, yRange, root, 70, 50_000_000, 5_000_000);
-	}
-	
+		
 	public static AnimationTimer blinkingNodeTimer(Node node) {
 		return blinkingNodeTimer(node, 500_000_000);
 	}
@@ -487,7 +479,15 @@ public class Utils {
 		return new Node[] {stack, input};
 	}
 	
-	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, int initialAmount, long creationDelay, long speed, Node... toFront) {
+	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, Node... toFront) {
+		return getBackgroundTimer(xRange, yRange, root, 30, 200_000_000, 5_000_000, toFront);
+	}
+	
+	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root) {
+		return getBackgroundTimer(xRange, yRange, root, 30, 200_000_000, 5_000_000);
+	}
+	
+	public static AnimationTimer getBackgroundTimer(int xRange, int yRange, Pane root, int initialAmount, long creationDelay, long speed, Node... toFront) {		
 		List<Particle> particles = new ArrayList<Particle>();	// list of all particles
 		Random random = new Random();
 		
@@ -498,14 +498,22 @@ public class Utils {
 		
 		/* generate particle with its trail */
 		for(int i=0; i<initialAmount; i++) {
-			Particle p = new Particle(random.nextInt(xRange)+10, particleY[random.nextInt(yRange)], random.nextDouble());
-				particles.add(p); root.getChildren().add(p);
+			final int x = random.nextInt(xRange)+10;
+			final int y = particleY[random.nextInt(yRange)];
+			final double alpha = 0.1 + 0.70 * random.nextDouble();
+			final int distance = getRandomDistance(alpha);
 			
-			Particle trail_1 = new Particle(p.getTranslateX()-1, p.getTranslateY(), p.getAlpha()*0.66);
-				particles.add(trail_1); root.getChildren().add(trail_1);
+			Particle p = new Particle(distance, x, y, alpha);
+				particles.add(p);
+				root.getChildren().add(p);
+			
+			Particle trail_1 = new Particle(distance, x-1, y, alpha*0.66);
+				particles.add(trail_1);
+				root.getChildren().add(trail_1);
 				
-			Particle trail_2 = new Particle(p.getTranslateX()-2, p.getTranslateY(), p.getAlpha()*0.33);
-				particles.add(trail_2); root.getChildren().add(trail_2);
+			Particle trail_2 = new Particle(distance, x-2, y, alpha*0.33);
+				particles.add(trail_2);
+				root.getChildren().add(trail_2);
 		}
 		
 		/* animating particles */
@@ -531,19 +539,27 @@ public class Utils {
 					particles.removeAll(toRemove);
 					root.getChildren().removeAll(toRemove);
 					toRemove.clear();
+					System.gc();
 					
 					particle_move = now;
 				}
 				
 				if(now - particle_create >= creationDelay) {
-					Particle p = new Particle(-2, particleY[random.nextInt(yRange)], random.nextDouble());
-						particles.add(p); root.getChildren().add(p);
+					final int y = particleY[random.nextInt(yRange)];
+					final double alpha = 0.1 + 0.70 * random.nextDouble();
+					final int distance = getRandomDistance(alpha);
+					
+					Particle p = new Particle(distance, -2, y, alpha);
+						particles.add(p);
+						root.getChildren().add(p);
 						
-					Particle trail_1 = new Particle(-3, p.getTranslateY(), p.getAlpha()*0.66);
-						particles.add(trail_1); root.getChildren().add(trail_1);
+					Particle trail_1 = new Particle(distance, -3, y, alpha*0.66);
+						particles.add(trail_1);
+						root.getChildren().add(trail_1);
 						
-					Particle trail_2 = new Particle(-4, p.getTranslateY(), p.getAlpha()*0.33);
-						particles.add(trail_2); root.getChildren().add(trail_2);
+					Particle trail_2 = new Particle(distance, -4, y, alpha*0.33);
+						particles.add(trail_2);
+						root.getChildren().add(trail_2);
 						
 					for(Node n : toFront) {
 						n.toFront();
@@ -552,7 +568,17 @@ public class Utils {
 				}
 			}
 			
-		};
+		};		
+		
+	}
+	
+	/* Get random distance but weighted */
+	private static int getRandomDistance(double alpha) {
+		if(alpha <= 0.45) return 1;
+		if(alpha <= 0.70) return 2;
+		if(alpha <= 1.00) return 3;
+		
+		return 0;
 	}
 	
 	public static boolean fileExists(String name) {

@@ -1,6 +1,6 @@
 package menu.obj;
 
-import base.Colors;
+import app.Colors;
 import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;

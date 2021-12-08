@@ -4,6 +4,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import menu.obj.Option;
 
+import static app.Window.window;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,10 +13,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import base.Log;
-import base.Scenes;
-import base.Window;
-import static base.Window.window;
+import app.Log;
+import app.Scenes;
+import app.Window;
 
 public class Select {
 	
