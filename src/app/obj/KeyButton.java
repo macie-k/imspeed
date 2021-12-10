@@ -25,19 +25,29 @@ public class KeyButton extends StackPane {
 	private Color secondary;
 	private Text value;
 	private boolean active = false;
+	private boolean onRelease = false;
 	
 	private ArrayList<Shape> primaryColored = new ArrayList<>();
 	private ArrayList<Shape> secondaryColored = new ArrayList<>();
 	
 	public KeyButton(Scene scene, Pane root, KeyCode trigger, String val, int x, int y, int width, int height, int fontSize, int radius, ButtonAction callback) {
-		this(scene, root, trigger, val, x, y, width, height, Colors.DARK_GREY_C, Color.WHITE, fontSize, radius, callback);
+		this(scene, root, trigger, val, x, y, width, height, Colors.DARK_GREY_C, Color.WHITE, fontSize, radius, false, callback);
 	}
 	
 	public KeyButton(Scene scene, Pane root, KeyCode trigger, String val, int x, int y, int width, int height, String primary, String secondary, int fontSize, int radius, ButtonAction callback) {
-		this(scene, root, trigger, val, x, y, width, height, Color.web(primary), Color.web(secondary), fontSize, radius, callback);
+		this(scene, root, trigger, val, x, y, width, height, Color.web(primary), Color.web(secondary), fontSize, radius, false, callback);
 	}
 	
-	public KeyButton(Scene scene, Pane root, KeyCode trigger, String val, int x, int y, int width, int height, Color primary, Color secondary, int fontSize, int radius, ButtonAction callback) {
+	public KeyButton(Scene scene, Pane root, KeyCode trigger, String val, int x, int y, int width, int height, int fontSize, int radius, boolean onRelease, ButtonAction callback) {
+		this(scene, root, trigger, val, x, y, width, height, Colors.DARK_GREY_C, Color.WHITE, fontSize, radius, onRelease, callback);
+	}
+	
+	public KeyButton(Scene scene, Pane root, KeyCode trigger, String val, int x, int y, int width, int height, String primary, String secondary, int fontSize, int radius, boolean onRelease, ButtonAction callback) {
+		this(scene, root, trigger, val, x, y, width, height, Color.web(primary), Color.web(secondary), fontSize, radius, onRelease, callback);
+	}
+	
+	public KeyButton(Scene scene, Pane root, KeyCode trigger, String val, int x, int y, int width, int height, Color primary, Color secondary, int fontSize, int radius, boolean onRelease, ButtonAction callback) {
+		this.onRelease = onRelease;
 		this.primary = primary;
 		this.secondary = secondary;
 		this.value = createText(val, secondary, Scenes.FONT_TEXT, fontSize);
@@ -65,19 +75,30 @@ public class KeyButton extends StackPane {
 		scene.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
 			if(e.getCode() == trigger) {
 				setPressed();
-				callback.callback(root, active);
-				active = !active;
+				if(!this.onRelease) {
+					callback.callback(root, active);
+					active = !active;
+				}
 			} else {
 				e.consume();
 			}
         });
+		
 		scene.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
 			if(e.getCode() == trigger) {
 				setReleased();
+				if(this.onRelease) {
+					callback.callback(root, active);
+					active = !active;
+				}
 			} else {
 				e.consume();
 			}
         });
+	}
+	
+	public void setOnRelease(boolean onRelease) {
+		this.onRelease = onRelease;
 	}
 		
 	public void setPressed() {

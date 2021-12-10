@@ -378,7 +378,8 @@ public class Window extends Application {
 					List<Word> del = new ArrayList<Word>();		// list of words to deletion after loop
 					boolean gameOver = false;
 					
-		outerloop: for(Word w : words) {
+					outerloop:
+					for(Word w : words) {
 						
 						if(curtain) {
 							break;
@@ -438,7 +439,6 @@ public class Window extends Application {
 						curtain(scene, root);
 					} else {
 						words.removeAll(del);
-						System.gc();
 					}
 					
 					if(words.isEmpty()) { // if no words are on the screen
@@ -481,17 +481,16 @@ public class Window extends Application {
 
 				if(!pause) {
 					animation_words.stop();
-					animation_background.stop();
 					pauseTime = System.nanoTime();
-					
+
+					Log.success("Suspended");
 					Scenes.input.setEditable(false);
 					Scenes.pauseBox.setVisible(true);
 					Scenes.pauseBox.toFront();
 				} else {
 					animation_words.start();
-					animation_background.start();
 					startTime = System.nanoTime() - (pauseTime - startTime);
-					
+
 					Scenes.input.setEditable(true);
 					Scenes.pauseBox.setVisible(false);
 				}

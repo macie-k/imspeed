@@ -1,7 +1,10 @@
 package menu;
 
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import menu.obj.Option;
 
 import static app.Window.window;
@@ -13,9 +16,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import app.ButtonAction;
 import app.Log;
 import app.Scenes;
+import app.Utils;
 import app.Window;
+import app.obj.KeyButton;
 
 public class Select {
 	
@@ -57,6 +63,19 @@ public class Select {
 				default: break;			
 			}
 		});
+		 
+		Text showScoreboardText = Utils.createText("SCOREBOARD", Color.WHITE, Scenes.FONT_TEXT, 14);
+			showScoreboardText.setTranslateX(70);
+			showScoreboardText.setTranslateY(470);
+			
+		KeyButton showScoreboard = new KeyButton(scene, root, KeyCode.S, "S", 20, 450, 30, 30, 14, 8, true, new ButtonAction() {
+			@Override
+			public void callback(Pane root, boolean active) {
+				window.setScene(Scenes.scoreboard());
+			}
+		});
+		
+		root.getChildren().addAll(showScoreboardText, showScoreboard);
 	}
 	
 	/* set difficulty */
