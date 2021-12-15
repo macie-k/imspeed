@@ -15,6 +15,7 @@ public class ScoreboardEntry extends StackPane {
 	
 	public static boolean colorSwitch = false;			// flag for changing color
 	public static ScoreboardEntry activeEntry = null;	// storing active entry object
+	public static ScoreboardEntry toDeleteEntry = null;
 	
 	final static int COL_WIDTHS[] = {40, 100, 60, 90, 100, 90, 130, 140};	// storing widths of scoreboard columns + index (first one)
 	
@@ -23,6 +24,9 @@ public class ScoreboardEntry extends StackPane {
 	final private String date;
 	final private int nr;
 	private String baseColor;
+	private String baseStyle = "-fx-border-color: white;"
+								+ "-fx-padding: 0 10 0 0;"
+								+ "-fx-border-style: hidden solid hidden hidden;";
 	
 	/* constructor for table headers */
 	public ScoreboardEntry(int y, String... headers) {
@@ -60,12 +64,8 @@ public class ScoreboardEntry extends StackPane {
 			baseColor = (colorSwitch ? Colors.MID_GREY : Colors.DARK_GREY);
 			
 			/* add style to it */
-			String style = "-fx-border-color: white;"
-					+ "-fx-padding: 0 10 0 0;"
-					+ "-fx-border-style: hidden solid hidden hidden;"
-					+ "-fx-background-color: ";
-				style += baseColor + ";";	// switching grey colors for rows
-				
+			String style = baseStyle + "-fx-background-color: " + baseColor + ";"; // switching grey colors for rows
+							
 			/* set different colors for active entry */
 			if(active) {
 				style += "-fx-background-color: #00AAAA;";
@@ -86,7 +86,7 @@ public class ScoreboardEntry extends StackPane {
 				l.setTextFill(Color.BLACK);
 				l.setAlignment(Pos.CENTER);
 			}
-			
+						
 			l.setStyle(style);	// apply all styles
 			currentX += width;	// shift X for next column
 			index++;			// increase index
@@ -118,10 +118,23 @@ public class ScoreboardEntry extends StackPane {
 		entry.getChildren().forEach(child -> {
 			final Label label = (Label) child;
 			final Color baseColor = Color.web(entry.baseColor);
-			final String baseColorRGB = String.format("rgba(%d, %d, %d, %f)", (int) baseColor.getRed(), (int) baseColor.getGreen(), (int) baseColor.getBlue(), 0.3);
+			final String baseColorRGB = String.format("rgba(%d, %d, %d, %f)",
+					(int) baseColor.getRed(),
+					(int) baseColor.getGreen(),
+					(int) baseColor.getBlue(),
+					0.3);
 				label.setStyle(label.getStyle() + ";-fx-background-color: " + baseColorRGB + ";");
 				label.setTextFill(Color.rgb(255, 255, 255, 0.3));
 		});
+	}
+	
+	public void setToDelete(boolean toDelete) {
+		if(toDelete) {
+			toDeleteEntry = this;
+			getChildren().forEach(e -> e.setStyle(e.getStyle() + "-fx-background-color: #fc3908;-fx-border-color: #EBB796;"));
+		} else {
+			getChildren().forEach(e -> e.setStyle(e.getStyle().replace("-fx-background-color: #fc3908;-fx-border-color: #EBB796;", "")));
+		}
 	}
 		
 	public long getDateNum() {
@@ -138,14 +151,12 @@ public class ScoreboardEntry extends StackPane {
 	}
 	
 	public String getName() {
-		Label nameField = getNameLabel();
-		return nameField.getText();
+		return getNameLabel().getText();
 	}
 	
 	/* sets visible name value */
 	public void setName(String name) {
-		Label nameField = getNameLabel();
-		nameField.setText(name);
+		getNameLabel().setText(name);
 	}
 	
 	/* returns numeral date */

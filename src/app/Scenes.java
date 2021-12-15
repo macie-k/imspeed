@@ -53,6 +53,7 @@ public class Scenes {
 	public static String fontsPath;
 	
 	private static ArrayList<ScoreboardEntry> entries;
+	private static int toDeleteIndex = 0;
 
 	@SuppressWarnings("serial")
 	private static Map<String, String> columns = new LinkedHashMap<String, String>() {{
@@ -69,12 +70,18 @@ public class Scenes {
 	private static int columnsIndex = 0;
 	
 	private static int currentPage = 1;
+	private static boolean deletable = false;
 	static boolean saved;
 	
+	/* fallback for default call, if called from main menu 'saved' is set as true */
 	public static Scene scoreboard() {
+		return scoreboard(false);
+	}
+	
+	public static Scene scoreboard(boolean _saved) {
 		
 		boolean newScore = false;	// flag for asking for user's name
-		saved = false;
+		saved = _saved;
 				
 		Pane root = new Pane();
 			root.setPrefSize(800, 500);
@@ -82,8 +89,8 @@ public class Scenes {
 		
 		/* text with error information when SQLException occurs */
 		Text errorMsg = createText("Could not get any scores", Colors.RED_C, FONT_TEXT, 15);
-			errorMsg.setTranslateX(10);
-			errorMsg.setTranslateY(20);
+			errorMsg.setTranslateX(292);
+			errorMsg.setTranslateY(80);
 			errorMsg.setVisible(false);
 			
 		/* title text */
@@ -100,13 +107,14 @@ public class Scenes {
 			
 		Pane resultsContainer = new Pane();
 			resultsContainer.setTranslateX(25);
-			resultsContainer.setTranslateY(95);
+			resultsContainer.setTranslateY(85);
 			resultsContainer.setPrefSize(752, 354);
 			resultsContainer.setStyle("-fx-border-color: white;");
 			
 		Text newScoreText = createText("New score - Press enter to save", Colors.GREEN_C, FONT_TEXT, 15);
-			newScoreText.setTranslateY(80);
 			newScoreText.setTranslateX(261);
+			newScoreText.setTranslateY(75);
+			
 		AnimationTimer newScoreTimer = blinkingNodeTimer(newScoreText, 750_000_000);
 			
 		StackPane pageStack = new StackPane();
@@ -145,11 +153,11 @@ public class Scenes {
 		
 		currentPage = activeEntry != null ? ScoreboardEntry.activeEntry.getEntryPage() : 1;
 		pagePrev.setVisible(currentPage != 1);
-		pageNext.setVisible(currentPage != pages);
+		pageNext.setVisible(currentPage != pages && pages != 1);
 		
 		newScoreText.setVisible(newScore);
 		if(newScore) newScoreTimer.start();
-		title.setTranslateY(newScore ? 54 : 59);
+		title.setTranslateY(newScore ? 49 : 54);
 		
 		showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
 		
@@ -157,74 +165,17 @@ public class Scenes {
 		root.setId(String.valueOf(newScore));	// store information if there is new score, so it can be accessed inside lambda
 
 		Scene scene = new Scene(root);
-				
-		scene.setOnKeyPressed(e -> {
-			
-			switch(e.getCode()) {
-				/* show next page if possible */
-				case RIGHT:
-					if(currentPage + 1 <= pages) {
-						showScoreboardPage(++currentPage, resultsContainer, entries, pageNumber);
-					}
-				break;
-				/* show previous page if possible */
-				case LEFT:
-					if(currentPage - 1 >= 1) {
-						showScoreboardPage(--currentPage, resultsContainer, entries, pageNumber);
-					}
-				break;
-				case ESCAPE:
-					/* if input prompt is active, close it */
-					if(nameInput.isVisible()) {
-						nameInput.setVisible(false);
-						newScoreTimer.start();
-						root.setId("true");
-					} else {
-						/* else check if record should be removed */
-						if(Boolean.valueOf(root.getId())) {
-							Utils.removeActiveRecord(ScoreboardEntry.activeEntry.getDate());
-						}
-						/* and return to selection scene */
-						ScoreboardEntry.activeEntry = null;
-						Select.selectGamemode();
-					}
-					break;
-				case ENTER:
-					/* if there is a new score */
-					if(Boolean.valueOf(root.getId())){
-						newScoreTimer.stop();			// stop new score animation
-						newScoreText.setVisible(false);	// and hide it
 						
-						nameInput.setVisible(true);		// show name prompt
-						root.setId("false");			// update flag about new score
-					} else {
-						/* if prompt is active and is not empty save the name */
-						if(nameInput.isVisible() && input.getText().trim().length() > 0) {
-							final String name = input.getText();
-							if(Utils.setScoreName(name, activeEntry.getDate())) {
-								ScoreboardEntry.activeEntry.setName(name);		// update visible user's name
-								saved = true;
-							} else {
-								/* if error occurs display information */
-								errorMsg.setText("Could not save name");
-								errorMsg.setVisible(true);
-							}
-							nameInput.setVisible(false);	// hide name prompt
-						}
-					}
-				default: break;
-			}
-			/* hide/show navigation arrows */
-			pagePrev.setVisible(currentPage != 1);
-			pageNext.setVisible(currentPage != pages);
-		});
-		
 		
 		Text sortText = createText("SORT BY: " + columnsKeys[columnsIndex], Color.WHITE, FONT_TEXT, 14);
 			sortText.setTranslateX(85);
-			sortText.setTranslateY(473);
+			sortText.setTranslateY(460);
 			
-		ButtonAction changeSort = new ButtonAction() {
+		Text deleteText = createText("DELETE", Color.WHITE, FONT_TEXT, 14);
+			deleteText.setTranslateX(85);
+			deleteText.setTranslateY(485);
+			
+		KeyButton sortButton = new KeyButton(scene, root, KeyCode.TAB, "TAB", 25, 447, 50, 20, 14, 8, new ButtonAction() {
 			@Override
 			public void callback(Pane root, boolean active) {
 				columnsIndex = (columnsIndex + 1 == columnsKeys.length) ? 0 : columnsIndex+1;
@@ -236,17 +187,136 @@ public class Scenes {
 				showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
 				sortText.setText("SORT BY: " + column);
 			}
-		};
+		});		
 		
-		KeyButton sortButton = new KeyButton(scene, root, KeyCode.TAB, "TAB", 25, 460, 50, 20, 14, 8, changeSort);		
+		KeyButton deleteButton = new KeyButton(scene, root, KeyCode.DELETE, "DEL", 25, 472, 50, 20, 14, 8, new ButtonAction() {
+			@Override
+			public void callback(Pane root, boolean active) {
+				if(saved) {
+					if(!deletable) {
+						deletable = true;
+						deleteText.setText("ESC TO CANCEL");
+						setToDeleteEntry(0, resultsContainer, pageNumber);
+					}
+				} else {
+					deleteText.setText("SAVE FIRST");
+				}
+			}
+		});	
 		root.getChildren().addAll(sortButton, sortText);
+		root.getChildren().addAll(deleteButton, deleteText);
 		
 		/* animation timer with floating particles */
 		AnimationTimer animation_bg = Utils.getBackgroundTimer(790, 590, root, resultsContainer, newScoreText, nameInput, sortButton, sortText);
 			animation_bg.start();
 			
-
+			
+		scene.setOnKeyPressed(e -> {
+			
+			switch(e.getCode()) {
+				/* show next page if possible */
+				case DOWN:
+					if(deletable) {
+						if(++toDeleteIndex == entries.size()) toDeleteIndex = 0;
+						setToDeleteEntry(toDeleteIndex, resultsContainer, pageNumber);
+					}
+					
+				break;
+				
+				case UP:
+					if(deletable) {
+						if(--toDeleteIndex < 0) toDeleteIndex = entries.size()-1;
+						setToDeleteEntry(toDeleteIndex, resultsContainer, pageNumber);
+					}
+				break;
+				
+				case RIGHT:
+					if(currentPage + 1 <= pages) {
+						showScoreboardPage(++currentPage, resultsContainer, entries, pageNumber);
+					}
+				break;
+				
+				/* show previous page if possible */
+				case LEFT:
+					if(currentPage - 1 >= 1) {
+						showScoreboardPage(--currentPage, resultsContainer, entries, pageNumber);
+					}
+				break;
+				
+				case ESCAPE:
+					/* if input prompt is active, close it */
+					if(deletable) {
+						deletable = false;
+						deleteText.setText("DELETE");
+						setToDeleteEntry(-1, resultsContainer, pageNumber);
+					} else {
+						if(nameInput.isVisible()) {
+							nameInput.setVisible(false);
+							newScoreTimer.start();
+							root.setId("true");
+						} else {
+							/* else check if record should be removed */
+							if(Boolean.valueOf(root.getId())) {
+								Utils.removeRecord(ScoreboardEntry.activeEntry.getDate());
+							}
+							/* and return to selection scene */
+							ScoreboardEntry.activeEntry = null;
+							Select.selectGamemode();
+						}
+					}					
+					break;
+					
+				case ENTER:
+					/* if there is a new score */
+					if(Boolean.valueOf(root.getId())){
+						newScoreTimer.stop();			// stop new score animation
+						newScoreText.setVisible(false);	// and hide it
+						
+						nameInput.setVisible(true);		// show name prompt
+						root.setId("false");			// update flag about new score
+					} 
+					
+					else if (nameInput.isVisible() && input.getText().trim().length() > 0) { // if prompt is active and is not empty save the name
+						final String name = input.getText();
+						if(Utils.setScoreName(name, activeEntry.getDate())) {
+							ScoreboardEntry.activeEntry.setName(name);		// update visible user's name
+							saved = true;
+							deleteText.setText("DELETE");
+						} else {
+							/* if error occurs display information */
+							errorMsg.setText("Could not save name");
+							errorMsg.setVisible(true);
+						}
+						nameInput.setVisible(false);	// hide name prompt
+					}
+					
+					else if(deletable) {
+						deletable = false;
+						Utils.removeRecord(ScoreboardEntry.toDeleteEntry.getDate());
+						deleteText.setText("DELETE");
+						setToDeleteEntry(-1, resultsContainer, pageNumber);
+						ScoreboardEntry.toDeleteEntry = null;
+						entries = Utils.getRows("Score", "DESC");
+						showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
+					}
+				break;
+						
+				default: break;
+			}
+			/* hide/show navigation arrows */
+			pagePrev.setVisible(currentPage != 1);
+			pageNext.setVisible(currentPage != pages);
+		});
+			
 		return scene;
+	}
+	
+	private static void setToDeleteEntry(int index, Pane resultsContainer, Text pageNumber) {
+		entries.forEach(entry -> entry.setToDelete(false));
+		if(index != -1) {
+			entries.get(index).setToDelete(true);
+		}
+		showScoreboardPage(currentPage, resultsContainer, entries, pageNumber);
 	}
 
 			
@@ -522,54 +592,5 @@ public class Scenes {
 				Log.error(String.format("Unable to load font {%s}: {%s}", font, e));
 			}
 		}		
-	}
-	
-	/* spaghetti for downloading and loading fonts */
-//	public static void fontSetup() {
-//		
-//		/* fonts to be loaded */
-//		String[] fontNames = {	"Grixel Kyrou 7 Wide Bold.ttf",
-//								"Courier New.ttf",
-//								"Courier New Bold.ttf" };	
-//				
-//		fontsPath = Window.saveDirectory;
-//		
-//		if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {		// if 'imspeed' folder doesn't exist and cannot be created throw an error
-//			System.err.println("[ERROR] Could not create 'imspeed' directory");
-//		} else {
-//			fontsPath += "fonts" + Window.slash;	// add 'fonts' to the path with OS-dependent slash
-//			
-//			if(!new File(fontsPath).exists() && !new File(fontsPath).mkdir()) {		// if 'fonts' folder doesn't exist and cannot be created throw an error
-//				System.err.println("[ERROR] Could not create 'fonts' directory");
-//			} else {
-//				
-//				for(int i=0; i<fontNames.length; i++) {		// iterate all fonts
-//					if(!new File(fontsPath + fontNames[i]).exists()) {
-//						try {
-//							URL font = new URL("https://kazmierczyk.me/--imspeed/" + URLEncoder.encode(fontNames[i], "UTF-8").replace("+", "%20"));		// change encoding for url
-//							InputStream url = font.openStream();
-//							Files.copy(url, Paths.get(fontsPath + fontNames[i]));	// download fonts from private hosting and save in dedicated folder
-//							url.close();
-//							System.out.println("[OK] Success downloading {" + fontNames[i] + "}");
-//						} catch (Exception e) {
-//							System.err.println("[ERROR] Could not download font: " + e);
-//						}		
-//					} else {
-//						System.out.println("[OK] {" + fontNames[i] + "} already downloaded");
-//					}
-//				}
-//			}
-//		}
-//		
-//		/* load every front */
-//		for(int i=0; i<fontNames.length; i++) {
-//			try {
-//				InputStream font = new FileInputStream(fontsPath + fontNames[i]);
-//				Font.loadFont(font, 15);
-//			} catch (FileNotFoundException e) {
-//				System.err.println("[Error] Could not load font file: " + e);
-//			}
-//		} System.out.println();
-//	}
-	
+	}	
 }

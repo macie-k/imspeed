@@ -71,7 +71,7 @@ public class Select {
 		KeyButton showScoreboard = new KeyButton(scene, root, KeyCode.S, "S", 20, 450, 30, 30, 14, 8, true, new ButtonAction() {
 			@Override
 			public void callback(Pane root, boolean active) {
-				window.setScene(Scenes.scoreboard());
+				window.setScene(Scenes.scoreboard(true));
 			}
 		});
 		

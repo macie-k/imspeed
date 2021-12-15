@@ -31,7 +31,7 @@ public class Particle extends StackPane {
 				r.setTranslateX(i);
 				r.setFill(Color.WHITE);
 				r.setOpacity((i+1)*(1.0/3)*alpha);
-				this.getChildren().add(r);
+			this.getChildren().add(r);
 		}
 		
 		mover = new Thread(() -> {

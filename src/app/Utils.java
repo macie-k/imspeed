@@ -42,7 +42,7 @@ public class Utils {
 	public static final String OS = System.getProperty("os.name").toLowerCase();	// get current operating system
 	public static final boolean WINDOWS = !OS.equals("linux");
 	
-	public static final String SAVE_DIR = WINDOWS ? (System.getenv("APPDATA") + "/imspeed/") : (System.getenv("HOME") + "/.local/share/imspeed/");
+	public static final String SAVE_DIR = WINDOWS ? (System.getenv("APPDATA") + "\\imspeed\\") : (System.getenv("HOME") + "/.local/share/imspeed/");
 	public static final String PATH_SCORE_TEMPLATE = "/resources/scoreboard";
 	public static final String PATH_SCORE_PUBLIC = SAVE_DIR + "scoreboard";	
 	
@@ -367,7 +367,7 @@ public class Utils {
 	}
 	
 	/* removes all not saved scores / all with NULL as name */
-	public static boolean removeActiveRecord(String date) {
+	public static boolean removeRecord(String date) {
 		final File scoreboard = new File(PATH_SCORE_PUBLIC);
 		final long modTime = scoreboard.lastModified();
 		final String sql = String.format("DELETE FROM scoreboard WHERE DateTime='%s'", date);
@@ -378,9 +378,13 @@ public class Utils {
 				st.close();
 				
 			scoreboard.setLastModified(modTime);
-			ScoreboardEntry.activeEntry = null;
+			
+			ScoreboardEntry activeEntry = ScoreboardEntry.activeEntry;
+			if(activeEntry != null && activeEntry.getDate().equals(date)) {
+				ScoreboardEntry.activeEntry = null;
+			}
 			if(rows > 0) {
-				Log.success("Removed " + rows +" scores");
+				Log.success("Removed " + rows + " scores");
 				return true;
 			} else {
 				Log.success("No scores were removed");

@@ -61,9 +61,7 @@ public class Window extends Application {
 
 		Scenes.fontSetup();
 		Select.selectGamemode();
-		
-//		window.setScene(Scenes.scoreboard());
-				
+						
 		window.setTitle("I'm speed");
 		window.setResizable(false);
 		window.show();
@@ -74,7 +72,7 @@ public class Window extends Application {
 			if(!Scenes.saved) {
 				final ScoreboardEntry entry = ScoreboardEntry.activeEntry;
 				if(entry != null) {
-					Utils.removeActiveRecord(entry.getDate()); 
+					Utils.removeRecord(entry.getDate()); 
 				}
 			}
 		});	
